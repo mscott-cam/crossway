@@ -55,7 +55,7 @@
     'Hanken Grotesk', 'Hanken Grotesk Fallback', system-ui, -apple-system,
     'Segoe UI', Roboto, sans-serif;
 
-  --step-hero: clamp(4rem, 12.5vw, 13rem);
+  --step-hero: clamp(5rem, 86px + 6.5vw, 13rem);
   --step-h1: clamp(2.75rem, 1.9rem + 4.2vw, 5.5rem);
   --step-h2: clamp(2rem, 1.5rem + 2.4vw, 3.75rem);
   --step-h3: clamp(1.5rem, 1.25rem + 1.1vw, 2.25rem);

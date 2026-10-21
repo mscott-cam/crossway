@@ -139,6 +139,18 @@ const sources = [
     box-shadow: 0 0 0 3px var(--paper);
   }
 
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-video-toggle {
+      animation: hero-toggle-in 0.6s ease 0.8s both;
+    }
+  }
+
+  @keyframes hero-toggle-in {
+    from {
+      opacity: 0;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .hero-video-toggle {
       transition: none;

@@ -130,7 +130,11 @@ import HeroVideo from './hero-video.astro';
 
   @container (max-width: 40rem) {
     .hero__title {
-      font-size: clamp(4rem, 29vw, 8rem);
+      font-size: clamp(
+        min(4rem, 20vw),
+        min(29vw, (100vw - 2 * var(--gutter)) / 3),
+        8rem
+      );
     }
 
     .hero .eyebrow {

@@ -1,5 +1,13 @@
-import { mkdirSync } from 'node:fs';
-import { test, expect, type Page } from '@playwright/test';
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import {
+  chromium,
+  test,
+  expect,
+  type BrowserContext,
+  type Page,
+} from '@playwright/test';
 
 const SERMON =
   '/sermons/entrusted-with-resources-putting-money-in-its-place-2026-10-18';
@@ -62,6 +70,19 @@ async function headerGeometry(page: Page) {
         ? box(document.querySelector('.menu-button'))
         : null,
     };
+  });
+}
+
+async function h1Spill(page: Page) {
+  return page.evaluate(() => {
+    const h1 = document.querySelector('main h1');
+    if (!h1) return 0;
+    const range = document.createRange();
+    range.selectNodeContents(h1);
+    const text = range.getBoundingClientRect();
+    const box = h1.getBoundingClientRect();
+    const viewport = document.documentElement.clientWidth;
+    return Math.max(text.right - Math.min(box.right, viewport), 0);
   });
 }
 
@@ -213,6 +234,7 @@ test.describe('enlarged text on phones', () => {
           await page.evaluate(() => document.fonts.ready);
           await page.waitForTimeout(250);
 
+          expect(await h1Spill(page), 'h1 text spills').toBeLessThanOrEqual(1);
           const g = await headerGeometry(page);
           expect(g.scrollWidth, 'page scrollWidth').toBeLessThanOrEqual(
             g.viewport,
@@ -274,9 +296,74 @@ test.describe('enlarged text across every route', () => {
             );
           if (g.bar && g.bar.right > g.viewport + 0.5)
             problems.push(`${width}px @${scale}%: header bar spills`);
+          if ((await h1Spill(page)) > 1)
+            problems.push(`${width}px @${scale}%: h1 text spills`);
         }
       }
       expect(problems).toEqual([]);
+    });
+  }
+});
+
+test.describe('a larger default font size set in the browser itself', () => {
+  test.setTimeout(60_000);
+
+  async function launch(size: number): Promise<BrowserContext | null> {
+    const dir = mkdtempSync(join(tmpdir(), 'cw-font-'));
+    mkdirSync(join(dir, 'Default'));
+    writeFileSync(
+      join(dir, 'Default', 'Preferences'),
+      JSON.stringify({
+        webkit: {
+          webprefs: {
+            default_font_size: size,
+            default_fixed_font_size: size - 3,
+          },
+        },
+      }),
+    );
+    try {
+      return await chromium.launchPersistentContext(dir, {
+        channel: 'chrome',
+        reducedMotion: 'reduce',
+        viewport: { width: 390, height: 800 },
+      });
+    } catch {
+      return null;
+    }
+  }
+
+  for (const size of [24, 32]) {
+    test(`${size}px default text keeps every page and the header inside a phone`, async ({
+      baseURL,
+    }) => {
+      const context = await launch(size);
+      test.skip(!context, 'Chrome is not installed');
+      const page = context!.pages()[0] ?? (await context!.newPage());
+      try {
+        const problems: string[] = [];
+        for (const width of [320, 390]) {
+          await page.setViewportSize({ width, height: 800 });
+          for (const route of ['/', '/visit', '/who-we-are', '/sermons']) {
+            await page.goto(`${baseURL}${route}`);
+            expect(
+              await page.evaluate(
+                () => getComputedStyle(document.documentElement).fontSize,
+              ),
+            ).toBe(`${size}px`);
+            const g = await headerGeometry(page);
+            if (g.scrollWidth > g.viewport)
+              problems.push(`${route} @${width}: scrollWidth ${g.scrollWidth}`);
+            if (g.bar && g.bar.right > g.viewport + 0.5)
+              problems.push(`${route} @${width}: header bar spills`);
+            if ((await h1Spill(page)) > 1)
+              problems.push(`${route} @${width}: h1 text spills`);
+          }
+        }
+        expect(problems).toEqual([]);
+      } finally {
+        await context!.close();
+      }
     });
   }
 });

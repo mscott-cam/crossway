@@ -1,8 +1,14 @@
-<ul class="series-grid">
-  <slot />
-</ul>
+<div class="series-grid-wrap">
+  <ul class="series-grid">
+    <slot />
+  </ul>
+</div>
 
 <style>
+  .series-grid-wrap {
+    container-type: inline-size;
+  }
+
   .series-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
@@ -10,5 +16,12 @@
     margin: 0;
     padding: 0;
     list-style: none;
+  }
+
+  @container (min-width: 20rem) and (max-width: 33.99rem) {
+    .series-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.75rem 1rem;
+    }
   }
 </style>
