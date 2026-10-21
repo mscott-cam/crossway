@@ -1,0 +1,119 @@
+---
+import BaseLayout from './base-layout.astro';
+import Eyebrow from '../components/eyebrow.astro';
+import Pagination from '../components/pagination.astro';
+import SermonCard from '../components/sermon-card.astro';
+import type { Sermon } from '../lib/sanity/types';
+
+interface Props {
+  title: string;
+  description: string;
+  eyebrow: string;
+  heading: string;
+  intro?: string;
+  sermons: Sermon[];
+  current: number;
+  last: number;
+  base: string;
+  numberedFirst?: boolean;
+  showSeries?: boolean;
+  total: number;
+}
+
+const {
+  title,
+  description,
+  eyebrow,
+  heading,
+  intro,
+  sermons,
+  current,
+  last,
+  base,
+  numberedFirst = false,
+  showSeries = true,
+  total,
+} = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="container section list-page">
+    <header class="list-page__head" data-reveal="fade">
+      <Eyebrow>{eyebrow}</Eyebrow>
+      <h1>{heading}</h1>
+      {intro && <p class="list-page__intro">{intro}</p>}
+      <slot name="head" />
+    </header>
+
+    {sermons.length > 0 ? (
+      <ul
+        class="sermon-list"
+        aria-label={`${total} ${total === 1 ? 'message' : 'messages'}`}
+        data-sermon-list
+      >
+        {sermons.map((sermon) => (
+          <SermonCard
+            sermon={sermon}
+            showSeries={showSeries}
+            headingLevel="h2"
+          />
+        ))}
+      </ul>
+    ) : (
+      <p>No messages here yet.</p>
+    )}
+
+    <Pagination
+      current={current}
+      last={last}
+      base={base}
+      numberedFirst={numberedFirst}
+    />
+
+    <p class="list-page__back">
+      <a href="/sermons">← Back to all sermons</a>
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .list-page {
+    max-width: calc(60rem + 2 * var(--gutter));
+  }
+
+  .list-page__head {
+    margin-bottom: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  .list-page__head h1 {
+    margin-top: 1.25rem;
+    font-size: var(--step-h2);
+    line-height: 1.04;
+  }
+
+  .list-page__intro {
+    max-width: var(--measure);
+    margin: 1.25rem 0 0;
+  }
+
+  .sermon-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .list-page__back {
+    margin: 2.5rem 0 0;
+    font-weight: 600;
+  }
+
+  .list-page__back a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--navy);
+    text-decoration-color: var(--amber-ink);
+    text-decoration-thickness: 2px;
+  }
+</style>

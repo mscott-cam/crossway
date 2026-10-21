@@ -1,0 +1,36 @@
+---
+import type { GetStaticPaths } from 'astro';
+import SermonListLayout from '../../../../layouts/sermon-list-layout.astro';
+import { getSermons } from '../../../../lib/sanity/queries';
+import { PAGE_SIZE } from '../../../../lib/pagination';
+import { groupSpeakers } from '../../../../lib/sermon-groups';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const groups = groupSpeakers(await getSermons());
+  return groups.flatMap(({ speaker, sermons }) =>
+    paginate(sermons, {
+      pageSize: PAGE_SIZE,
+      params: { speaker: speaker.slug },
+      props: { speaker },
+    }),
+  );
+}) satisfies GetStaticPaths;
+
+const { page, speaker } = Astro.props;
+const suffix = page.currentPage > 1 ? ` – Page ${page.currentPage}` : '';
+const range =
+  page.lastPage > 1 ? ` Page ${page.currentPage} of ${page.lastPage}.` : '';
+---
+
+<SermonListLayout
+  title={`Messages by ${speaker.name}${suffix}`}
+  description={`Messages preached by ${speaker.name} at Crossway Bible Church, newest first.${range}`}
+  eyebrow="Speaker"
+  heading={speaker.name}
+  intro={speaker.role}
+  sermons={page.data}
+  current={page.currentPage}
+  last={page.lastPage}
+  base={`/sermons/speaker/${speaker.slug}`}
+  total={page.total}
+/>

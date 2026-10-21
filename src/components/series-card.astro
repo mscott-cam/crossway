@@ -1,0 +1,103 @@
+---
+import { sanityImageUrl } from '../lib/image-url';
+import type { SeriesGroup } from '../lib/sermon-groups';
+import CrossMark from './cross-mark.astro';
+
+interface Props {
+  group: SeriesGroup;
+  headingLevel?: 'h2' | 'h3';
+}
+
+const { group, headingLevel: Heading = 'h3' } = Astro.props;
+const { series, count } = group;
+const artwork = series.artwork;
+const countLabel = `${count} ${count === 1 ? 'message' : 'messages'}`;
+---
+
+<li class="series-card" data-series-card>
+  <a class="series-card__link" href={`/series/${series.slug}`}>
+    {artwork ? (
+      <>
+        <img
+          class="series-card__art"
+          src={sanityImageUrl(artwork.url, 640)}
+          srcset={`${sanityImageUrl(artwork.url, 480)} 480w, ${sanityImageUrl(artwork.url, 960)} 960w`}
+          sizes="(min-width: 48rem) 20rem, 90vw"
+          width={artwork.width}
+          height={artwork.height}
+          alt={artwork.alt ?? ''}
+          loading="lazy"
+          decoding="async"
+        />
+        <Heading class="series-card__title series-card__title--below">
+          {series.title}
+        </Heading>
+      </>
+    ) : (
+      <div class="series-card__type on-navy">
+        <CrossMark size={22} />
+        <Heading class="series-card__title">{series.title}</Heading>
+      </div>
+    )}
+    <p class="series-card__count">{countLabel}</p>
+  </a>
+</li>
+
+<style>
+  .series-card__link {
+    display: grid;
+    gap: 0.9rem;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .series-card__art,
+  .series-card__type {
+    aspect-ratio: 4 / 3;
+    width: 100%;
+    border-radius: 6px;
+  }
+
+  .series-card__art {
+    object-fit: cover;
+    background: var(--navy);
+  }
+
+  .series-card__type {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.25rem;
+    transition: background-color 0.25s ease;
+  }
+
+  .series-card__title {
+    font-size: var(--step-h4);
+    line-height: 1.15;
+  }
+
+  .series-card__title--below {
+    color: var(--navy);
+  }
+
+  .series-card__link:hover .series-card__title {
+    text-decoration: underline;
+    text-decoration-color: var(--amber-ink);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+  }
+
+  .series-card__link:hover .series-card__type .series-card__title {
+    text-decoration-color: var(--amber);
+  }
+
+  .series-card__count {
+    margin: 0;
+    color: var(--charcoal);
+    font-size: 0.875rem;
+  }
+
+  .series-card__link:focus-visible {
+    outline-offset: 4px;
+  }
+</style>

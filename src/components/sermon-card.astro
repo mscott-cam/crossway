@@ -1,0 +1,89 @@
+---
+import { formatSermonDate } from '../lib/dates';
+import { sermonMeta } from '../lib/sermon-groups';
+import type { Sermon } from '../lib/sanity/types';
+
+interface Props {
+  sermon: Sermon;
+  showSeries?: boolean;
+  headingLevel?: 'h2' | 'h3';
+}
+
+const { sermon, showSeries = true, headingLevel: Heading = 'h3' } = Astro.props;
+const meta = sermonMeta(sermon, [
+  'speaker',
+  'passage',
+  ...(showSeries ? (['series'] as const) : []),
+]);
+---
+
+<li class="sermon-card" data-sermon-card>
+  <time class="sermon-card__date" datetime={sermon.date}>
+    {formatSermonDate(sermon.date)}
+  </time>
+  <div class="sermon-card__body">
+    <Heading class="sermon-card__title">
+      <a href={`/sermons/${sermon.slug}`}>{sermon.title}</a>
+    </Heading>
+    {meta.length > 0 && (
+      <p class="sermon-card__meta" data-sermon-meta>
+        {meta.join(' · ')}
+      </p>
+    )}
+  </div>
+</li>
+
+<style>
+  .sermon-card {
+    position: relative;
+    display: grid;
+    gap: 0.35rem 2rem;
+    padding-block: 1.5rem;
+    border-top: 1px solid var(--rule);
+  }
+
+  .sermon-card__date {
+    color: var(--amber-ink);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    line-height: 1.6;
+    text-transform: uppercase;
+  }
+
+  .sermon-card__title {
+    font-size: var(--step-h4);
+    line-height: 1.2;
+  }
+
+  .sermon-card__title a {
+    text-decoration: none;
+  }
+
+  .sermon-card__title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .sermon-card__title a:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--amber-ink);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+  }
+
+  .sermon-card__meta {
+    margin: 0.4rem 0 0;
+    color: var(--charcoal);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+
+  @media (min-width: 48rem) {
+    .sermon-card {
+      grid-template-columns: 11rem 1fr;
+      align-items: baseline;
+    }
+  }
+</style>

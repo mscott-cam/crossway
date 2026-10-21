@@ -1,0 +1,122 @@
+---
+import { pageHref, pageItems } from '../lib/pagination';
+
+interface Props {
+  current: number;
+  last: number;
+  base: string;
+  numberedFirst?: boolean;
+}
+
+const { current, last, base, numberedFirst = false } = Astro.props;
+const href = (page: number) => pageHref(base, page, numberedFirst);
+const items = pageItems(current, last);
+---
+
+{last > 1 && (
+  <nav class="pagination" aria-label="Pagination">
+    {current > 1 ? (
+      <a class="pagination__step" href={href(current - 1)} rel="prev">
+        <span aria-hidden="true">←</span> Previous
+      </a>
+    ) : (
+      <span class="pagination__step pagination__step--off" aria-hidden="true" />
+    )}
+    <ol class="pagination__pages">
+      {items.map((item) => (
+        <li>
+          {item === null ? (
+            <span class="pagination__gap" aria-hidden="true">
+              …
+            </span>
+          ) : item === current ? (
+            <span class="pagination__page" aria-current="page">
+              <span class="sr-only">Page </span>
+              {item}
+            </span>
+          ) : (
+            <a class="pagination__page" href={href(item)}>
+              <span class="sr-only">Page </span>
+              {item}
+            </a>
+          )}
+        </li>
+      ))}
+    </ol>
+    {current < last ? (
+      <a class="pagination__step" href={href(current + 1)} rel="next">
+        Next <span aria-hidden="true">→</span>
+      </a>
+    ) : (
+      <span class="pagination__step pagination__step--off" aria-hidden="true" />
+    )}
+  </nav>
+)}
+
+<style>
+  .pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rule);
+    font-size: 0.9375rem;
+  }
+
+  .pagination__pages {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .pagination__page,
+  .pagination__step,
+  .pagination__gap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 0.75rem;
+    border-radius: 999px;
+    color: var(--navy);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  a.pagination__page:hover,
+  a.pagination__step:hover {
+    background: color-mix(in srgb, var(--navy) 8%, transparent);
+  }
+
+  .pagination__page[aria-current='page'] {
+    background: var(--navy);
+    color: var(--paper);
+  }
+
+  .pagination__step {
+    gap: 0.5em;
+  }
+
+  .pagination__step--off {
+    visibility: hidden;
+  }
+
+  @media (max-width: 40rem) {
+    .pagination__pages {
+      order: 3;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .pagination__step--off {
+      display: none;
+    }
+  }
+</style>

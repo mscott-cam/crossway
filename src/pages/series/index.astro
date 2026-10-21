@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../../layouts/base-layout.astro';
+import Eyebrow from '../../components/eyebrow.astro';
+import SeriesCard from '../../components/series-card.astro';
+import SeriesGrid from '../../components/series-grid.astro';
+import { getSermons } from '../../lib/sanity/queries';
+import { groupSeries } from '../../lib/sermon-groups';
+
+const groups = groupSeries(await getSermons());
+---
+
+<BaseLayout
+  title="Sermon Series"
+  description="Every sermon series from Crossway Bible Church, most recent first."
+>
+  <div class="container section series-index">
+    <header class="series-index__head" data-reveal="fade">
+      <Eyebrow>Sermons</Eyebrow>
+      <h1>Series</h1>
+      <p>Most recent first.</p>
+    </header>
+    {groups.length > 0 ? (
+      <div data-reveal="fade">
+        <SeriesGrid>
+          {groups.map((group) => (
+            <SeriesCard group={group} headingLevel="h2" />
+          ))}
+        </SeriesGrid>
+      </div>
+    ) : (
+      <p>No series yet.</p>
+    )}
+    <p class="series-index__back">
+      <a href="/sermons">← Back to all sermons</a>
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .series-index__head {
+    margin-bottom: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  .series-index__head h1 {
+    margin-top: 1.25rem;
+    font-size: var(--step-h2);
+    line-height: 1.04;
+  }
+
+  .series-index__head p:last-child {
+    margin: 1.25rem 0 0;
+  }
+
+  .series-index__back {
+    margin: 3rem 0 0;
+    font-weight: 600;
+  }
+
+  .series-index__back a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--navy);
+    text-decoration-color: var(--amber-ink);
+    text-decoration-thickness: 2px;
+  }
+</style>

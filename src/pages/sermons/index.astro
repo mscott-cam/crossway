@@ -1,0 +1,204 @@
+---
+import BaseLayout from '../../layouts/base-layout.astro';
+import Eyebrow from '../../components/eyebrow.astro';
+import PodcastLinks from '../../components/podcast-links.astro';
+import SermonCard from '../../components/sermon-card.astro';
+import SermonFilters from '../../components/sermon-filters.astro';
+import SermonMedia from '../../components/sermon-media.astro';
+import SeriesCard from '../../components/series-card.astro';
+import SeriesGrid from '../../components/series-grid.astro';
+import { getSermons } from '../../lib/sanity/queries';
+import {
+  groupBooks,
+  groupSeries,
+  groupSpeakers,
+  sermonMeta,
+} from '../../lib/sermon-groups';
+import { parseVimeoId } from '../../lib/video/vimeo';
+
+const ARCHIVE_COUNT = 12;
+const SERIES_COUNT = 8;
+
+const sermons = await getSermons();
+const [latest, ...rest] = sermons;
+const archive = rest.slice(0, ARCHIVE_COUNT);
+const series = groupSeries(sermons).slice(0, SERIES_COUNT);
+const books = groupBooks(sermons).map((group) => group.book);
+const speakers = groupSpeakers(sermons).map((group) => group.speaker);
+const latestMeta = latest
+  ? sermonMeta(latest, ['speaker', 'passage', 'series', 'date'])
+  : [];
+const latestHasMedia = Boolean(
+  latest &&
+  ((latest.vimeoUrl && parseVimeoId(latest.vimeoUrl)) || latest.audio?.url),
+);
+---
+
+<BaseLayout
+  title="Sermons"
+  description="Watch and listen to messages from Crossway Bible Church in San Antonio. Browse by series, book of the Bible or speaker."
+>
+  <div class="container section sermons-page">
+    <header class="sermons-page__head" data-reveal="fade">
+      <Eyebrow>Sermons</Eyebrow>
+      <h1>
+        Messages from <em>God’s Word</em>
+      </h1>
+    </header>
+
+    {latest ? (
+      <section
+        class="block"
+        aria-labelledby="latest-heading"
+        data-reveal="fade"
+      >
+        <h2 class="eyebrow" id="latest-heading">
+          Latest message
+        </h2>
+        <div class:list={['feature', { 'feature--text': !latestHasMedia }]}>
+          {latestHasMedia && (
+            <div class="feature__media">
+              <SermonMedia sermon={latest} />
+            </div>
+          )}
+          <div class="feature__text">
+            <h3>
+              <a href={`/sermons/${latest.slug}`}>{latest.title}</a>
+            </h3>
+            {latestMeta.length > 0 && (
+              <p class="feature__meta" data-sermon-meta>
+                {latestMeta.join(' · ')}
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
+    ) : (
+      <p>Messages will appear here soon.</p>
+    )}
+
+    {series.length > 0 && (
+      <section
+        class="block"
+        aria-labelledby="series-heading"
+        data-reveal="fade"
+      >
+        <h2 class="eyebrow" id="series-heading">
+          Series
+        </h2>
+        <SeriesGrid>
+          {series.map((group) => (
+            <SeriesCard group={group} />
+          ))}
+        </SeriesGrid>
+        <p class="block__more">
+          <a href="/series">
+            All series <span aria-hidden="true">→</span>
+          </a>
+        </p>
+      </section>
+    )}
+
+    {archive.length > 0 && (
+      <section
+        class="block"
+        aria-labelledby="archive-heading"
+        data-reveal="fade"
+      >
+        <h2 class="eyebrow" id="archive-heading">
+          Archive
+        </h2>
+        <SermonFilters books={books} speakers={speakers} />
+        <ul class="sermon-list">
+          {archive.map((sermon) => (
+            <SermonCard sermon={sermon} />
+          ))}
+        </ul>
+        <p class="block__more">
+          <a href="/sermons/archive/1">
+            Browse all messages <span aria-hidden="true">→</span>
+          </a>
+        </p>
+      </section>
+    )}
+
+    <div class="block" data-reveal="fade">
+      <PodcastLinks />
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .sermons-page {
+    max-width: calc(72rem + 2 * var(--gutter));
+  }
+
+  .sermons-page__head h1 {
+    margin-top: 1.25rem;
+    font-size: var(--step-h1);
+  }
+
+  .block {
+    margin-top: clamp(3.5rem, 7vw, 6rem);
+  }
+
+  .block > .eyebrow {
+    margin-bottom: 1.75rem;
+  }
+
+  .feature {
+    display: grid;
+    gap: 2rem;
+    align-items: end;
+  }
+
+  .feature__text h3 {
+    font-size: var(--step-h2);
+    line-height: 1.06;
+  }
+
+  .feature__text h3 a {
+    text-decoration: none;
+  }
+
+  .feature__text h3 a:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--amber-ink);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.12em;
+  }
+
+  .feature__meta {
+    margin: 1.25rem 0 0;
+    font-size: 1rem;
+  }
+
+  .block__more a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    min-height: 44px;
+    color: var(--navy);
+    text-decoration-color: var(--amber-ink);
+    text-decoration-thickness: 2px;
+  }
+
+  .block__more {
+    margin: 1.75rem 0 0;
+    font-weight: 600;
+  }
+
+  .sermon-list {
+    margin: 2.5rem 0 0;
+    padding: 0;
+    list-style: none;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  @media (min-width: 64rem) {
+    .feature:not(.feature--text) {
+      grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+      gap: 3rem;
+    }
+  }
+</style>

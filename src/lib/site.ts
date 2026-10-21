@@ -25,6 +25,7 @@ export const site = {
     instagram: 'https://www.instagram.com/crosswaybiblechurchsa/',
     applePodcasts:
       'https://podcasts.apple.com/us/podcast/crossway-bible-church-sermons/id1353947938',
+    spreakerShow: 'https://www.spreaker.com/show/2817602',
     spreakerFeed: 'https://www.spreaker.com/show/2817602/episodes/feed',
   },
   fallbackServiceTimes: ['9:00', '10:45'],

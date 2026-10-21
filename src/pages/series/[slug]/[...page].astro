@@ -1,0 +1,63 @@
+---
+import type { GetStaticPaths } from 'astro';
+import SermonListLayout from '../../../layouts/sermon-list-layout.astro';
+import { getSermons } from '../../../lib/sanity/queries';
+import { PAGE_SIZE } from '../../../lib/pagination';
+import { groupSeries } from '../../../lib/sermon-groups';
+import { sanityImageUrl } from '../../../lib/image-url';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const sermons = await getSermons();
+  return groupSeries(sermons).flatMap(({ series }) =>
+    paginate(
+      sermons.filter((sermon) => sermon.series.slug === series.slug),
+      { pageSize: PAGE_SIZE, params: { slug: series.slug }, props: { series } },
+    ),
+  );
+}) satisfies GetStaticPaths;
+
+const { page, series } = Astro.props;
+const suffix = page.currentPage > 1 ? ` – Page ${page.currentPage}` : '';
+const range =
+  page.lastPage > 1 ? ` Page ${page.currentPage} of ${page.lastPage}.` : '';
+const intro =
+  series.description ??
+  (series.isStandalone ? 'Messages that stand on their own.' : undefined);
+const count = `${page.total} ${page.total === 1 ? 'message' : 'messages'}`;
+---
+
+<SermonListLayout
+  title={`${series.title} – Sermon Series${suffix}`}
+  description={`${intro ?? `A sermon series at Crossway Bible Church.`} ${count}, newest first.${range}`}
+  eyebrow="Series"
+  heading={series.title}
+  intro={intro}
+  sermons={page.data}
+  current={page.currentPage}
+  last={page.lastPage}
+  base={`/series/${series.slug}`}
+  showSeries={false}
+  total={page.total}
+>
+  {series.artwork && (
+    <img
+      slot="head"
+      class="series-art"
+      src={sanityImageUrl(series.artwork.url, 960)}
+      width={series.artwork.width}
+      height={series.artwork.height}
+      alt={series.artwork.alt ?? ''}
+      decoding="async"
+    />
+  )}
+</SermonListLayout>
+
+<style>
+  .series-art {
+    width: 100%;
+    max-width: 28rem;
+    height: auto;
+    margin-top: 2rem;
+    border-radius: 6px;
+  }
+</style>

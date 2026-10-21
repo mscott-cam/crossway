@@ -1,0 +1,28 @@
+---
+import type { GetStaticPaths } from 'astro';
+import SermonListLayout from '../../../layouts/sermon-list-layout.astro';
+import { getSermons } from '../../../lib/sanity/queries';
+import { PAGE_SIZE } from '../../../lib/pagination';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const sermons = await getSermons();
+  return paginate(sermons, { pageSize: PAGE_SIZE });
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+const suffix = page.currentPage > 1 ? ` – Page ${page.currentPage}` : '';
+---
+
+<SermonListLayout
+  title={`All Messages${suffix}`}
+  description={`Every message from Crossway Bible Church, newest first. Page ${page.currentPage} of ${page.lastPage}.`}
+  eyebrow="Archive"
+  heading="All messages"
+  intro={`Newest first. Page ${page.currentPage} of ${page.lastPage}.`}
+  sermons={page.data}
+  current={page.currentPage}
+  last={page.lastPage}
+  base="/sermons/archive"
+  numberedFirst
+  total={page.total}
+/>

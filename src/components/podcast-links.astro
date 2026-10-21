@@ -1,0 +1,48 @@
+---
+import { site } from '../lib/site';
+import NavLink from './nav-link.astro';
+---
+
+<section class="podcast-links" aria-labelledby="podcast-links-heading">
+  <h2 id="podcast-links-heading">Listen on your favorite app</h2>
+  <p>
+    Prefer another podcast app? Search for “Crossway Bible Church Sermons” to
+    follow along.
+  </p>
+  <ul>
+    <li>
+      <NavLink class="pill-navy" href={site.links.applePodcasts} external>
+        Apple Podcasts
+      </NavLink>
+    </li>
+    <li>
+      <NavLink class="pill-navy" href={site.links.spreakerShow} external>
+        Spreaker
+      </NavLink>
+    </li>
+  </ul>
+</section>
+
+<style>
+  .podcast-links h2 {
+    font-size: var(--step-h4);
+  }
+
+  .podcast-links p {
+    max-width: var(--measure);
+    margin: 0.75rem 0 1.25rem;
+  }
+
+  .podcast-links ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .podcast-links :global(.pill-navy) {
+    min-height: 44px;
+  }
+</style>

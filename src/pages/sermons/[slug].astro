@@ -1,0 +1,186 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/base-layout.astro';
+import PodcastLinks from '../../components/podcast-links.astro';
+import SermonCard from '../../components/sermon-card.astro';
+import SermonMedia from '../../components/sermon-media.astro';
+import { formatSermonDate } from '../../lib/dates';
+import { getSermons } from '../../lib/sanity/queries';
+import {
+  paragraphs,
+  sermonDescription,
+  sermonPageTitle,
+} from '../../lib/sermon-groups';
+import { getVimeoThumb, parseVimeoId } from '../../lib/video/vimeo';
+
+export const getStaticPaths = (async () => {
+  const sermons = await getSermons();
+  const seen = new Set<string>();
+  return sermons.flatMap((sermon) => {
+    if (seen.has(sermon.slug)) return [];
+    seen.add(sermon.slug);
+    return [{ params: { slug: sermon.slug }, props: { sermon } }];
+  });
+}) satisfies GetStaticPaths;
+
+const { sermon } = Astro.props;
+const all = await getSermons();
+const more = all
+  .filter((s) => s.series.slug === sermon.series.slug && s.slug !== sermon.slug)
+  .slice(0, 3);
+const videoId = sermon.vimeoUrl ? parseVimeoId(sermon.vimeoUrl) : null;
+const thumb = videoId ? await getVimeoThumb(videoId) : null;
+const hasMedia = Boolean(videoId || sermon.audio?.url);
+const body = sermon.description ? paragraphs(sermon.description) : [];
+---
+
+<BaseLayout
+  title={sermonPageTitle(sermon)}
+  description={sermonDescription(sermon)}
+  ogImage={thumb ?? undefined}
+>
+  <article class="container section sermon-page">
+    <p class="sermon-page__back">
+      <a href="/sermons">← All sermons</a>
+    </p>
+
+    {hasMedia && (
+      <div class="sermon-page__media">
+        <SermonMedia sermon={sermon} />
+      </div>
+    )}
+
+    <header class="sermon-page__head" data-reveal="fade">
+      <p class="eyebrow">
+        <a href={`/series/${sermon.series.slug}`}>{sermon.series.title}</a>
+      </p>
+      <h1>{sermon.title}</h1>
+      <p class="sermon-page__meta" data-sermon-meta>
+        {sermon.speaker && (
+          <span>
+            <a href={`/sermons/speaker/${sermon.speaker.slug}`}>
+              {sermon.speaker.name}
+            </a>
+          </span>
+        )}
+        <span>
+          <time datetime={sermon.date}>{formatSermonDate(sermon.date)}</time>
+        </span>
+      </p>
+      {sermon.passage && (
+        <p class="sermon-page__passage" data-sermon-passage>
+          {sermon.passage}
+        </p>
+      )}
+    </header>
+
+    {body.length > 0 && (
+      <div class="sermon-page__body prose" data-reveal="fade">
+        {body.map((text) => (
+          <p>{text}</p>
+        ))}
+      </div>
+    )}
+
+    {more.length > 0 && (
+      <section
+        class="sermon-page__more"
+        aria-labelledby="more-heading"
+        data-reveal="fade"
+      >
+        <h2 class="eyebrow" id="more-heading">
+          More from this series
+        </h2>
+        <ul class="sermon-list">
+          {more.map((s) => (
+            <SermonCard sermon={s} showSeries={false} />
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <div class="sermon-page__podcast" data-reveal="fade">
+      <PodcastLinks />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .sermon-page {
+    max-width: calc(56rem + 2 * var(--gutter));
+    margin-inline: auto;
+  }
+
+  .sermon-page__back {
+    margin: 0 0 2rem;
+    font-weight: 600;
+  }
+
+  .sermon-page__back a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--navy);
+    text-decoration-color: var(--amber-ink);
+    text-decoration-thickness: 2px;
+  }
+
+  .sermon-page__media {
+    margin-bottom: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  .sermon-page__head .eyebrow a {
+    color: inherit;
+    text-decoration-thickness: 1px;
+  }
+
+  .sermon-page__head h1 {
+    margin-top: 1.25rem;
+    font-size: var(--step-h2);
+    line-height: 1.04;
+  }
+
+  .sermon-page__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0;
+    margin: 1.25rem 0 0;
+  }
+
+  .sermon-page__meta span + span::before {
+    content: '·';
+    margin-inline: 0.6em;
+  }
+
+  .sermon-page__meta a {
+    color: var(--navy);
+  }
+
+  .sermon-page__passage {
+    margin: 0.5rem 0 0;
+    color: var(--navy);
+    font-family: var(--font-text);
+    font-size: 1.25rem;
+    font-style: italic;
+  }
+
+  .sermon-page__body {
+    margin-top: clamp(2rem, 5vw, 3rem);
+  }
+
+  .sermon-page__body > p {
+    margin: 0;
+  }
+
+  .sermon-page__more,
+  .sermon-page__podcast {
+    margin-top: clamp(3rem, 7vw, 5rem);
+  }
+
+  .sermon-list {
+    margin: 1.5rem 0 0;
+    padding: 0;
+    list-style: none;
+    border-bottom: 1px solid var(--rule);
+  }
+</style>
