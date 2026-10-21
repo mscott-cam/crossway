@@ -14,6 +14,7 @@ const base: PlaybackInput = {
   visible: true,
   userPaused: false,
   hasPlayed: false,
+  interacted: false,
 };
 
 describe('shouldPlay', () => {
@@ -66,6 +67,13 @@ describe('showsControl', () => {
     expect(showsControl({ ...base, userPaused: true })).toBe(true);
   });
 
+  it('stays once the visitor has used it, even if nothing has played yet', () => {
+    expect(showsControl({ ...base, interacted: true })).toBe(true);
+    expect(showsControl({ ...base, interacted: true, userPaused: false })).toBe(
+      true,
+    );
+  });
+
   it('is never offered under reduced motion or save-data', () => {
     expect(showsControl({ ...base, hasPlayed: true, reduceMotion: true })).toBe(
       false,
@@ -73,6 +81,9 @@ describe('showsControl', () => {
     expect(showsControl({ ...base, userPaused: true, saveData: true })).toBe(
       false,
     );
+    expect(
+      showsControl({ ...base, interacted: true, reduceMotion: true }),
+    ).toBe(false);
   });
 });
 

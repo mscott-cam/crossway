@@ -232,7 +232,7 @@ test.describe('every public route across widths', () => {
 test.describe('the full wordmark at default text on phones', () => {
   test.use({ reducedMotion: 'reduce' });
 
-  for (const width of [320, 360, 390]) {
+  for (const width of [320, 340, 360, 390]) {
     test(`shows the full lockup at ${width}px and 100% text`, async ({
       page,
     }) => {

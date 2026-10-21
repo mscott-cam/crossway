@@ -176,6 +176,73 @@ test.describe('hero video pause control', () => {
     );
   });
 
+  const toggleState = (page: Page) =>
+    page.evaluate(() => {
+      const button = document.querySelector<HTMLElement>('.hero-video-toggle')!;
+      return {
+        focused: document.activeElement === button,
+        hidden: button.hidden,
+        opacity: getComputedStyle(button).opacity,
+      };
+    });
+
+  test('pausing and resuming in the session keeps the focus on the button', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    await expect.poll(() => videoPaused(page), { timeout: 3000 }).toBe(false);
+    const button = pauseButton(page);
+    await expect(button).toHaveCSS('opacity', '1');
+    await button.focus();
+    await page.keyboard.press('Enter');
+    await expect.poll(() => videoPaused(page)).toBe(true);
+    expect(await toggleState(page)).toEqual({
+      focused: true,
+      hidden: false,
+      opacity: '1',
+    });
+    await page.keyboard.press('Enter');
+    await expect.poll(() => videoPaused(page)).toBe(false);
+    expect(await toggleState(page)).toEqual({
+      focused: true,
+      hidden: false,
+      opacity: '1',
+    });
+  });
+
+  for (const how of ['keyboard', 'mouse'] as const) {
+    test(`resuming after a reload by ${how} keeps the button, its focus and its opacity`, async ({
+      page,
+    }) => {
+      await page.goto('/');
+      await expect.poll(() => videoPaused(page), { timeout: 3000 }).toBe(false);
+      await pauseButton(page).click();
+      await expect.poll(() => videoPaused(page)).toBe(true);
+      await page.reload();
+      const button = pauseButton(page);
+      await expect(button).toHaveAccessibleName('Play background video');
+      await expect(button).toHaveCSS('opacity', '1');
+      if (how === 'keyboard') {
+        await button.focus();
+        await page.keyboard.press('Enter');
+      } else {
+        await button.click();
+      }
+      expect(await toggleState(page)).toMatchObject({
+        focused: true,
+        hidden: false,
+        opacity: '1',
+      });
+      await expect(button).toHaveAccessibleName('Pause background video');
+      await expect.poll(() => videoPaused(page), { timeout: 3000 }).toBe(false);
+      expect(await toggleState(page)).toEqual({
+        focused: true,
+        hidden: false,
+        opacity: '1',
+      });
+    });
+  }
+
   test('a hidden tab does not resume a video the visitor paused', async ({
     page,
   }) => {

@@ -82,6 +82,7 @@ function setup(root: HTMLElement) {
   const start = Math.max(0, parseFloat(video.dataset.start ?? '') || 0);
   let userPaused = loadPaused();
   let hasPlayed = false;
+  let interacted = false;
   const toggle = createToggle(root.closest<HTMLElement>('[data-hero]') ?? root);
   const input = (): PlaybackInput => ({
     reduceMotion: reduceMotion.matches,
@@ -89,9 +90,11 @@ function setup(root: HTMLElement) {
     visible: document.visibilityState === 'visible',
     userPaused,
     hasPlayed,
+    interacted,
   });
   const renderToggle = () => {
-    toggle.hidden = !showsControl(input());
+    const hidden = !showsControl(input());
+    if (toggle.hidden !== hidden) toggle.hidden = hidden;
     toggle.setAttribute('aria-label', controlLabel(userPaused));
     toggle.innerHTML = userPaused ? PLAY_ICON : PAUSE_ICON;
   };
@@ -137,6 +140,7 @@ function setup(root: HTMLElement) {
   };
 
   toggle.addEventListener('click', () => {
+    interacted = true;
     userPaused = !userPaused;
     storePaused(userPaused);
     sync();

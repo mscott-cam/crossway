@@ -6,6 +6,7 @@ export interface PlaybackInput {
   visible: boolean;
   userPaused: boolean;
   hasPlayed: boolean;
+  interacted: boolean;
 }
 
 export function shouldPlay(input: PlaybackInput): boolean {
@@ -16,7 +17,7 @@ export function shouldPlay(input: PlaybackInput): boolean {
 
 export function showsControl(input: PlaybackInput): boolean {
   if (input.reduceMotion || input.saveData) return false;
-  return input.hasPlayed || input.userPaused;
+  return input.hasPlayed || input.userPaused || input.interacted;
 }
 
 export function controlLabel(userPaused: boolean): string {
