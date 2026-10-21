@@ -1,0 +1,81 @@
+import type { TransformResult } from './webflow-transform';
+
+export type CliArgs = {
+  sermons?: string;
+  series?: string;
+  dryRun: boolean;
+  errors: string[];
+};
+
+export const USAGE =
+  'Usage: npx tsx scripts/import-webflow.ts --sermons <sermons.csv> --series <series.csv> [--dry-run]';
+
+export function parseArgs(argv: string[]): CliArgs {
+  const args: CliArgs = { dryRun: false, errors: [] };
+  for (let i = 0; i < argv.length; i++) {
+    const [flag, inline] = argv[i].split(/=(.*)/s, 2);
+    if (flag === '--dry-run') {
+      args.dryRun = true;
+    } else if (flag === '--sermons' || flag === '--series') {
+      const value = inline ?? argv[++i];
+      if (!value || value.startsWith('--')) {
+        args.errors.push(`${flag} needs a file path`);
+        if (value?.startsWith('--')) i--;
+      } else if (flag === '--sermons') args.sermons = value;
+      else args.series = value;
+    } else {
+      args.errors.push(`Unknown argument ${argv[i]}`);
+    }
+  }
+  if (!args.sermons && !args.errors.some((e) => e.startsWith('--sermons')))
+    args.errors.push('Missing --sermons <csv>');
+  if (!args.series && !args.errors.some((e) => e.startsWith('--series')))
+    args.errors.push('Missing --series <csv>');
+  return args;
+}
+
+export function chunk<T>(items: readonly T[], size: number): T[][] {
+  if (!Number.isInteger(size) || size < 1)
+    throw new Error('chunk size must be a positive integer');
+  const out: T[][] = [];
+  for (let i = 0; i < items.length; i += size)
+    out.push(items.slice(i, i + size));
+  return out;
+}
+
+export function formatReport(result: TransformResult): string {
+  const { stats, problems } = result;
+  const lines = [
+    `Sermons CSV: ${stats.sermonRows} rows, ${stats.skippedDraftOrArchived} draft/archived skipped, ${stats.skippedInvalid} skipped because of problems`,
+    `Ready to import: ${stats.sermons} sermons, ${stats.series} series, ${stats.speakers} speakers`,
+    '',
+    `First ${Math.min(5, result.sermons.length)} transformed sermons:`,
+    ...result.sermons.slice(0, 5).map((s) => JSON.stringify(s, null, 2)),
+    '',
+    `Problems (${problems.length}):`,
+    ...(problems.length ? problems.map((p) => `  - ${p}`) : ['  none']),
+  ];
+  return lines.join('\n');
+}
+
+type TransactionLike = {
+  createOrReplace(doc: { _id: string; _type: string }): TransactionLike;
+  commit(): Promise<unknown>;
+};
+
+export async function commitInBatches(
+  client: { transaction(): TransactionLike },
+  docs: readonly { _id: string; _type: string }[],
+  size: number,
+  onBatch?: (written: number, total: number) => void,
+): Promise<number> {
+  let written = 0;
+  for (const batch of chunk(docs, size)) {
+    const tx = client.transaction();
+    for (const doc of batch) tx.createOrReplace(doc);
+    await tx.commit();
+    written += batch.length;
+    onBatch?.(written, docs.length);
+  }
+  return written;
+}
