@@ -1,5 +1,6 @@
 ---
 import type { Announcement } from '../lib/sanity/types';
+import { safeHref } from '../lib/safe-href';
 
 interface Props {
   announcement: Announcement;
@@ -7,14 +8,15 @@ interface Props {
 
 const { announcement } = Astro.props;
 const text = announcement.text?.trim() ?? '';
-const href = announcement.href?.trim() || undefined;
+const href = safeHref(announcement.href);
 const show = announcement.enabled && text !== '';
 const external = Boolean(href && /^https?:\/\//i.test(href));
 ---
 
 {show && (
-  <aside
+  <div
     class="announcement on-navy"
+    role="region"
     aria-label="Announcement"
     data-announcement
   >
@@ -36,7 +38,7 @@ const external = Boolean(href && /^https?:\/\//i.test(href));
         text
       )}
     </p>
-  </aside>
+  </div>
 )}
 
 <style>

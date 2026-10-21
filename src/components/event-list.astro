@@ -8,9 +8,16 @@ interface Props {
   limit?: number;
   variant: 'home' | 'full';
   headingLevel?: 'h2' | 'h3';
+  reveal?: boolean;
 }
 
-const { events, limit, variant, headingLevel: Heading = 'h3' } = Astro.props;
+const {
+  events,
+  limit,
+  variant,
+  headingLevel: Heading = 'h3',
+  reveal = true,
+} = Astro.props;
 
 const shown = (events ?? []).slice(0, limit ?? Infinity);
 const rows = shown.map((event) => ({
@@ -36,7 +43,7 @@ const EAGER_ROWS = 3;
           { 'event--image': variant === 'full' && event.imageUrl },
         ]}
         data-event
-        data-reveal={index >= EAGER_ROWS ? 'fade' : undefined}
+        data-reveal={reveal && index >= EAGER_ROWS ? 'fade' : undefined}
       >
         <div class="event__date" aria-hidden="true">
           <span class="event__day">{when.day}</span>

@@ -3,34 +3,44 @@ import HeroVideo from './hero-video.astro';
 ---
 
 <div class="hero-stage">
-  <section class="hero" data-hero aria-labelledby="home-title">
-    <div class="hero__media">
-      <HeroVideo poster="/video/lobby-poster" />
+  <div class="hero-stage__inner">
+    <section class="hero" data-hero aria-labelledby="home-title">
+      <div class="hero__media">
+        <HeroVideo poster="/video/lobby-poster" />
+      </div>
+      <div class="hero__wash" aria-hidden="true"></div>
+      <div class="container hero__inner">
+        <p class="eyebrow" data-reveal="fade" data-reveal-delay="0.7">
+          Crossway Bible Church · San Antonio
+        </p>
+        <h1
+          class="display-hero hero__title"
+          id="home-title"
+          data-reveal="lines"
+        >
+          <span class="hero__line">You are</span>{' '}
+          <span class="hero__line">
+            <em>loved.</em>
+          </span>
+        </h1>
+        <p class="hero__verse" data-reveal="fade" data-reveal-delay="0.95">
+          “We love because he first loved us.”
+          <span class="verse-cite">1 John 4:19</span>
+        </p>
+      </div>
+    </section>
+    <div class="hero-stage__card">
+      <slot />
     </div>
-    <div class="hero__wash" aria-hidden="true"></div>
-    <div class="container hero__inner">
-      <p class="eyebrow" data-reveal="fade" data-reveal-delay="0.7">
-        Crossway Bible Church · San Antonio
-      </p>
-      <h1 class="display-hero hero__title" id="home-title" data-reveal="lines">
-        <span class="hero__line">You are</span>{' '}
-        <span class="hero__line">
-          <em>loved.</em>
-        </span>
-      </h1>
-      <p class="hero__verse" data-reveal="fade" data-reveal-delay="0.95">
-        “We love because he first loved us.”
-        <span class="verse-cite">1 John 4:19</span>
-      </p>
-    </div>
-  </section>
-  <div class="hero-stage__card">
-    <slot />
   </div>
 </div>
 
 <style>
   .hero-stage {
+    container-type: inline-size;
+  }
+
+  .hero-stage__inner {
     position: relative;
   }
 
@@ -41,7 +51,7 @@ import HeroVideo from './hero-video.astro';
     justify-content: flex-end;
     min-height: clamp(34rem, 86svh, 47rem);
     padding-block: 8rem clamp(3rem, 6vw, 4.5rem);
-    overflow-x: clip;
+    overflow: clip;
     background: var(--paper);
   }
 
@@ -101,7 +111,7 @@ import HeroVideo from './hero-video.astro';
   .hero__verse {
     max-width: 30ch;
     margin: 2rem 0 0;
-    color: #3a4a5c;
+    color: color-mix(in srgb, var(--navy) 82%, var(--charcoal));
     font-family: var(--font-text);
     font-size: clamp(1.125rem, 1rem + 0.5vw, 1.3125rem);
     font-style: italic;
@@ -118,7 +128,7 @@ import HeroVideo from './hero-video.astro';
     padding: 1.5rem var(--gutter) 3rem;
   }
 
-  @media (max-width: 40rem) {
+  @container (max-width: 40rem) {
     .hero__title {
       font-size: clamp(4rem, 29vw, 8rem);
     }
@@ -148,8 +158,8 @@ import HeroVideo from './hero-video.astro';
     }
   }
 
-  @media (min-width: 1100px) {
-    .hero-stage {
+  @container (min-width: 68.75rem) {
+    .hero-stage__inner {
       margin-bottom: 6rem;
     }
 

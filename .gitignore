@@ -13,3 +13,4 @@ playwright-report/
 .lighthouseci/
 .sanity/
 dist-empty-states/
+dist-announcement/

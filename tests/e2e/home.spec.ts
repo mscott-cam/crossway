@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import sharp from 'sharp';
 
 const MAPS = 'https://maps.app.goo.gl/o7uWJUWy6KxYDraX7';
 const LIVE = 'https://live.crosswaysa.org/';
@@ -217,6 +218,131 @@ test.describe('layout', () => {
   });
 });
 
+test.describe('hero edge during the zoom settle', () => {
+  for (const [width, height] of [
+    [1440, 900],
+    [390, 844],
+  ]) {
+    test(`nothing paints below the hero at ${width}px while the media settles`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height });
+      await page.goto('/');
+      const overflow = await hero(page).evaluate((el) => {
+        const style = getComputedStyle(el);
+        return [style.overflowX, style.overflowY];
+      });
+      expect(overflow).toEqual(['clip', 'clip']);
+      for (const seconds of [0, 0.05, 0.3, 0.7, 1.5]) {
+        await page.evaluate((t) => {
+          for (const animation of document
+            .querySelector('.hero__media')!
+            .getAnimations()) {
+            animation.pause();
+            animation.currentTime = t * 1000;
+          }
+        }, seconds);
+        const box = (await hero(page).boundingBox())!;
+        const bottom = Math.round(box.y + box.height);
+        const strip = await page.screenshot({
+          clip: {
+            x: 0,
+            y: bottom + 2,
+            width: Math.min(width, 700),
+            height: 4,
+          },
+        });
+        const { data } = await sharp(strip)
+          .removeAlpha()
+          .raw()
+          .toBuffer({ resolveWithObject: true });
+        for (let i = 0; i < data.length; i += 3) {
+          expect(
+            Math.abs(data[i] - 243) +
+              Math.abs(data[i + 1] - 240) +
+              Math.abs(data[i + 2] - 232),
+            `t=${seconds}s pixel ${i / 3}`,
+          ).toBeLessThanOrEqual(6);
+        }
+      }
+    });
+  }
+});
+
+test.describe('enlarged text', () => {
+  for (const [width, scale] of [
+    [1440, '200%'],
+    [1280, '150%'],
+  ] as const) {
+    test(`at ${width}px with ${scale} text nothing overlaps and the header collapses`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/');
+      await settled(page);
+      await page.evaluate((size) => {
+        document.documentElement.style.fontSize = size;
+      }, scale);
+      await page.waitForTimeout(300);
+      expect(await noOverflow(page)).toBe(true);
+
+      const boxes = await page.evaluate(() => {
+        const box = (selector: string) => {
+          const r = document.querySelector(selector)!.getBoundingClientRect();
+          return { x: r.x, y: r.y, w: r.width, h: r.height };
+        };
+        return {
+          card: box('[data-sunday-card]'),
+          h1: box('h1'),
+          eyebrow: box('[data-hero] .eyebrow'),
+          verse: box('.hero__verse'),
+        };
+      });
+      const intersects = (
+        a: { x: number; y: number; w: number; h: number },
+        b: { x: number; y: number; w: number; h: number },
+      ) =>
+        a.x < b.x + b.w &&
+        b.x < a.x + a.w &&
+        a.y < b.y + b.h &&
+        b.y < a.y + a.h;
+      for (const name of ['h1', 'eyebrow', 'verse'] as const)
+        expect(intersects(boxes.card, boxes[name]), name).toBe(false);
+
+      await expect(page.locator('.menu-button')).toBeVisible();
+      await expect(page.locator('.primary-nav')).toBeHidden();
+      const bar = (await page.locator('.site-header__bar').boundingBox())!;
+      expect(bar.height).toBeLessThan(150);
+    });
+  }
+
+  test('at 1x the desktop nav and the overlapping card are unchanged at 1280px', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/');
+    await settled(page);
+    await expect(page.locator('.primary-nav')).toBeVisible();
+    await expect(page.locator('.menu-button')).toBeHidden();
+    const bar = (await page.locator('.site-header__bar').boundingBox())!;
+    expect(bar.height).toBeLessThan(80);
+    const h = (await hero(page).boundingBox())!;
+    const c = (await card(page).boundingBox())!;
+    expect(c.y).toBeLessThan(h.y + h.height);
+  });
+});
+
+test.describe('This Sunday card type', () => {
+  test('the AM marker stays at least 13px on a phone', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/');
+    const size = await page
+      .locator('.sunday-card__meridiem')
+      .evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+    expect(size).toBeGreaterThanOrEqual(13);
+  });
+});
+
 test.describe('header and announcement', () => {
   test.use({ viewport: { width: 1440, height: 900 } });
 
@@ -350,6 +476,10 @@ test.describe('sections', () => {
     await page.goto('/');
     const section = page.locator('[data-entrusted-feature]');
     await expect(section).toContainText('With much, for more.');
+    await expect(section).toContainText(
+      'Entrusted is a one-fund, two-year, church-wide initiative, from December 2026 to December 2028. Every gift given to Crossway goes to Existing disciple-making, Expanding disciple-making, and Extending disciple-making.',
+    );
+    await expect(section).not.toContainText('$');
     await expect(
       section.getByRole('link', { name: /Learn about Entrusted/ }),
     ).toHaveAttribute('href', '/entrusted');

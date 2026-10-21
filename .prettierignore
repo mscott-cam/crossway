@@ -10,3 +10,5 @@ PRODUCT.md
 test-results
 playwright-report
 .sanity
+dist-announcement
+dist-empty-states

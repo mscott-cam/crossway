@@ -1,3 +1,5 @@
+import { SEEK_GRACE_MS, readyToReveal } from '../lib/video/hero-reveal';
+
 interface VideoSource {
   src: string;
   type: string;
@@ -43,17 +45,37 @@ function setup(root: HTMLElement) {
   let attached = false;
   const start = Math.max(0, parseFloat(video.dataset.start ?? '') || 0);
 
-  video.addEventListener('playing', () => root.classList.add('is-playing'));
+  let revealed = false;
+  let waitStart = performance.now();
+  const reveal = () => {
+    if (revealed) return;
+    const ready = readyToReveal({
+      start,
+      currentTime: video.currentTime,
+      waitedMs: performance.now() - waitStart,
+      playing: !video.paused && !video.seeking,
+    });
+    if (!ready) return;
+    revealed = true;
+    root.classList.add('is-playing');
+  };
+  for (const type of ['playing', 'seeked', 'timeupdate'])
+    video.addEventListener(type, reveal);
 
   const sync = () => {
     if (!mayPlay()) {
       video.pause();
-      if (reduceMotion.matches) root.classList.remove('is-playing');
+      if (reduceMotion.matches) {
+        revealed = false;
+        root.classList.remove('is-playing');
+      }
       return;
     }
     if (!attached) {
       attached = true;
+      waitStart = performance.now();
       attachSources(video, start);
+      if (start > 0) window.setTimeout(reveal, SEEK_GRACE_MS + 50);
     }
     video.play().catch(() => {});
   };

@@ -59,4 +59,32 @@ describe('AnnouncementBar', () => {
     expect(html).not.toContain('<img');
     expect(html).toContain('&lt;img');
   });
+
+  it('is a labelled region, not an aside', async () => {
+    const html = await render({ enabled: true, text: 'Hello' });
+    expect(html).not.toContain('<aside');
+    expect(html).toContain('role="region"');
+    expect(html).toContain('aria-label="Announcement"');
+  });
+
+  it('drops unsafe hrefs but keeps the text', async () => {
+    const html = await render({
+      enabled: true,
+      text: 'Read this',
+      href: 'javascript:alert(1)',
+    });
+    expect(html).toContain('Read this');
+    expect(html).not.toContain('javascript:');
+    expect(html).not.toContain('<a ');
+  });
+
+  it('allows mailto links without opening a new tab', async () => {
+    const html = await render({
+      enabled: true,
+      text: 'Email us',
+      href: 'mailto:hello@crosswaysa.org',
+    });
+    expect(html).toContain('href="mailto:hello@crosswaysa.org"');
+    expect(html).not.toContain('target="_blank"');
+  });
 });

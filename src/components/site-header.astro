@@ -172,6 +172,7 @@ const pathname = Astro.url.pathname;
     margin-inline: auto;
     padding: 0.5rem 0.5rem 0.5rem clamp(1.25rem, 2vw, 1.625rem);
     border: 1px solid color-mix(in srgb, var(--navy) 12%, transparent);
+    container-type: inline-size;
     border-radius: 999px;
     background: color-mix(in srgb, var(--paper) 86%, transparent);
     -webkit-backdrop-filter: blur(18px) saturate(1.2);
@@ -360,7 +361,7 @@ const pathname = Astro.url.pathname;
     display: inline;
   }
 
-  @media (max-width: 1099.98px) {
+  @container (max-width: 63.99rem) {
     .primary-nav,
     .site-header .plan-visit {
       display: none;

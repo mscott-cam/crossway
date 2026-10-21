@@ -1,5 +1,3 @@
-const DESKTOP_QUERY = '(min-width: 1100px)';
-
 const FOCUSABLE =
   'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
@@ -66,7 +64,7 @@ function initMenu(header: HTMLElement) {
   if (!toggle || !menu) return;
 
   const root = document.documentElement;
-  const desktop = window.matchMedia(DESKTOP_QUERY);
+  const bar = header.querySelector<HTMLElement>('.site-header__bar');
   const outside = () =>
     Array.from(document.body.children).filter(
       (el): el is HTMLElement =>
@@ -120,9 +118,11 @@ function initMenu(header: HTMLElement) {
     }
   });
 
-  desktop.addEventListener('change', (event) => {
-    if (event.matches && isOpen()) setOpen(false);
-  });
+  const isDesktop = () => getComputedStyle(toggle).display === 'none';
+  const closeOnDesktop = () => {
+    if (isOpen() && isDesktop()) setOpen(false);
+  };
+  if (bar) new ResizeObserver(closeOnDesktop).observe(bar);
 
   window.addEventListener('pageshow', (event) => {
     if (event.persisted && isOpen()) setOpen(false);

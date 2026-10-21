@@ -113,4 +113,15 @@ describe('EventList', () => {
       });
     }
   }
+
+  it('fades rows after the first three by default and not when reveal is off', async () => {
+    const many = [...events, ...events].map((event, index) => ({
+      ...event,
+      id: `${event.id}-${index}`,
+    }));
+    const on = await render({ events: many, variant: 'home' });
+    expect(on.match(/data-reveal="fade"/g)).toHaveLength(3);
+    const off = await render({ events: many, variant: 'home', reveal: false });
+    expect(off).not.toContain('data-reveal');
+  });
 });
