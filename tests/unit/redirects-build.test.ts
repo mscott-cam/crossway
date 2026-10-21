@@ -41,6 +41,7 @@ beforeAll(() => {
     'astro.config.mjs',
     'package.json',
     'tsconfig.json',
+    'vercel.json',
   ]) {
     cpSync(join(root, entry), join(work, entry), { recursive: true });
   }
@@ -92,6 +93,11 @@ describe('Vercel output redirects', () => {
     const fs = routes.findIndex((r) => r.handle === 'filesystem');
     expect(fs).toBeGreaterThan(-1);
     expect(routes.slice(0, fs).some((r) => r.status === 301)).toBe(true);
+  });
+
+  it('serves the rebuild cron endpoint from the server function', () => {
+    const route = routes.find((r) => r.src === '^/api/cron/rebuild$');
+    expect(route?.dest).toBe('_render');
   });
 
   it('does not redirect current sermon URLs', () => {

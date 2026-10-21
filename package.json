@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "postbuild": "tsx scripts/audio-report.ts || true",
     "preview": "astro preview",
     "test": "vitest run",
     "test:e2e": "SANITY_FIXTURES=1 E2E=1 TURNSTILE_SITE_KEY=e2e-site-key astro build && SANITY_FIXTURES=1 SANITY_FIXTURE_SETTINGS=announcement E2E=1 TURNSTILE_SITE_KEY=e2e-site-key astro build --outDir dist-announcement && SANITY_FIXTURES=1 E2E=1 playwright test",
