@@ -1,4 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "astro",
   "crons": [{ "path": "/api/cron/rebuild", "schedule": "0 11 * * *" }]
 }
