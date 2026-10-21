@@ -11,16 +11,28 @@ const connect = {
   permanent: true,
 };
 
+const archive = {
+  source: '/sermons/archive',
+  destination: '/sermons/archive/1',
+  permanent: true,
+};
+
+const statics = [connect, archive];
+
 describe('buildRedirects', () => {
+  it('redirects the bare archive path to its first page', () => {
+    expect(buildRedirects([])).toContainEqual(archive);
+  });
+
   it('always includes /connect to /visit', () => {
-    expect(buildRedirects([])).toEqual([connect]);
+    expect(buildRedirects([])).toEqual(statics);
   });
 
   it('emits nothing for an unchanged slug', () => {
     const out = buildRedirects([
       { slug: 'grace-2026-01-04', webflowPath: '/sermons/grace-2026-01-04' },
     ]);
-    expect(out).toEqual([connect]);
+    expect(out).toEqual(statics);
   });
 
   it('emits one 301 for a changed slug', () => {
@@ -28,7 +40,7 @@ describe('buildRedirects', () => {
       { slug: 'grace-and-truth-2026-01-04', webflowPath: '/sermons/grace' },
     ]);
     expect(out).toEqual([
-      connect,
+      ...statics,
       {
         source: '/sermons/grace',
         destination: '/sermons/grace-and-truth-2026-01-04',
@@ -38,7 +50,7 @@ describe('buildRedirects', () => {
   });
 
   it('emits nothing for sermons without a webflowPath', () => {
-    expect(buildRedirects([{ slug: 'new-one-2026-02-01' }])).toEqual([connect]);
+    expect(buildRedirects([{ slug: 'new-one-2026-02-01' }])).toEqual(statics);
   });
 
   it('dedupes by source and keeps the first', () => {
@@ -60,7 +72,7 @@ describe('buildRedirects', () => {
       { slug: 'same', webflowPath: '/sermons/same/' },
       { slug: 'same-2', webflowPath: '/sermons/same-2' },
     ]);
-    expect(out).toEqual([connect]);
+    expect(out).toEqual(statics);
   });
 
   it('skips a source that is another sermon page', () => {
@@ -68,7 +80,7 @@ describe('buildRedirects', () => {
       { slug: 'new-2026-01-04', webflowPath: '/sermons/other-2026-01-11' },
       { slug: 'other-2026-01-11' },
     ]);
-    expect(out).toEqual([connect]);
+    expect(out).toEqual(statics);
   });
 
   it('skips a source that collides with a static route', () => {
@@ -81,7 +93,7 @@ describe('buildRedirects', () => {
       ],
       { warn },
     );
-    expect(out).toEqual([connect]);
+    expect(out).toEqual(statics);
     expect(warn).toHaveBeenCalledTimes(3);
   });
 
@@ -91,7 +103,7 @@ describe('buildRedirects', () => {
       { slug: 'b-2026-01-11', webflowPath: '/elsewhere/old' },
       { slug: 'c-2026-01-18', webflowPath: '/sermons/[id]' },
     ]);
-    expect(out).toEqual([connect]);
+    expect(out).toEqual(statics);
   });
 
   it('caps the total and reports it', () => {
@@ -102,7 +114,7 @@ describe('buildRedirects', () => {
     }));
     const out = buildRedirects(sermons, { max: 4, warn });
     expect(out).toHaveLength(4);
-    expect(out[0]).toEqual(connect);
+    expect(out.slice(0, 2)).toEqual(statics);
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('cap'));
   });
 });
@@ -111,6 +123,7 @@ describe('toAstroRedirects', () => {
   it('maps entries to Astro redirect config with status 301', () => {
     expect(toAstroRedirects(buildRedirects([]))).toEqual({
       '/connect': { status: 301, destination: '/visit' },
+      '/sermons/archive': { status: 301, destination: '/sermons/archive/1' },
     });
   });
 });
@@ -132,7 +145,7 @@ describe('loadAstroRedirects', () => {
     const out = await loadAstroRedirects(async () => {
       throw new Error('boom');
     }, warn);
-    expect(out).toEqual({ '/connect': { status: 301, destination: '/visit' } });
+    expect(Object.keys(out)).toEqual(['/connect', '/sermons/archive']);
     expect(warn).toHaveBeenCalledTimes(1);
     expect(warn.mock.calls[0]![0]).toContain('boom');
   });
@@ -148,6 +161,6 @@ describe('fixture sermons', () => {
       (s) => s.webflowPath && s.webflowPath !== `/sermons/${s.slug}`,
     );
     expect(changed).toHaveLength(2);
-    expect(buildRedirects(sermons)).toHaveLength(3);
+    expect(buildRedirects(sermons)).toHaveLength(2 + statics.length);
   });
 });

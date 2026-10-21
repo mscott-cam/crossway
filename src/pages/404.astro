@@ -1,0 +1,72 @@
+---
+import BaseLayout from '../layouts/base-layout.astro';
+import Eyebrow from '../components/eyebrow.astro';
+
+const links = [
+  { href: '/', label: 'Home' },
+  { href: '/visit', label: 'Plan your visit' },
+  { href: '/sermons', label: 'Sermons' },
+  { href: '/events', label: 'Events' },
+];
+---
+
+<BaseLayout
+  title="Page not found"
+  description="We couldn't find that page. Head back to the Crossway Bible Church home page, plan a visit, or browse sermons and events."
+  noindex
+  questions={false}
+>
+  <div class="container section not-found">
+    <Eyebrow>Page not found</Eyebrow>
+    <h1>We couldn’t find that page</h1>
+    <p class="not-found__lede">
+      The link may be old, or the page may have moved. Here are a few good
+      places to pick up from.
+    </p>
+    <ul class="not-found__links">
+      {links.map((link) => (
+        <li>
+          <a href={link.href}>
+            {link.label} <span aria-hidden="true">→</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</BaseLayout>
+
+<style>
+  .not-found {
+    max-width: calc(48rem + 2 * var(--gutter));
+  }
+
+  .not-found h1 {
+    margin-top: 1.25rem;
+    font-size: var(--step-h1);
+  }
+
+  .not-found__lede {
+    max-width: 34rem;
+    margin: 1.5rem 0 0;
+  }
+
+  .not-found__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 2rem;
+    margin: 2.5rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .not-found__links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    min-height: 44px;
+    color: var(--navy);
+    font-weight: 600;
+    text-decoration-color: var(--amber-ink);
+    text-decoration-thickness: 2px;
+  }
+</style>

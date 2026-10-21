@@ -23,7 +23,8 @@ export default defineConfig({
   integrations: [
     requireContent(),
     sitemap({
-      filter: (page) => !/^\/(dev|api)(\/|$)/.test(new URL(page).pathname),
+      filter: (page) =>
+        !/^\/(dev|api|404)(\/|$)/.test(new URL(page).pathname),
     }),
     ...(isE2E ? [] : [pruneDevPages()]),
   ],

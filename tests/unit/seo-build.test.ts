@@ -84,6 +84,29 @@ describe.each([
   });
 });
 
+describe('404 page in the production build', () => {
+  it('is prerendered as a static 404.html with its own metadata', () => {
+    expect(existsSync(join(prod.outputDir, '404.html'))).toBe(true);
+    const root = parse(read(prod, '404.html'));
+    expect(root.querySelector('title')?.text).toBe(
+      'Page not found | Crossway Bible Church',
+    );
+    expect(root.querySelectorAll('h1')).toHaveLength(1);
+    expect(
+      root.querySelector('meta[name="robots"]')?.getAttribute('content'),
+    ).toBe('noindex');
+    expect(root.querySelector('.site-header')).not.toBeNull();
+    expect(root.querySelector('.site-footer')).not.toBeNull();
+  });
+
+  it.each([
+    ['production build', () => prod],
+    ['e2e build', () => e2e],
+  ])('stays out of the sitemap in the %s', (_label, get) => {
+    expect(sitemapUrls(get()).some((u) => /\/404$/.test(u))).toBe(false);
+  });
+});
+
 describe('dev fixture pages', () => {
   it('are absent from the production output', () => {
     expect(existsSync(join(prod.outputDir, 'dev'))).toBe(false);

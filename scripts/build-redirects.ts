@@ -23,6 +23,11 @@ export const MAX_REDIRECTS = 2000;
 
 const STATIC_REDIRECTS: RedirectEntry[] = [
   { source: '/connect', destination: '/visit', permanent: true },
+  {
+    source: '/sermons/archive',
+    destination: '/sermons/archive/1',
+    permanent: true,
+  },
 ];
 
 const SERMON_PATH = /^\/sermons\/[A-Za-z0-9_~-][A-Za-z0-9._~-]*$/;

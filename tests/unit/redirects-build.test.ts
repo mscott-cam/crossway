@@ -77,6 +77,24 @@ describe('Vercel output redirects', () => {
     expect(route?.headers?.Location).toBe('/visit');
   });
 
+  it('redirects the bare archive path to its first page with a 301', () => {
+    const route = redirectFor('/sermons/archive');
+    expect(route?.status).toBe(301);
+    expect(route?.headers?.Location).toBe('/sermons/archive/1');
+  });
+
+  it('routes unknown paths to the static 404 page instead of the function', () => {
+    const fs = routes.findIndex((r) => r.handle === 'filesystem');
+    const catchAll = routes
+      .slice(fs)
+      .find(
+        (r) => r.src !== undefined && new RegExp(r.src).test('/no/such/page'),
+      );
+    expect(catchAll?.dest).toBe('/404.html');
+    expect(catchAll?.status).toBe(404);
+    expect(existsSync(join(work, '.vercel/output/static/404.html'))).toBe(true);
+  });
+
   it.each([
     ['/sermons/faith-that-works', '/sermons/faith-that-works-2026-08-16'],
     [
