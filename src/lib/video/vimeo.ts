@@ -1,8 +1,9 @@
 import { readCache, writeCache } from '../cache';
 import { isFixtureMode } from '../sanity/client';
 
-const TIMEOUT_MS = 4000;
+export const VIMEO_TIMEOUT_MS = 4000;
 const CONCURRENCY = 4;
+export const BREAKER_THRESHOLD = 5;
 const OEMBED = 'https://vimeo.com/api/oembed.json';
 const NUMERIC_ID = /^\d+$/;
 const HASH = /^[a-z0-9]+$/i;
@@ -69,27 +70,71 @@ function pageUrl(id: string): string {
     : `https://vimeo.com/${base}`;
 }
 
-export async function getVimeoThumb(id: string): Promise<string | null> {
-  try {
-    if (isFixtureMode()) return null;
-    const key = cacheKey(id);
-    const cached = readCache<string>(key);
-    if (typeof cached === 'string' && cached) return cached;
+const memo = new Map<string, Promise<string | null>>();
+let consecutiveFailures = 0;
+let tripped = false;
 
-    const endpoint = `${OEMBED}?url=${encodeURIComponent(pageUrl(id))}&width=1280`;
-    const thumb = await limited(async () => {
+export function resetVimeoState(): void {
+  memo.clear();
+  consecutiveFailures = 0;
+  tripped = false;
+}
+
+function recordFailure(): void {
+  consecutiveFailures += 1;
+  if (!tripped && consecutiveFailures >= BREAKER_THRESHOLD) {
+    tripped = true;
+    console.warn(
+      '[vimeo] Vimeo thumbnails unavailable; building without thumbnails',
+    );
+  }
+}
+
+async function fetchThumb(id: string): Promise<string | null> {
+  const endpoint = `${OEMBED}?url=${encodeURIComponent(pageUrl(id))}&width=1280`;
+  return limited(async () => {
+    if (tripped) return null;
+    try {
       const response = await fetch(endpoint, {
-        signal: AbortSignal.timeout(TIMEOUT_MS),
+        signal: AbortSignal.timeout(VIMEO_TIMEOUT_MS),
         headers: { accept: 'application/json' },
       });
+      if (response.status === 429 || response.status >= 500) {
+        recordFailure();
+        return null;
+      }
+      consecutiveFailures = 0;
       if (!response.ok) return null;
       const body = (await response.json()) as { thumbnail_url?: unknown };
       return typeof body.thumbnail_url === 'string' && body.thumbnail_url
         ? body.thumbnail_url
         : null;
-    });
-    if (thumb) writeCache(key, thumb);
-    return thumb;
+    } catch {
+      recordFailure();
+      return null;
+    }
+  });
+}
+
+async function lookup(id: string): Promise<string | null> {
+  const key = cacheKey(id);
+  const cached = readCache<string>(key);
+  if (typeof cached === 'string' && cached) return cached;
+  if (tripped) return null;
+  const thumb = await fetchThumb(id);
+  if (thumb) writeCache(key, thumb);
+  return thumb;
+}
+
+export async function getVimeoThumb(id: string): Promise<string | null> {
+  try {
+    if (isFixtureMode()) return null;
+    let pending = memo.get(id);
+    if (!pending) {
+      pending = lookup(id);
+      memo.set(id, pending);
+    }
+    return await pending;
   } catch {
     return null;
   }

@@ -2,7 +2,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { getVimeoThumb, parseVimeoId } from '../../src/lib/video/vimeo';
+import {
+  BREAKER_THRESHOLD,
+  getVimeoThumb,
+  parseVimeoId,
+  resetVimeoState,
+  VIMEO_TIMEOUT_MS,
+} from '../../src/lib/video/vimeo';
 import { readCache, writeCache } from '../../src/lib/cache';
 
 describe('parseVimeoId', () => {
@@ -75,6 +81,7 @@ describe('getVimeoThumb', () => {
     vi.stubEnv('CROSSWAY_CACHE_DIR', dir);
     vi.stubEnv('SANITY_FIXTURES', '');
     vi.stubEnv('VERCEL_ENV', '');
+    resetVimeoState();
   });
 
   afterEach(() => {
@@ -242,5 +249,136 @@ describe('getVimeoThumb', () => {
     const settled = await Promise.all(results);
     expect(settled.every((s) => typeof s === 'string')).toBe(true);
     expect(peak).toBe(4);
+  });
+
+  it('looks each video up once per build, including a null result', async () => {
+    const fetchSpy = vi.fn(
+      async () => ({ ok: false, status: 404 }) as Response,
+    );
+    vi.stubGlobal('fetch', fetchSpy);
+    expect(await getVimeoThumb('801')).toBeNull();
+    expect(await getVimeoThumb('801')).toBeNull();
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('looks up a thrown failure once as well', async () => {
+    const fetchSpy = vi.fn(async () => {
+      throw new Error('offline');
+    });
+    vi.stubGlobal('fetch', fetchSpy);
+    await getVimeoThumb('802');
+    await getVimeoThumb('802');
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('shares one request between concurrent lookups of the same video', async () => {
+    const fetchSpy = vi.fn(async () =>
+      okResponse({ thumbnail_url: 'https://i.vimeocdn.com/803' }),
+    );
+    vi.stubGlobal('fetch', fetchSpy);
+    const results = await Promise.all([
+      getVimeoThumb('803'),
+      getVimeoThumb('803'),
+      getVimeoThumb('803'),
+    ]);
+    expect(results).toEqual(Array(3).fill('https://i.vimeocdn.com/803'));
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  describe('circuit breaker', () => {
+    const failing = () =>
+      vi.fn(async () => {
+        throw new DOMException('timed out', 'TimeoutError');
+      });
+
+    it('stops fetching after the threshold of consecutive failures and warns once', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const fetchSpy = failing();
+      vi.stubGlobal('fetch', fetchSpy);
+      for (let i = 0; i < BREAKER_THRESHOLD + 10; i += 1) {
+        expect(await getVimeoThumb(`${900 + i}`)).toBeNull();
+      }
+      expect(fetchSpy).toHaveBeenCalledTimes(BREAKER_THRESHOLD);
+      const vimeoWarnings = warn.mock.calls.filter((call) =>
+        String(call[0]).includes('Vimeo thumbnails unavailable'),
+      );
+      expect(vimeoWarnings).toHaveLength(1);
+      expect(vimeoWarnings[0][0]).toContain('building without thumbnails');
+    });
+
+    it('bounds the worst-case wait to the threshold times the timeout', () => {
+      expect(BREAKER_THRESHOLD * VIMEO_TIMEOUT_MS).toBeLessThanOrEqual(20_000);
+    });
+
+    it('treats 429 and 5xx as failures', async () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const statuses = [429, 500, 502, 503, 429];
+      let call = 0;
+      const fetchSpy = vi.fn(
+        async () => ({ ok: false, status: statuses[call++] }) as Response,
+      );
+      vi.stubGlobal('fetch', fetchSpy);
+      for (let i = 0; i < statuses.length + 3; i += 1) {
+        await getVimeoThumb(`${1000 + i}`);
+      }
+      expect(fetchSpy).toHaveBeenCalledTimes(statuses.length);
+    });
+
+    it('does not trip on per-video misses such as 404', async () => {
+      const fetchSpy = vi.fn(
+        async () => ({ ok: false, status: 404 }) as Response,
+      );
+      vi.stubGlobal('fetch', fetchSpy);
+      const total = BREAKER_THRESHOLD + 5;
+      for (let i = 0; i < total; i += 1) await getVimeoThumb(`${1100 + i}`);
+      expect(fetchSpy).toHaveBeenCalledTimes(total);
+    });
+
+    it('resets the count on a success', async () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      let call = 0;
+      const fetchSpy = vi.fn(async () => {
+        call += 1;
+        if (call % BREAKER_THRESHOLD === 0) {
+          return okResponse({ thumbnail_url: 'https://i.vimeocdn.com/ok' });
+        }
+        throw new Error('offline');
+      });
+      vi.stubGlobal('fetch', fetchSpy);
+      const total = BREAKER_THRESHOLD * 3;
+      for (let i = 0; i < total; i += 1) await getVimeoThumb(`${1200 + i}`);
+      expect(fetchSpy).toHaveBeenCalledTimes(total);
+    });
+
+    it('skips queued lookups once tripped, bounding the waiting time', async () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const fetchSpy = failing();
+      vi.stubGlobal('fetch', fetchSpy);
+      const results = await Promise.all(
+        Array.from({ length: 50 }, (_, i) => getVimeoThumb(`${1300 + i}`)),
+      );
+      expect(results.every((r) => r === null)).toBe(true);
+      expect(fetchSpy.mock.calls.length).toBeLessThanOrEqual(
+        BREAKER_THRESHOLD + 3,
+      );
+    });
+
+    it('still serves disk-cached thumbnails after tripping', async () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      vi.stubGlobal('fetch', failing());
+      for (let i = 0; i < BREAKER_THRESHOLD; i += 1) {
+        await getVimeoThumb(`${1400 + i}`);
+      }
+      writeCache('vimeo-thumb-1500', 'https://i.vimeocdn.com/cached');
+      expect(await getVimeoThumb('1500')).toBe('https://i.vimeocdn.com/cached');
+    });
+
+    it('never fetches in fixtures mode and does not count toward the breaker', async () => {
+      vi.stubEnv('SANITY_FIXTURES', '1');
+      const fetchSpy = vi.fn();
+      vi.stubGlobal('fetch', fetchSpy);
+      for (let i = 0; i < 20; i += 1) await getVimeoThumb(`${1600 + i}`);
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
   });
 });

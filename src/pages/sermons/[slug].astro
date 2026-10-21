@@ -46,7 +46,7 @@ const body = sermon.description ? paragraphs(sermon.description) : [];
 
     {hasMedia && (
       <div class="sermon-page__media">
-        <SermonMedia sermon={sermon} priority />
+        <SermonMedia sermon={sermon} thumb={thumb} priority />
       </div>
     )}
 

@@ -19,12 +19,12 @@ export default defineConfig({
   adapter,
   site: 'https://crosswaysa.org',
   trailingSlash: 'never',
+  build: { concurrency: 4 },
   redirects,
   integrations: [
     requireContent(),
     sitemap({
-      filter: (page) =>
-        !/^\/(dev|api|404)(\/|$)/.test(new URL(page).pathname),
+      filter: (page) => !/^\/(dev|api|404)(\/|$)/.test(new URL(page).pathname),
     }),
     ...(isE2E ? [] : [pruneDevPages()]),
   ],
