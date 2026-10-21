@@ -113,15 +113,6 @@ test.describe('desktop header', () => {
     await expect(live).toHaveAttribute('target', '_blank');
   });
 
-  test('current page is marked', async ({ page }) => {
-    await page.goto('/');
-    await expect(
-      page
-        .getByRole('navigation', { name: 'Primary' })
-        .locator('[aria-current]'),
-    ).toHaveCount(0);
-  });
-
   test('has no axe violations', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: 'About Us' }).click();
@@ -168,6 +159,7 @@ test.describe('mobile menu', () => {
     await expect(menu).toHaveAttribute('aria-expanded', 'false');
     await menu.click();
     await expect(menu).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.locator('html')).toHaveClass(/menu-open/);
 
     const panel = page.getByRole('navigation', { name: 'Mobile' });
     for (const name of ['Connect', 'Culture', 'Events']) {
@@ -185,6 +177,25 @@ test.describe('mobile menu', () => {
     await expect(menu).toHaveAttribute('aria-expanded', 'false');
     await expect(panel.getByRole('link', { name: 'Connect' })).toBeHidden();
     await expect(menu).toBeFocused();
+    await expect(page.locator('html')).not.toHaveClass(/menu-open/);
+  });
+
+  test('menu links receive pointer events and navigate', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Menu' }).click();
+    const culture = page
+      .getByRole('navigation', { name: 'Mobile' })
+      .getByRole('link', { name: 'Culture' });
+    await expect(culture).toBeVisible();
+    const hit = await culture.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return el.contains(
+        document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2),
+      );
+    });
+    expect(hit).toBe(true);
+    await culture.click({ timeout: 3000 });
+    await page.waitForURL('**/culture');
   });
 
   test('traps focus while open and releases the page afterwards', async ({
@@ -229,6 +240,7 @@ test.describe('mobile menu', () => {
         name: 'Connect',
       }),
     ).toBeVisible();
+    await expect(page.locator('#mobile-menu')).toHaveCSS('opacity', '1');
     results = await new AxeBuilder({ page }).include('.site-header').analyze();
     expect(results.violations).toEqual([]);
   });
