@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   describeEventWhen,
+  eventSpan,
   formatEventDate,
   formatEventTime,
   formatSermonDate,
@@ -155,5 +156,135 @@ describe('describeEventWhen', () => {
         allDay: true,
       }).dateLabel,
     ).toBe('Sat, Nov 14');
+  });
+});
+
+describe('all-day events in either representation', () => {
+  const chicagoMidnight = (start: string, end?: string) => ({
+    startsAt: start,
+    ...(end ? { endsAt: end } : {}),
+    allDay: true,
+  });
+
+  it('formats Oct 25 the same from UTC midnight or Chicago midnight', () => {
+    expect(formatEventDate('2026-10-25T00:00:00Z', true)).toBe('Sun, Oct 25');
+    expect(formatEventDate('2026-10-25T05:00:00Z', true)).toBe('Sun, Oct 25');
+  });
+
+  it('still reads a timed UTC midnight as the previous Chicago evening', () => {
+    expect(formatEventDate('2026-10-25T00:00:00Z')).toBe('Sat, Oct 24');
+    expect(formatEventDate('2026-10-25T00:00:00Z', false)).toBe('Sat, Oct 24');
+  });
+
+  it('describes a single all-day Oct 25 identically in both representations', () => {
+    const expected = {
+      dateLabel: 'Sun, Oct 25',
+      day: '25',
+      month: 'Oct',
+      datetime: '2026-10-25',
+    };
+    for (const input of [
+      chicagoMidnight('2026-10-25T00:00:00Z', '2026-10-26T00:00:00Z'),
+      chicagoMidnight('2026-10-25T00:00:00Z', '2026-10-25T23:59:00Z'),
+      chicagoMidnight('2026-10-25T00:00:00Z'),
+      chicagoMidnight('2026-10-25T05:00:00Z', '2026-10-26T05:00:00Z'),
+      chicagoMidnight('2026-10-25T05:00:00Z', '2026-10-26T04:59:00Z'),
+      chicagoMidnight('2026-10-25T05:00:00Z'),
+    ]) {
+      expect(describeEventWhen(input)).toEqual(expected);
+    }
+  });
+
+  it('describes a multi-day all-day range identically in both representations', () => {
+    for (const input of [
+      chicagoMidnight('2026-10-25T00:00:00Z', '2026-10-27T00:00:00Z'),
+      chicagoMidnight('2026-10-25T05:00:00Z', '2026-10-27T05:00:00Z'),
+    ]) {
+      const when = describeEventWhen(input);
+      expect(when.dateLabel).toBe('Sun, Oct 25 – Mon, Oct 26');
+      expect(when.datetime).toBe('2026-10-25');
+      expect(when.timeLabel).toBeUndefined();
+    }
+  });
+
+  it('handles the fall-back day (2026-11-01, 25 hours long)', () => {
+    expect(
+      describeEventWhen(
+        chicagoMidnight('2026-11-01T05:00:00Z', '2026-11-02T06:00:00Z'),
+      ),
+    ).toEqual({
+      dateLabel: 'Sun, Nov 1',
+      day: '1',
+      month: 'Nov',
+      datetime: '2026-11-01',
+    });
+    expect(
+      describeEventWhen(
+        chicagoMidnight('2026-11-01T05:00:00Z', '2026-11-03T06:00:00Z'),
+      ).dateLabel,
+    ).toBe('Sun, Nov 1 – Mon, Nov 2');
+    expect(
+      describeEventWhen(chicagoMidnight('2026-11-02T06:00:00Z')).dateLabel,
+    ).toBe('Mon, Nov 2');
+    expect(
+      describeEventWhen(
+        chicagoMidnight('2026-11-01T00:00:00Z', '2026-11-02T00:00:00Z'),
+      ).dateLabel,
+    ).toBe('Sun, Nov 1');
+  });
+
+  it('handles the spring-forward day (2026-03-08, 23 hours long)', () => {
+    expect(
+      describeEventWhen(
+        chicagoMidnight('2026-03-08T06:00:00Z', '2026-03-09T05:00:00Z'),
+      ),
+    ).toEqual({
+      dateLabel: 'Sun, Mar 8',
+      day: '8',
+      month: 'Mar',
+      datetime: '2026-03-08',
+    });
+    expect(
+      describeEventWhen(
+        chicagoMidnight('2026-03-07T06:00:00Z', '2026-03-09T05:00:00Z'),
+      ).dateLabel,
+    ).toBe('Sat, Mar 7 – Sun, Mar 8');
+    expect(
+      describeEventWhen(
+        chicagoMidnight('2026-03-08T00:00:00Z', '2026-03-09T00:00:00Z'),
+      ).dateLabel,
+    ).toBe('Sun, Mar 8');
+    expect(
+      describeEventWhen(chicagoMidnight('2026-03-09T05:00:00Z')).dateLabel,
+    ).toBe('Mon, Mar 9');
+  });
+});
+
+describe('eventSpan', () => {
+  it('returns first and last calendar days for both representations', () => {
+    expect(
+      eventSpan({
+        startsAt: '2026-10-25T00:00:00Z',
+        endsAt: '2026-10-27T00:00:00Z',
+        allDay: true,
+      }),
+    ).toEqual({ first: '2026-10-25', last: '2026-10-26' });
+    expect(
+      eventSpan({
+        startsAt: '2026-10-25T05:00:00Z',
+        endsAt: '2026-10-27T05:00:00Z',
+        allDay: true,
+      }),
+    ).toEqual({ first: '2026-10-25', last: '2026-10-26' });
+  });
+
+  it('uses Chicago days for timed events', () => {
+    expect(
+      eventSpan({
+        startsAt: '2026-10-26T00:00:00Z',
+        endsAt: '2026-10-26T01:30:00Z',
+        allDay: false,
+      }),
+    ).toEqual({ first: '2026-10-25', last: '2026-10-25' });
   });
 });

@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { eventSpan, toChicagoDate } from '../dates';
 import { env, isFixtureMode } from '../sanity/client';
 
 export type ChurchEvent = {
@@ -22,10 +23,27 @@ const FIXTURE_NOW = new Date('2026-10-20T12:00:00-05:00');
 const MAX_PAGES = 5;
 const TIMEOUT_MS = 15000;
 const RETRY_DELAY_MS = 750;
+const MAX_RETRY_AFTER_MS = 5000;
 
 type Json = Record<string, any>;
 
-class PcoError extends Error {}
+class PcoError extends Error {
+  constructor(
+    message: string,
+    readonly retryable = true,
+    readonly retryAfterMs?: number,
+  ) {
+    super(message);
+  }
+}
+
+type FetchOptions = {
+  retryDelayMs?: number;
+  maxRetryAfterMs?: number;
+  timeoutMs?: number;
+};
+
+type Settings = Required<FetchOptions>;
 
 const isObject = (value: unknown): value is Json =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -62,6 +80,24 @@ function safeImage(value: unknown): string | undefined {
     : undefined;
 }
 
+function isUpcoming(
+  start: Date,
+  end: Date | undefined,
+  allDay: boolean,
+  now: Date,
+): boolean {
+  if (allDay) {
+    const { last } = eventSpan({
+      startsAt: start.toISOString(),
+      endsAt: end?.toISOString(),
+      allDay,
+    });
+    return last >= toChicagoDate(now);
+  }
+  if (start.getTime() >= now.getTime()) return true;
+  return end !== undefined && end.getTime() > now.getTime();
+}
+
 export function mapPcoEvents(json: unknown, now: Date): ChurchEvent[] {
   if (!isObject(json) || !Array.isArray(json.data)) return [];
   const events = new Map<string, Json>();
@@ -89,10 +125,12 @@ export function mapPcoEvents(json: unknown, now: Date): ChurchEvent[] {
     const attrs = item.attributes;
     const start = validDate(attrs.starts_at);
     const name = text(attrs.name) || text(eventAttrs.name);
-    if (!start || !name || start.getTime() < now.getTime()) continue;
+    if (!start || !name) continue;
+    const allDay = attrs.all_day_event === true;
+    const end = validDate(attrs.ends_at);
+    if (!isUpcoming(start, end, allDay, now)) continue;
 
     const id = String(eventId);
-    const end = validDate(attrs.ends_at);
     const location = text(attrs.location);
     const imageUrl = safeImage(eventAttrs.image_url);
     candidates.push({
@@ -102,7 +140,7 @@ export function mapPcoEvents(json: unknown, now: Date): ChurchEvent[] {
         name,
         startsAt: text(attrs.starts_at),
         ...(end ? { endsAt: text(attrs.ends_at) } : {}),
-        allDay: attrs.all_day_event === true,
+        allDay,
         ...(location ? { location } : {}),
         ...(imageUrl ? { imageUrl } : {}),
         url: churchCenterUrl(attrs.church_center_url, id),
@@ -122,12 +160,38 @@ export function mapPcoEvents(json: unknown, now: Date): ChurchEvent[] {
 const wait = (ms: number) =>
   new Promise<void>((resolveWait) => setTimeout(resolveWait, ms));
 
-async function requestPage(url: string, authorization: string): Promise<Json> {
+function retryAfterMs(header: string | null | undefined, cap: number) {
+  const seconds = Number(header?.trim());
+  if (!header || !/^\d+$/.test(header.trim()) || !Number.isFinite(seconds)) {
+    return undefined;
+  }
+  return Math.min(seconds * 1000, cap);
+}
+
+async function requestPage(
+  url: string,
+  authorization: string,
+  settings: Settings,
+): Promise<Json> {
   const response = await fetch(url, {
     headers: { Authorization: authorization, Accept: 'application/json' },
-    signal: AbortSignal.timeout(TIMEOUT_MS),
+    redirect: 'error',
+    signal: AbortSignal.timeout(settings.timeoutMs),
   });
-  if (!response.ok) throw new PcoError(`HTTP ${response.status}`);
+  if (!response.ok) {
+    const { status } = response;
+    if (status === 429) {
+      throw new PcoError(
+        `HTTP ${status}`,
+        true,
+        retryAfterMs(
+          response.headers?.get('retry-after'),
+          settings.maxRetryAfterMs,
+        ),
+      );
+    }
+    throw new PcoError(`HTTP ${status}`, status >= 500);
+  }
   const body: unknown = await response.json();
   if (!isObject(body)) throw new PcoError('unexpected response');
   return body;
@@ -136,13 +200,18 @@ async function requestPage(url: string, authorization: string): Promise<Json> {
 async function requestWithRetry(
   url: string,
   authorization: string,
-  retryDelayMs: number,
+  settings: Settings,
 ): Promise<Json> {
   try {
-    return await requestPage(url, authorization);
-  } catch {
-    await wait(retryDelayMs);
-    return requestPage(url, authorization);
+    return await requestPage(url, authorization, settings);
+  } catch (error) {
+    if (error instanceof PcoError && !error.retryable) throw error;
+    const delay =
+      error instanceof PcoError && error.retryAfterMs !== undefined
+        ? error.retryAfterMs
+        : settings.retryDelayMs;
+    await wait(delay);
+    return requestPage(url, authorization, settings);
   }
 }
 
@@ -151,25 +220,52 @@ function nextPageUrl(body: Json): string | undefined {
   if (!next) return undefined;
   const url = new URL(next);
   if (url.protocol !== 'https:' || url.hostname !== API_HOST) {
-    throw new PcoError('unexpected next page link');
+    throw new PcoError('unexpected next page link', false);
   }
   return url.href;
+}
+
+function reason(error: unknown): string {
+  if (error instanceof PcoError) return error.message;
+  return error instanceof Error ? error.name : 'unknown error';
 }
 
 async function fetchFromApi(
   appId: string,
   secret: string,
-  retryDelayMs: number,
+  settings: Settings,
 ): Promise<ChurchEvent[]> {
   const authorization = `Basic ${Buffer.from(`${appId}:${secret}`).toString('base64')}`;
   const data: unknown[] = [];
   const included: unknown[] = [];
   let url: string | undefined = INSTANCES_URL;
   for (let page = 0; url && page < MAX_PAGES; page += 1) {
-    const body = await requestWithRetry(url, authorization, retryDelayMs);
+    let body: Json;
+    try {
+      body = await requestWithRetry(url, authorization, settings);
+    } catch (error) {
+      if (page === 0) throw error;
+      console.warn(
+        `[events] a later page of Planning Center events failed (${reason(error)}); showing the events loaded so far.`,
+      );
+      url = undefined;
+      break;
+    }
     if (Array.isArray(body.data)) data.push(...body.data);
     if (Array.isArray(body.included)) included.push(...body.included);
-    url = nextPageUrl(body);
+    try {
+      url = nextPageUrl(body);
+    } catch (error) {
+      console.warn(
+        `[events] the next page of Planning Center events was refused (${reason(error)}); showing the events loaded so far.`,
+      );
+      url = undefined;
+    }
+  }
+  if (url) {
+    console.warn(
+      `[events] more than ${MAX_PAGES} pages of Planning Center events; the list is truncated.`,
+    );
   }
   return mapPcoEvents({ data, included }, new Date());
 }
@@ -182,7 +278,7 @@ async function readFixture(): Promise<ChurchEvent[]> {
   return mapPcoEvents(json, FIXTURE_NOW);
 }
 
-async function loadEvents(retryDelayMs: number): Promise<ChurchEvent[] | null> {
+async function loadEvents(settings: Settings): Promise<ChurchEvent[] | null> {
   try {
     if (isFixtureMode()) return await readFixture();
     const appId = env('PCO_APP_ID');
@@ -193,16 +289,10 @@ async function loadEvents(retryDelayMs: number): Promise<ChurchEvent[] | null> {
       );
       return null;
     }
-    return await fetchFromApi(appId, secret, retryDelayMs);
+    return await fetchFromApi(appId, secret, settings);
   } catch (error) {
-    const reason =
-      error instanceof PcoError
-        ? error.message
-        : error instanceof Error
-          ? error.name
-          : 'unknown error';
     console.warn(
-      `[events] Planning Center events unavailable (${reason}); linking to Church Center instead.`,
+      `[events] Planning Center events unavailable (${reason(error)}); linking to Church Center instead.`,
     );
     return null;
   }
@@ -212,9 +302,13 @@ let pending: Promise<ChurchEvent[] | null> | undefined;
 
 export async function fetchUpcomingEvents(
   limit?: number,
-  options: { retryDelayMs?: number } = {},
+  options: FetchOptions = {},
 ): Promise<ChurchEvent[] | null> {
-  pending ??= loadEvents(options.retryDelayMs ?? RETRY_DELAY_MS);
+  pending ??= loadEvents({
+    retryDelayMs: options.retryDelayMs ?? RETRY_DELAY_MS,
+    maxRetryAfterMs: options.maxRetryAfterMs ?? MAX_RETRY_AFTER_MS,
+    timeoutMs: options.timeoutMs ?? TIMEOUT_MS,
+  });
   const events = await pending;
   if (!events) return null;
   return limit === undefined ? events : events.slice(0, Math.max(0, limit));

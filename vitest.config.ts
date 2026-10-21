@@ -1,9 +1,12 @@
 /// <reference types="vitest/config" />
 import { getViteConfig } from 'astro/config';
 
-export default getViteConfig({
-  test: {
-    include: ['src/**/*.test.ts', 'tests/unit/**/*.test.ts'],
-    passWithNoTests: true,
+export default getViteConfig(
+  {
+    test: {
+      include: ['src/**/*.test.ts', 'tests/unit/**/*.test.ts'],
+      passWithNoTests: true,
+    },
   },
-});
+  { configFile: false, site: 'https://crosswaysa.org', trailingSlash: 'never' },
+);

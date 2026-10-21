@@ -62,7 +62,65 @@ function clock(date: Date) {
   };
 }
 
-export function formatEventDate(iso: string): string {
+const calendarDay = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'UTC',
+  weekday: 'short',
+  month: 'short',
+  day: 'numeric',
+});
+
+function dayParts(ymd: string) {
+  const [year, month, day] = ymd.split('-').map(Number);
+  const parts = calendarDay.formatToParts(
+    new Date(Date.UTC(year, month - 1, day, 12)),
+  );
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
+  const weekday = get('weekday');
+  const monthName = get('month');
+  const dayNumber = get('day');
+  return {
+    label: `${weekday}, ${monthName} ${dayNumber}`,
+    month: monthName,
+    day: dayNumber,
+  };
+}
+
+const isUtcMidnight = (date: Date) => date.getTime() % 86_400_000 === 0;
+
+export type EventWhenInput = {
+  startsAt: string;
+  endsAt?: string;
+  allDay: boolean;
+};
+
+const MINUTE = 60_000;
+
+export function eventSpan(input: EventWhenInput): {
+  first: string;
+  last: string;
+} {
+  const start = new Date(input.startsAt);
+  const parsedEnd = input.endsAt ? new Date(input.endsAt) : undefined;
+  const end =
+    parsedEnd && parsedEnd.getTime() > start.getTime() ? parsedEnd : undefined;
+  if (input.allDay) {
+    const day = isUtcMidnight(start)
+      ? (date: Date) => date.toISOString().slice(0, 10)
+      : (date: Date) => toChicagoDate(date);
+    const first = day(start);
+    const last = end ? day(new Date(end.getTime() - MINUTE)) : first;
+    return { first, last: last < first ? first : last };
+  }
+  return {
+    first: toChicagoDate(start),
+    last: toChicagoDate(end ?? start),
+  };
+}
+
+export function formatEventDate(iso: string, allDay = false): string {
+  if (allDay) {
+    return dayParts(eventSpan({ startsAt: iso, allDay }).first).label;
+  }
   const c = clock(new Date(iso));
   return `${c.weekday}, ${c.month} ${c.day}`;
 }
@@ -72,12 +130,6 @@ export function formatEventTime(iso: string): string {
   return `${c.hour12}:${c.minute} ${c.period}`;
 }
 
-export type EventWhenInput = {
-  startsAt: string;
-  endsAt?: string;
-  allDay: boolean;
-};
-
 export type EventWhen = {
   dateLabel: string;
   timeLabel?: string;
@@ -86,7 +138,6 @@ export type EventWhen = {
   datetime: string;
 };
 
-const MINUTE = 60_000;
 const SPILL_HOURS = 12;
 const SPILL_CUTOFF_HOUR = 6;
 
@@ -111,14 +162,16 @@ export function describeEventWhen(input: EventWhenInput): EventWhen {
   const base = { day: startClock.day, month: startClock.month };
 
   if (input.allDay) {
-    const lastMoment = end ? new Date(end.getTime() - MINUTE) : undefined;
-    const multi = lastMoment && toChicagoDate(lastMoment) > startDay;
+    const { first, last } = eventSpan(input);
+    const firstDay = dayParts(first);
     return {
-      ...base,
-      dateLabel: multi
-        ? `${startLabel} – ${formatEventDate(lastMoment.toISOString())}`
-        : startLabel,
-      datetime: startDay,
+      day: firstDay.day,
+      month: firstDay.month,
+      dateLabel:
+        last > first
+          ? `${firstDay.label} – ${dayParts(last).label}`
+          : firstDay.label,
+      datetime: first,
     };
   }
 

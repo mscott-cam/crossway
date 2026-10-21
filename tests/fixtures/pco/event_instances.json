@@ -352,6 +352,60 @@
           }
         }
       }
+    },
+    {
+      "type": "EventInstance",
+      "id": "90009",
+      "attributes": {
+        "all_day_event": false,
+        "church_center_url": "https://crosswaysa.churchcenter.com/calendar/event/1009",
+        "compact_recurrence_description": null,
+        "created_at": "2026-08-01T15:00:00Z",
+        "ends_at": "2026-10-21T17:00:00Z",
+        "kind": "standard",
+        "location": "Camp",
+        "name": "Fall Prayer Retreat",
+        "published_ends_at": null,
+        "published_starts_at": null,
+        "recurrence": null,
+        "starts_at": "2026-10-19T23:00:00Z",
+        "updated_at": "2026-09-01T15:00:00Z"
+      },
+      "relationships": {
+        "event": {
+          "data": {
+            "type": "Event",
+            "id": "1009"
+          }
+        }
+      }
+    },
+    {
+      "type": "EventInstance",
+      "id": "90010",
+      "attributes": {
+        "all_day_event": true,
+        "church_center_url": "https://crosswaysa.churchcenter.com/calendar/event/1010",
+        "compact_recurrence_description": null,
+        "created_at": "2026-08-01T15:00:00Z",
+        "ends_at": "2026-10-21T05:00:00Z",
+        "kind": "standard",
+        "location": "Main Campus",
+        "name": "Community Care Day",
+        "published_ends_at": null,
+        "published_starts_at": null,
+        "recurrence": null,
+        "starts_at": "2026-10-20T05:00:00Z",
+        "updated_at": "2026-09-01T15:00:00Z"
+      },
+      "relationships": {
+        "event": {
+          "data": {
+            "type": "Event",
+            "id": "1010"
+          }
+        }
+      }
     }
   ],
   "included": [
@@ -514,11 +568,43 @@
         "updated_at": "2026-09-01T15:00:00Z",
         "visible_in_church_center": true
       }
+    },
+    {
+      "type": "Event",
+      "id": "1009",
+      "attributes": {
+        "approval_status": "A",
+        "created_at": "2026-08-01T15:00:00Z",
+        "featured": false,
+        "image_url": null,
+        "link_only": false,
+        "name": "Fall Prayer Retreat",
+        "registration_url": null,
+        "summary": null,
+        "updated_at": "2026-09-01T15:00:00Z",
+        "visible_in_church_center": true
+      }
+    },
+    {
+      "type": "Event",
+      "id": "1010",
+      "attributes": {
+        "approval_status": "A",
+        "created_at": "2026-08-01T15:00:00Z",
+        "featured": false,
+        "image_url": null,
+        "link_only": false,
+        "name": "Community Care Day",
+        "registration_url": null,
+        "summary": null,
+        "updated_at": "2026-09-01T15:00:00Z",
+        "visible_in_church_center": true
+      }
     }
   ],
   "meta": {
-    "total_count": 13,
-    "count": 13,
+    "total_count": 15,
+    "count": 15,
     "can_order_by": ["created_at", "ends_at", "starts_at", "updated_at"],
     "can_query_by": [
       "created_at",

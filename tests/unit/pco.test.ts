@@ -55,21 +55,24 @@ const event = (
 
 const okResponse = (body: unknown) =>
   ({ ok: true, status: 200, json: async () => body }) as Response;
-const failResponse = (status: number) =>
+const failResponse = (status: number, headers: Record<string, string> = {}) =>
   ({
     ok: false,
     status,
+    headers: { get: (name: string) => headers[name.toLowerCase()] ?? null },
     json: async () => ({ errors: [] }),
-  }) as Response;
+  }) as unknown as Response;
 
 const allLogs = (spies: ReturnType<typeof vi.spyOn>[]) =>
   spies.flatMap((spy) => spy.mock.calls.flat().map(String)).join('\n');
 
 describe('mapPcoEvents', () => {
-  it('returns one entry per visible future event, sorted by start', async () => {
+  it('returns one entry per visible upcoming event, sorted by start', async () => {
     const { mapPcoEvents } = await load();
     const events = mapPcoEvents(FIXTURE, NOW);
     expect(events.map((e) => [e.id, e.name, e.startsAt])).toEqual([
+      ['1009', 'Fall Prayer Retreat', '2026-10-19T23:00:00Z'],
+      ['1010', 'Community Care Day', '2026-10-20T05:00:00Z'],
       ['1001', 'Advanced Commitment Night', '2026-10-26T00:00:00Z'],
       ['1002', '1st Wednesday - Prayer & Praise', '2026-11-05T00:30:00Z'],
       ['1005', 'Fall Church Work Day', '2026-11-14T06:00:00Z'],
@@ -95,7 +98,7 @@ describe('mapPcoEvents', () => {
     expect(prayer[0].startsAt).toBe('2026-11-05T00:30:00Z');
   });
 
-  it('keeps an instance starting exactly now and drops one a second earlier', async () => {
+  it('keeps an instance starting exactly now and drops a one-moment-earlier instance with no end', async () => {
     const { mapPcoEvents } = await load();
     const json = page(
       [
@@ -105,6 +108,110 @@ describe('mapPcoEvents', () => {
       [event('e1', 'Now'), event('e2', 'Just gone')],
     );
     expect(mapPcoEvents(json, NOW).map((e) => e.id)).toEqual(['e1']);
+  });
+
+  it('keeps in-progress events (end still ahead) and drops ones that just ended', async () => {
+    const { mapPcoEvents } = await load();
+    const json = page(
+      [
+        instance('1', 'running', '2026-10-20T15:00:00Z', {
+          ends_at: '2026-10-20T17:00:01Z',
+        }),
+        instance('2', 'ended-now', '2026-10-20T15:00:00Z', {
+          ends_at: '2026-10-20T17:00:00Z',
+        }),
+        instance('3', 'ended', '2026-10-20T15:00:00Z', {
+          ends_at: '2026-10-20T16:00:00Z',
+        }),
+        instance('4', 'retreat', '2026-10-19T23:00:00Z', {
+          ends_at: '2026-10-21T17:00:00Z',
+        }),
+      ],
+      [
+        event('running', 'Running'),
+        event('ended-now', 'Ended now'),
+        event('ended', 'Ended'),
+        event('retreat', 'Retreat'),
+      ],
+    );
+    expect(mapPcoEvents(json, NOW).map((e) => e.id)).toEqual([
+      'retreat',
+      'running',
+    ]);
+  });
+
+  it('keeps all-day events on their last day in either representation and drops them the day after', async () => {
+    const { mapPcoEvents } = await load();
+    const allDay = (id: string, start: string, end?: string) =>
+      instance(id, id, start, {
+        all_day_event: true,
+        ...(end ? { ends_at: end } : {}),
+      });
+    const instances = [
+      allDay('chicago-today', '2026-10-20T05:00:00Z', '2026-10-21T05:00:00Z'),
+      allDay('utc-today', '2026-10-20T00:00:00Z', '2026-10-21T00:00:00Z'),
+      allDay('no-end-today', '2026-10-20T00:00:00Z'),
+      allDay(
+        'chicago-yesterday',
+        '2026-10-19T05:00:00Z',
+        '2026-10-20T05:00:00Z',
+      ),
+      allDay('utc-yesterday', '2026-10-19T00:00:00Z', '2026-10-20T00:00:00Z'),
+      allDay('day-two', '2026-10-19T00:00:00Z', '2026-10-21T00:00:00Z'),
+      allDay('chicago-day-two', '2026-10-19T05:00:00Z', '2026-10-21T05:00:00Z'),
+    ];
+    const included = instances.map((i) =>
+      event(i.relationships.event.data.id, i.relationships.event.data.id),
+    );
+    const json = page(instances, included);
+    expect(
+      mapPcoEvents(json, NOW)
+        .map((e) => e.id)
+        .sort(),
+    ).toEqual([
+      'chicago-day-two',
+      'chicago-today',
+      'day-two',
+      'no-end-today',
+      'utc-today',
+    ]);
+    const nextDay = new Date('2026-10-21T12:00:00-05:00');
+    expect(mapPcoEvents(json, nextDay)).toEqual([]);
+  });
+
+  it('keeps a UTC-midnight all-day event through Chicago evening, after UTC has rolled over', async () => {
+    const { mapPcoEvents } = await load();
+    const json = page(
+      [
+        instance('1', 'e1', '2026-10-20T00:00:00Z', {
+          all_day_event: true,
+          ends_at: '2026-10-21T00:00:00Z',
+        }),
+      ],
+      [event('e1', 'Today')],
+    );
+    const lateEvening = new Date('2026-10-20T22:00:00-05:00');
+    expect(mapPcoEvents(json, lateEvening).map((e) => e.id)).toEqual(['e1']);
+  });
+
+  it('counts a recurring event that is in progress as its next occurrence', async () => {
+    const { mapPcoEvents } = await load();
+    const json = page(
+      [
+        instance('1', 'e1', '2026-10-27T17:00:00Z', {
+          ends_at: '2026-10-27T18:00:00Z',
+        }),
+        instance('2', 'e1', '2026-10-20T15:00:00Z', {
+          ends_at: '2026-10-20T19:00:00Z',
+        }),
+        instance('3', 'e1', '2026-11-03T17:00:00Z', {
+          ends_at: '2026-11-03T18:00:00Z',
+        }),
+      ],
+      [event('e1', 'Weekly')],
+    );
+    const events = mapPcoEvents(json, NOW);
+    expect(events.map((e) => e.startsAt)).toEqual(['2026-10-20T15:00:00Z']);
   });
 
   it('maps all-day, location, end time and image', async () => {
@@ -303,6 +410,8 @@ describe('fetchUpcomingEvents', () => {
     const { fetchUpcomingEvents } = await load();
     const events = await fetchUpcomingEvents();
     expect(events?.map((e) => e.id)).toEqual([
+      '1009',
+      '1010',
       '1001',
       '1002',
       '1005',
@@ -339,9 +448,9 @@ describe('fetchUpcomingEvents', () => {
     fetchMock.mockResolvedValue(okResponse(FIXTURE));
     const { fetchUpcomingEvents } = await load();
     const three = await fetchUpcomingEvents(3);
-    expect(three?.map((e) => e.id)).toEqual(['1001', '1002', '1005']);
+    expect(three?.map((e) => e.id)).toEqual(['1009', '1010', '1001']);
     const all = await fetchUpcomingEvents();
-    expect(all).toHaveLength(7);
+    expect(all).toHaveLength(9);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
@@ -356,13 +465,131 @@ describe('fetchUpcomingEvents', () => {
     expect(String(warn.mock.calls[0][0])).toContain('500');
   });
 
-  it('resolves null on a 401', async () => {
-    fetchMock.mockResolvedValue(failResponse(401));
+  it('does not retry client errors other than 429', async () => {
+    for (const status of [400, 401, 403, 404]) {
+      fetchMock.mockReset();
+      warn.mockClear();
+      fetchMock.mockResolvedValue(failResponse(status));
+      const { fetchUpcomingEvents } = await load();
+      await expect(
+        fetchUpcomingEvents(undefined, { retryDelayMs: 0 }),
+      ).resolves.toBeNull();
+      expect(fetchMock, String(status)).toHaveBeenCalledTimes(1);
+      expect(warn, String(status)).toHaveBeenCalledTimes(1);
+      expect(String(warn.mock.calls[0][0])).toContain(String(status));
+    }
+  });
+
+  describe('429 rate limiting', () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date', 'setTimeout'] });
+      vi.setSystemTime(NOW);
+    });
+
+    it('waits for Retry-After seconds, then retries once', async () => {
+      fetchMock
+        .mockResolvedValueOnce(failResponse(429, { 'retry-after': '2' }))
+        .mockResolvedValueOnce(okResponse(FIXTURE));
+      const { fetchUpcomingEvents } = await load();
+      const result = fetchUpcomingEvents(undefined, { retryDelayMs: 10 });
+      await vi.advanceTimersByTimeAsync(1999);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      await expect(result).resolves.toHaveLength(9);
+      expect(warn).not.toHaveBeenCalled();
+    });
+
+    it('caps a long Retry-After', async () => {
+      fetchMock
+        .mockResolvedValueOnce(failResponse(429, { 'retry-after': '120' }))
+        .mockResolvedValueOnce(okResponse(FIXTURE));
+      const { fetchUpcomingEvents } = await load();
+      const result = fetchUpcomingEvents(undefined, { retryDelayMs: 10 });
+      await vi.advanceTimersByTimeAsync(4999);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      await expect(result).resolves.toHaveLength(9);
+    });
+
+    it('honors an injected cap', async () => {
+      fetchMock
+        .mockResolvedValueOnce(failResponse(429, { 'retry-after': '120' }))
+        .mockResolvedValueOnce(okResponse(FIXTURE));
+      const { fetchUpcomingEvents } = await load();
+      const result = fetchUpcomingEvents(undefined, {
+        retryDelayMs: 10,
+        maxRetryAfterMs: 300,
+      });
+      await vi.advanceTimersByTimeAsync(300);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      await expect(result).resolves.toHaveLength(9);
+    });
+
+    it('falls back to the normal delay without a usable Retry-After', async () => {
+      for (const headers of [{}, { 'retry-after': 'soon' }] as Record<
+        string,
+        string
+      >[]) {
+        fetchMock.mockReset();
+        fetchMock
+          .mockResolvedValueOnce(failResponse(429, headers))
+          .mockResolvedValueOnce(okResponse(FIXTURE));
+        const { fetchUpcomingEvents } = await load();
+        const result = fetchUpcomingEvents(undefined, { retryDelayMs: 40 });
+        await vi.advanceTimersByTimeAsync(39);
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        await vi.advanceTimersByTimeAsync(1);
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+        await result;
+      }
+    });
+
+    it('gives up with null after the one retry also returns 429', async () => {
+      fetchMock.mockResolvedValue(failResponse(429, { 'retry-after': '1' }));
+      const { fetchUpcomingEvents } = await load();
+      const result = fetchUpcomingEvents(undefined, { retryDelayMs: 0 });
+      await vi.advanceTimersByTimeAsync(1000);
+      await expect(result).resolves.toBeNull();
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(warn).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('aborts a request that exceeds the timeout', async () => {
+    const signals: AbortSignal[] = [];
+    fetchMock.mockImplementation(
+      (_url: string, init: { signal: AbortSignal }) =>
+        new Promise((_resolve, reject) => {
+          signals.push(init.signal);
+          init.signal.addEventListener('abort', () =>
+            reject(init.signal.reason),
+          );
+        }),
+    );
     const { fetchUpcomingEvents } = await load();
     await expect(
-      fetchUpcomingEvents(undefined, { retryDelayMs: 0 }),
+      fetchUpcomingEvents(undefined, { retryDelayMs: 0, timeoutMs: 20 }),
     ).resolves.toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(signals.every((signal) => signal.aborted)).toBe(true);
     expect(warn).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses a 15 second timeout by default', async () => {
+    const timeout = vi.spyOn(AbortSignal, 'timeout');
+    fetchMock.mockResolvedValue(okResponse(FIXTURE));
+    const { fetchUpcomingEvents } = await load();
+    await fetchUpcomingEvents();
+    expect(timeout).toHaveBeenCalledWith(15000);
+  });
+
+  it('never follows redirects', async () => {
+    fetchMock.mockResolvedValue(okResponse(FIXTURE));
+    const { fetchUpcomingEvents } = await load();
+    await fetchUpcomingEvents();
+    expect(fetchMock.mock.calls[0][1].redirect).toBe('error');
   });
 
   it('resolves null when the network rejects or the body is not JSON', async () => {
@@ -395,7 +622,7 @@ describe('fetchUpcomingEvents', () => {
       .mockResolvedValueOnce(okResponse(FIXTURE));
     const { fetchUpcomingEvents } = await load();
     const events = await fetchUpcomingEvents(undefined, { retryDelayMs: 0 });
-    expect(events).toHaveLength(7);
+    expect(events).toHaveLength(9);
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(warn).not.toHaveBeenCalled();
   });
@@ -440,10 +667,11 @@ describe('fetchUpcomingEvents', () => {
     ]);
   });
 
-  it('stops after five pages', async () => {
+  const pagedResponses = (failOnPage?: number) => {
     let n = 0;
-    fetchMock.mockImplementation(async () => {
+    return async () => {
       n += 1;
+      if (n === failOnPage) return failResponse(404);
       return okResponse(
         page(
           [
@@ -457,14 +685,78 @@ describe('fetchUpcomingEvents', () => {
           `${API_ROOT}event_instances?offset=${n * 100}`,
         ),
       );
-    });
+    };
+  };
+
+  it('stops after five pages and warns once that the list is truncated', async () => {
+    fetchMock.mockImplementation(pagedResponses());
     const { fetchUpcomingEvents } = await load();
     const events = await fetchUpcomingEvents();
     expect(fetchMock).toHaveBeenCalledTimes(5);
     expect(events).toHaveLength(5);
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(String(warn.mock.calls[0][0])).toMatch(/truncated|more than 5/i);
   });
 
-  it('never sends credentials to a next link on another host', async () => {
+  it('does not warn when the last of five pages has no next link', async () => {
+    let n = 0;
+    fetchMock.mockImplementation(async () => {
+      n += 1;
+      return okResponse(
+        page(
+          [instance(`i${n}`, `e${n}`, `2026-11-0${n}T17:00:00Z`)],
+          [event(`e${n}`, `Event ${n}`)],
+          n < 5 ? `${API_ROOT}event_instances?offset=${n * 100}` : undefined,
+        ),
+      );
+    });
+    const { fetchUpcomingEvents } = await load();
+    expect(await fetchUpcomingEvents()).toHaveLength(5);
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it('keeps earlier pages with one warning when a later page fails', async () => {
+    fetchMock.mockImplementation(pagedResponses(3));
+    const { fetchUpcomingEvents } = await load();
+    const events = await fetchUpcomingEvents(undefined, { retryDelayMs: 0 });
+    expect(events?.map((e) => e.id)).toEqual(['e1', 'e2']);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(String(warn.mock.calls[0][0])).toContain('404');
+  });
+
+  it('keeps earlier pages when a later page fails after its retry', async () => {
+    let calls = 0;
+    fetchMock.mockImplementation(async () => {
+      calls += 1;
+      if (calls === 1) {
+        return okResponse(
+          page(
+            [instance('1', 'e1', '2026-11-01T17:00:00Z')],
+            [event('e1', 'One')],
+            `${API_ROOT}event_instances?offset=100`,
+          ),
+        );
+      }
+      return failResponse(500);
+    });
+    const { fetchUpcomingEvents } = await load();
+    const events = await fetchUpcomingEvents(undefined, { retryDelayMs: 0 });
+    expect(events?.map((e) => e.id)).toEqual(['e1']);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(warn).toHaveBeenCalledTimes(1);
+  });
+
+  it('still resolves null when the first page fails', async () => {
+    fetchMock.mockImplementation(pagedResponses(1));
+    const { fetchUpcomingEvents } = await load();
+    await expect(
+      fetchUpcomingEvents(undefined, { retryDelayMs: 0 }),
+    ).resolves.toBeNull();
+    expect(warn).toHaveBeenCalledTimes(1);
+  });
+
+  it('never sends credentials to a next link on another host, keeping what it has', async () => {
     fetchMock.mockResolvedValueOnce(
       okResponse(
         page(
@@ -475,9 +767,8 @@ describe('fetchUpcomingEvents', () => {
       ),
     );
     const { fetchUpcomingEvents } = await load();
-    await expect(
-      fetchUpcomingEvents(undefined, { retryDelayMs: 0 }),
-    ).resolves.toBeNull();
+    const events = await fetchUpcomingEvents(undefined, { retryDelayMs: 0 });
+    expect(events?.map((e) => e.id)).toEqual(['e1']);
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(warn).toHaveBeenCalledTimes(1);
   });
@@ -491,7 +782,7 @@ describe('fetchUpcomingEvents', () => {
     ]);
     await fetchUpcomingEvents();
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(a).toHaveLength(7);
+    expect(a).toHaveLength(9);
     expect(b).toHaveLength(2);
   });
 
@@ -521,6 +812,8 @@ describe('fetchUpcomingEvents', () => {
       const events = await fetchUpcomingEvents();
       expect(fetchMock).not.toHaveBeenCalled();
       expect(events?.map((e) => e.id)).toEqual([
+        '1009',
+        '1010',
         '1001',
         '1002',
         '1005',
@@ -535,8 +828,8 @@ describe('fetchUpcomingEvents', () => {
       vi.setSystemTime(new Date('2031-06-01T12:00:00Z'));
       const { fetchUpcomingEvents } = await load();
       const events = await fetchUpcomingEvents();
-      expect(events).toHaveLength(7);
-      expect(events?.[0].id).toBe('1001');
+      expect(events).toHaveLength(9);
+      expect(events?.[0].id).toBe('1009');
     });
 
     it('can read a different fixture file', async () => {

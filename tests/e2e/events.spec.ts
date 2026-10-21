@@ -3,6 +3,12 @@ import AxeBuilder from '@axe-core/playwright';
 
 const CALENDAR = 'https://crosswaysa.churchcenter.com/calendar?view=gallery';
 const EXPECTED = [
+  {
+    id: '1009',
+    name: 'Fall Prayer Retreat',
+    date: 'Mon, Oct 19 – Wed, Oct 21',
+  },
+  { id: '1010', name: 'Community Care Day', date: 'Tue, Oct 20' },
   { id: '1001', name: 'Advanced Commitment Night', date: 'Sun, Oct 25' },
   { id: '1002', name: '1st Wednesday - Prayer & Praise', date: 'Wed, Nov 4' },
   { id: '1005', name: 'Fall Church Work Day', date: 'Sat, Nov 14' },
@@ -16,9 +22,7 @@ test.describe('events page', () => {
   test('lists the visible fixture events in date order', async ({ page }) => {
     const response = await page.goto('/events');
     expect(response?.status()).toBe(200);
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-      'Upcoming events',
-    );
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Events');
     const rows = page.locator('[data-event]');
     await expect(rows).toHaveCount(EXPECTED.length);
     for (const [i, expected] of EXPECTED.entries()) {
@@ -66,23 +70,42 @@ test.describe('events page', () => {
   }) => {
     await page.goto('/events');
     const rows = page.locator('[data-event]');
-    await expect(rows.nth(0).locator('time')).toContainText('7:00 – 8:30 PM');
-    await expect(rows.nth(0)).toContainText('Main Campus');
-    await expect(rows.nth(2).locator('time')).not.toContainText(/\d:\d\d/);
-    await expect(rows.nth(3).locator('time')).toContainText('Starts 6:00 PM');
-    await expect(rows.nth(6).locator('time')).toContainText(
+    await expect(rows.nth(2).locator('time')).toContainText('7:00 – 8:30 PM');
+    await expect(rows.nth(2)).toContainText('Main Campus');
+    await expect(rows.nth(4).locator('time')).not.toContainText(/\d:\d\d/);
+    await expect(rows.nth(5).locator('time')).toContainText('Starts 6:00 PM');
+    await expect(rows.nth(8).locator('time')).toContainText(
       '10:00 PM – 12:30 AM',
     );
-    await expect(rows.nth(0).locator('time')).toHaveAttribute(
+    await expect(rows.nth(2).locator('time')).toHaveAttribute(
       'datetime',
       '2026-10-26T00:00:00Z',
+    );
+  });
+
+  test('keeps events that are in progress at the fixed now', async ({
+    page,
+  }) => {
+    await page.goto('/events');
+    const rows = page.locator('[data-event]');
+    await expect(rows.nth(0)).toContainText('Fall Prayer Retreat');
+    await expect(rows.nth(0).locator('time')).toContainText('Starts 6:00 PM');
+    await expect(rows.nth(0).locator('time')).toHaveAttribute(
+      'datetime',
+      '2026-10-19T23:00:00Z',
+    );
+    await expect(rows.nth(1)).toContainText('Community Care Day');
+    await expect(rows.nth(1).locator('time')).not.toContainText(/\d:\d\d/);
+    await expect(rows.nth(1).locator('time')).toHaveAttribute(
+      'datetime',
+      '2026-10-20',
     );
   });
 
   test('omits the location line when there is none', async ({ page }) => {
     await page.goto('/events');
     await expect(
-      page.locator('[data-event]').nth(4).locator('.event__where'),
+      page.locator('[data-event]').nth(6).locator('.event__where'),
     ).toHaveCount(0);
   });
 
@@ -162,9 +185,7 @@ test.describe('events page', () => {
       .getByRole('link', { name: 'Events' })
       .click();
     await expect(page).toHaveURL(/\/events$/);
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-      'Upcoming events',
-    );
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Events');
   });
 
   test('axe passes', async ({ page }) => {
