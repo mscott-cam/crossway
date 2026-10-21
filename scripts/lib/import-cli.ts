@@ -3,12 +3,13 @@ import type { TransformResult } from './webflow-transform';
 export type CliArgs = {
   sermons?: string;
   series?: string;
+  map?: string;
   dryRun: boolean;
   errors: string[];
 };
 
 export const USAGE =
-  'Usage: npx tsx scripts/import-webflow.ts --sermons <sermons.csv> --series <series.csv> [--dry-run]';
+  'Usage: npx tsx scripts/import-webflow.ts --sermons <sermons.csv> --series <series.csv> [--map <columns.json>] [--dry-run]';
 
 export function parseArgs(argv: string[]): CliArgs {
   const args: CliArgs = { dryRun: false, errors: [] };
@@ -16,13 +17,18 @@ export function parseArgs(argv: string[]): CliArgs {
     const [flag, inline] = argv[i].split(/=(.*)/s, 2);
     if (flag === '--dry-run') {
       args.dryRun = true;
-    } else if (flag === '--sermons' || flag === '--series') {
+    } else if (
+      flag === '--sermons' ||
+      flag === '--series' ||
+      flag === '--map'
+    ) {
       const value = inline ?? argv[++i];
       if (!value || value.startsWith('--')) {
         args.errors.push(`${flag} needs a file path`);
         if (value?.startsWith('--')) i--;
       } else if (flag === '--sermons') args.sermons = value;
-      else args.series = value;
+      else if (flag === '--series') args.series = value;
+      else args.map = value;
     } else {
       args.errors.push(`Unknown argument ${argv[i]}`);
     }
@@ -47,7 +53,7 @@ export function formatReport(result: TransformResult): string {
   const { stats, problems } = result;
   const lines = [
     `Sermons CSV: ${stats.sermonRows} rows, ${stats.skippedDraftOrArchived} draft/archived skipped, ${stats.skippedInvalid} skipped because of problems`,
-    `Ready to import: ${stats.sermons} sermons, ${stats.series} series, ${stats.speakers} speakers`,
+    `Ready to import: ${stats.sermons} sermons (${stats.withoutBook} without a book, ${stats.withoutSpeaker} without a speaker), ${stats.series} series, ${stats.speakers} speakers`,
     '',
     `First ${Math.min(5, result.sermons.length)} transformed sermons:`,
     ...result.sermons.slice(0, 5).map((s) => JSON.stringify(s, null, 2)),

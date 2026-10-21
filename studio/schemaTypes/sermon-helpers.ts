@@ -19,6 +19,22 @@ export function defaultSermonDate(now: Date = new Date()): string {
   return day.toISOString().slice(0, 10);
 }
 
+export function requiredUnlessImported(
+  value: unknown,
+  context: { document?: unknown },
+): true | string {
+  const filled =
+    typeof value === 'string'
+      ? value.trim() !== ''
+      : typeof value === 'object' &&
+        value !== null &&
+        Boolean((value as { _ref?: string })._ref);
+  if (filled) return true;
+  const webflowPath = (context.document as { webflowPath?: string } | undefined)
+    ?.webflowPath;
+  return webflowPath ? true : 'Required';
+}
+
 export function sermonSlugSource(title: string, date?: string): string {
   return sermonSlug(title, date ?? '');
 }

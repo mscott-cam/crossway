@@ -108,7 +108,8 @@ function normalizeSermon(raw: Raw): Sermon | undefined {
   }
   const speaker = normalizeSpeaker(raw.speaker);
   const series = normalizeSeries(raw.series);
-  if (!speaker || !series) return undefined;
+  if (!series) return undefined;
+  const book = str(raw.book);
   const optional = Object.fromEntries(
     (
       [
@@ -127,9 +128,9 @@ function normalizeSermon(raw: Raw): Sermon | undefined {
     _id: raw._id,
     title: raw.title,
     date: raw.date,
-    speaker,
     series,
-    book: str(raw.book) ?? '',
+    ...(speaker ? { speaker } : {}),
+    ...(book ? { book } : {}),
     slug: slugOf(raw.slug) ?? sermonSlug(raw.title, raw.date),
     ...optional,
   };

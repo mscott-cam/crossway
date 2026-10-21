@@ -1,6 +1,10 @@
 import { defineField, defineType } from 'sanity';
 import { BOOKS } from './books';
-import { defaultSermonDate, sermonSlugSource } from './sermon-helpers';
+import {
+  defaultSermonDate,
+  requiredUnlessImported,
+  sermonSlugSource,
+} from './sermon-helpers';
 
 export const sermon = defineType({
   name: 'sermon',
@@ -41,7 +45,7 @@ export const sermon = defineType({
       title: 'Speaker',
       type: 'reference',
       to: [{ type: 'speaker' }],
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) => Rule.custom(requiredUnlessImported),
     }),
     defineField({
       name: 'series',
@@ -60,7 +64,7 @@ export const sermon = defineType({
       options: {
         list: BOOKS.map((book) => ({ title: book.name, value: book.name })),
       },
-      validation: (Rule) => Rule.required(),
+      validation: (Rule) => Rule.custom(requiredUnlessImported),
     }),
     defineField({
       name: 'passage',

@@ -148,15 +148,28 @@ describe('getSermons with a mocked client', () => {
     });
   });
 
-  it('drops sermons whose speaker or series reference is missing', async () => {
+  it('keeps sermons with no speaker or no book, and drops those with no series', async () => {
     configure();
     fetchMock.mockResolvedValue([
       rawSermon('Good', '2026-10-18'),
       rawSermon('No Speaker', '2026-10-11', { speaker: null }),
+      rawSermon('No Book', '2026-10-05', { book: null }),
       rawSermon('No Series', '2026-10-04', { series: null }),
     ]);
     const { getSermons } = await load();
-    expect((await getSermons()).map((s) => s.title)).toEqual(['Good']);
+    const sermons = await getSermons();
+    expect(sermons.map((s) => s.title)).toEqual([
+      'Good',
+      'No Speaker',
+      'No Book',
+    ]);
+    const noSpeaker = sermons.find((s) => s.title === 'No Speaker')!;
+    expect(noSpeaker.speaker).toBeUndefined();
+    expect('speaker' in noSpeaker).toBe(false);
+    const noBook = sermons.find((s) => s.title === 'No Book')!;
+    expect(noBook.book).toBeUndefined();
+    expect('book' in noBook).toBe(false);
+    expect(noBook.speaker?.name).toBe('Josh Collins');
   });
 
   it('memoizes the fetch per build', async () => {
@@ -200,7 +213,7 @@ describe('getSermons with a mocked client', () => {
     expect(console.warn).toHaveBeenCalledTimes(1);
     const message = String(vi.mocked(console.warn).mock.calls[0][0]);
     expect(message).toContain('getSermons');
-    expect(message).toContain('sermon-No Speaker');
+    expect(message).not.toContain('sermon-No Speaker');
     expect(message).toContain('sermon-No Series');
     expect(message).not.toContain('sermon-Good');
   });
@@ -416,8 +429,19 @@ describe('fixture mode', () => {
     const { getSermons } = await load();
     const sermons = await getSermons();
     const names = new Set(BOOKS.map((b) => b.name));
-    for (const s of sermons) expect(names.has(s.book)).toBe(true);
+    for (const s of sermons) if (s.book) expect(names.has(s.book)).toBe(true);
     expect(sermons.some((s) => s.book === '1 Timothy')).toBe(true);
+  });
+
+  it('includes imported legacy sermons without a book or a speaker', async () => {
+    const { getSermons } = await load();
+    const sermons = await getSermons();
+    const noBook = sermons.filter((s) => s.book === undefined);
+    const noSpeaker = sermons.filter((s) => s.speaker === undefined);
+    expect(noBook.length).toBeGreaterThanOrEqual(1);
+    expect(noSpeaker.length).toBeGreaterThanOrEqual(1);
+    for (const s of [...noBook, ...noSpeaker])
+      expect(s.webflowPath).toBe(`/sermons/${s.slug}`);
   });
 
   it('has unique Webflow-style slugs equal to sermonSlug(title, date)', async () => {

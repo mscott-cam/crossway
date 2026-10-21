@@ -6,6 +6,7 @@ import {
   extractSpreakerId,
   extractVimeoUrl,
   normalizeBook,
+  parseColumnMap,
   parseSermonDate,
   transformRows,
   type Row,
@@ -51,7 +52,7 @@ describe('slugs and paths', () => {
     expect(sermon('god-settles-accounts-2026-06-14-701e6')?._id).toBe(
       'sermon-god-settles-accounts-2026-06-14-701e6',
     );
-    expect(sermon('gospel-repair')).toBeUndefined();
+    expect(sermon('gospel-repair')).toBeDefined();
     expect(sermon('christmas-transforms')?.webflowPath).toBe(
       '/sermons/christmas-transforms',
     );
@@ -245,12 +246,21 @@ describe('books', () => {
     expect(BOOK_ALIASES['1 pet']).toBe('1 Peter');
   });
 
-  it('skips sermons with unknown or empty books and reports each one', () => {
-    expect(sermon('forgive-one-another')).toBeUndefined();
-    expect(sermon('orchestrating-a-festive-crisis')).toBeUndefined();
+  it('imports sermons with unknown or empty books without a book, and reports each one', () => {
+    for (const slug of [
+      'forgive-one-another',
+      'orchestrating-a-festive-crisis',
+    ]) {
+      const doc = sermon(slug);
+      expect(doc).toBeDefined();
+      expect(doc).not.toHaveProperty('book');
+    }
     expect(
       result.problems.some(
-        (p) => p.includes('forgive-one-another') && p.includes('"Various"'),
+        (p) =>
+          p.includes('forgive-one-another') &&
+          p.includes('"Various"') &&
+          /without book/i.test(p),
       ),
     ).toBe(true);
     expect(
@@ -284,11 +294,12 @@ describe('speakers', () => {
   it('points every sermon at an existing speaker', () => {
     const ids = new Set(result.speakers.map((s) => s._id));
     for (const s of result.sermons) {
+      if (!s.speaker) continue;
       expect(ids.has(s.speaker._ref)).toBe(true);
       expect(s.speaker._type).toBe('reference');
     }
     expect(
-      sermon('how-to-not-be-a-pile-of-rocks-2026-09-13')?.speaker._ref,
+      sermon('how-to-not-be-a-pile-of-rocks-2026-09-13')?.speaker?._ref,
     ).toBe('speaker-josh-de-koning');
   });
 
@@ -314,11 +325,14 @@ describe('speakers', () => {
     expect(josh.name).toBe('Josh de Koning');
   });
 
-  it('skips a sermon with no speaker and reports it', () => {
-    expect(sermon('gospel-repair')).toBeUndefined();
+  it('imports a sermon with no speaker without a speaker, and reports it', () => {
+    const doc = sermon('gospel-repair');
+    expect(doc).toBeDefined();
+    expect(doc).not.toHaveProperty('speaker');
+    expect(doc?.book).toBe('Philemon');
     expect(
       result.problems.some(
-        (p) => p.includes('gospel-repair') && /speaker/i.test(p),
+        (p) => p.includes('gospel-repair') && /without speaker/i.test(p),
       ),
     ).toBe(true);
   });
@@ -420,12 +434,14 @@ describe('skipping and counts', () => {
     expect(result.stats).toEqual({
       sermonRows: 19,
       skippedDraftOrArchived: 2,
-      skippedInvalid: 3,
-      sermons: 14,
+      skippedInvalid: 0,
+      sermons: 17,
+      withoutBook: 2,
+      withoutSpeaker: 1,
       series: 9,
       speakers: 6,
     });
-    expect(result.sermons).toHaveLength(14);
+    expect(result.sermons).toHaveLength(17);
     expect(result.stats.sermonRows).toBe(
       result.stats.skippedDraftOrArchived +
         result.stats.skippedInvalid +
@@ -435,7 +451,9 @@ describe('skipping and counts', () => {
 
   it('formats a readable report with the first five docs and all problems', () => {
     const text = formatReport(result);
-    expect(text).toContain('14 sermons');
+    expect(text).toContain('17 sermons');
+    expect(text).toContain('2 without a book');
+    expect(text).toContain('1 without a speaker');
     expect(text).toContain('9 series');
     expect(text).toContain('6 speakers');
     for (const p of result.problems) expect(text).toContain(p);
@@ -568,6 +586,109 @@ describe('dates', () => {
   });
 });
 
+describe('column map overrides', () => {
+  const renamed = sermonsCsv.map(({ Speaker, Series, ...rest }) => ({
+    Preacher: Speaker,
+    'Sermon Series Link': Series,
+    ...rest,
+  }));
+
+  it('resolves renamed columns through an override map', () => {
+    const map = parseColumnMap({
+      sermons: { speaker: ['Preacher'], series: ['Sermon Series Link'] },
+    });
+    const out = transformRows(renamed, seriesCsv, map);
+    expect(out.sermons).toEqual(result.sermons);
+    expect(out.problems).toEqual(result.problems);
+  });
+
+  it('without the override the renamed columns are not found', () => {
+    const out = transformRows(renamed, seriesCsv);
+    expect(out.problems.some((p) => /no column/i.test(p))).toBe(true);
+  });
+
+  it('applies series overrides and keeps default names as a fallback', () => {
+    const cover = seriesCsv.map(({ Artwork, ...rest }) => ({
+      'Cover Photo': Artwork,
+      ...rest,
+    }));
+    const out = transformRows(
+      sermonsCsv,
+      cover,
+      parseColumnMap({ series: { artwork: ['Cover Photo'] } }),
+    );
+    expect(
+      out.series.find((s) => s.slug.current === 'isaiah')?.artworkUrl,
+    ).toMatch(/^https:/);
+    expect(out.sermons).toEqual(result.sermons);
+  });
+
+  it('rejects a malformed map', () => {
+    expect(() => parseColumnMap([])).toThrow();
+    expect(() => parseColumnMap({ sermons: { nope: ['x'] } })).toThrow(/nope/);
+    expect(() => parseColumnMap({ sermons: { speaker: 'Preacher' } })).toThrow(
+      /speaker/,
+    );
+    expect(() => parseColumnMap({ other: {} })).toThrow(/other/);
+    expect(parseColumnMap({})).toEqual({});
+  });
+});
+
+describe('series references', () => {
+  const seriesRef = (value: string) => {
+    const out = transformRows(
+      withRow('christmas-transforms', { Series: value }),
+      seriesCsv,
+    );
+    return {
+      ref: out.sermons.find((s) => s.slug.current === 'christmas-transforms')
+        ?.series._ref,
+      problems: out.problems,
+    };
+  };
+
+  it('resolves a series exported as its slug', () => {
+    expect(seriesRef('i-peter').ref).toBe('series-i-peter');
+    expect(seriesRef('increase-and-multiply---forever-together').ref).toBe(
+      'series-increase-and-multiply---forever-together',
+    );
+  });
+
+  it('resolves a series exported as its name, case-insensitively', () => {
+    expect(seriesRef('I Peter').ref).toBe('series-i-peter');
+    expect(seriesRef('  uncommon   COMMUNITY ').ref).toBe(
+      'series-uncommon-community',
+    );
+  });
+
+  it('tries the slug before the name', () => {
+    const rows = [
+      ...seriesCsv,
+      { Name: 'acts', Slug: 'other-series', Draft: 'false', Archived: 'false' },
+    ];
+    const out = transformRows(
+      withRow('christmas-transforms', { Series: 'acts' }),
+      rows,
+    );
+    expect(
+      out.sermons.find((s) => s.slug.current === 'christmas-transforms')?.series
+        ._ref,
+    ).toBe('series-acts');
+  });
+
+  it('sends an unresolved reference to Stand Alone Messages with a problem line', () => {
+    const { ref, problems } = seriesRef('Nonexistent Series');
+    expect(ref).toBe('series-stand-alone-messages');
+    expect(
+      problems.some(
+        (p) =>
+          p.includes('christmas-transforms') &&
+          p.includes('Nonexistent Series'),
+      ),
+    ).toBe(true);
+  });
+});
+
 describe('column map', () => {
   it('reports a required column that no header matches', () => {
     const renamed = sermonsCsv.map(({ Speaker, ...rest }) => ({
@@ -617,6 +738,19 @@ describe('cli helpers', () => {
       dryRun: false,
       errors: [],
     });
+  });
+
+  it('parses --map', () => {
+    expect(
+      parseArgs(['--sermons', 'a', '--series', 'b', '--map', 'm.json']).map,
+    ).toBe('m.json');
+    expect(
+      parseArgs(['--sermons', 'a', '--series', 'b', '--map=m.json']).map,
+    ).toBe('m.json');
+    expect(
+      parseArgs(['--sermons', 'a', '--series', 'b', '--map']).errors.join(' '),
+    ).toMatch(/--map/);
+    expect(parseArgs(['--sermons', 'a', '--series', 'b']).map).toBeUndefined();
   });
 
   it('reports missing, unknown and incomplete arguments', () => {

@@ -15,12 +15,30 @@ Sermons (`SERMON_COLUMNS` in `scripts/lib/webflow-transform.ts`): `Name` (title)
 
 Series (`SERIES_COLUMNS`): `Name`, `Slug`, `Draft`, `Archived`, `Artwork` (Webflow CDN URL), `Description`.
 
-If the real headers differ, add the real label to the matching list in `SERMON_COLUMNS` / `SERIES_COLUMNS`. A required column (title, date, speaker, book) that no header matches is reported as a problem. `Series` and `Speaker` are matched by name (series also by slug); if Webflow exports references as IDs, the series falls back to Stand Alone Messages and is reported.
+If the real headers differ, pass a JSON map instead of editing code. Names listed in the map are tried before the defaults:
+
+```
+npx tsx scripts/import-webflow.ts --sermons ... --series ... --map scripts/data/columns.json --dry-run
+```
+
+```json
+{
+  "sermons": {
+    "speaker": ["Preacher"],
+    "vimeo": ["Video Embed Code"],
+    "book": ["Scripture Book"]
+  },
+  "series": { "artwork": ["Cover Image URL"] }
+}
+```
+
+Fields: sermons `title slug draft archived date publishedOn speaker series book passage vimeo spreaker description`; series `title slug draft archived artwork description`. Unknown sections or fields are rejected. (Alternatively, add the label to `SERMON_COLUMNS` / `SERIES_COLUMNS` in `scripts/lib/webflow-transform.ts`.) A required column (title, date, speaker, book) that no header matches is reported as a problem.
 
 ## Rules worth knowing
 
 - Draft and archived rows are skipped silently.
-- A sermon is skipped, with a problem line, when it has no usable title, date, speaker or book. `book` is required by the Studio schema.
+- Every non-draft sermon is imported. One with no speaker or an unknown/empty book is written without that field, with a problem line naming the slug and raw value; the Studio waives those two required fields for documents that have a `webflowPath`. Only a row with no title, an unparseable date or a duplicate slug is skipped.
+- A sermon's `Series` may be the series slug or name (slug is tried first, then name case-insensitively). Unresolved or blank goes to Stand Alone Messages; an unresolved non-blank value is also reported.
 - Unknown books: add a lowercase key (no periods, digits for numerals, e.g. `'1 pet'`) to `BOOK_ALIASES`, then rerun the dry run.
 - Dates: values at exactly 00:00 UTC (Webflow's date-only fields, e.g. `Sun Oct 18 2026 00:00:00 GMT+0000`) keep their calendar date. Any other instant is converted to America/Chicago.
 - Series artwork is downloaded from the Webflow CDN and uploaded as a Sanity image only on a real run. A failed download is a warning, and the series is written without artwork.

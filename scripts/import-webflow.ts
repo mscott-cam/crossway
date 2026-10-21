@@ -8,6 +8,7 @@ import {
   parseArgs,
 } from './lib/import-cli';
 import {
+  parseColumnMap,
   transformRows,
   type Row,
   type SeriesDoc,
@@ -86,7 +87,19 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.errors.length) fail([...args.errors, USAGE].join('\n'));
 
-  const result = transformRows(readCsv(args.sermons!), readCsv(args.series!));
+  let overrides = {};
+  if (args.map) {
+    try {
+      overrides = parseColumnMap(JSON.parse(readFileSync(args.map, 'utf8')));
+    } catch (error) {
+      fail(`Cannot use column map ${args.map}: ${(error as Error).message}`);
+    }
+  }
+  const result = transformRows(
+    readCsv(args.sermons!),
+    readCsv(args.series!),
+    overrides,
+  );
   console.log(formatReport(result));
 
   if (args.dryRun) {

@@ -100,6 +100,59 @@ export const SERIES_COLUMNS = {
   description: ['Description', 'Summary'],
 };
 
+export type ColumnOverrides = {
+  sermons?: Partial<Record<keyof typeof SERMON_COLUMNS, string[]>>;
+  series?: Partial<Record<keyof typeof SERIES_COLUMNS, string[]>>;
+};
+
+function mergeColumns<T extends Record<string, string[]>>(
+  defaults: T,
+  overrides: Partial<Record<keyof T, string[]>> = {},
+): T {
+  return Object.fromEntries(
+    Object.entries(defaults).map(([field, names]) => [
+      field,
+      [...(overrides[field as keyof T] ?? []), ...names],
+    ]),
+  ) as T;
+}
+
+export function parseColumnMap(json: unknown): ColumnOverrides {
+  const isObject = (v: unknown): v is Record<string, unknown> =>
+    typeof v === 'object' && v !== null && !Array.isArray(v);
+  if (!isObject(json)) throw new Error('Column map must be a JSON object');
+  const groups = { sermons: SERMON_COLUMNS, series: SERIES_COLUMNS } as const;
+  const out: Record<string, Record<string, string[]>> = {};
+  for (const [group, fields] of Object.entries(json)) {
+    if (!(group in groups))
+      throw new Error(
+        `Column map: unknown section "${group}" (use "sermons" or "series")`,
+      );
+    if (!isObject(fields))
+      throw new Error(`Column map: "${group}" must be an object`);
+    const known = groups[group as keyof typeof groups] as Record<
+      string,
+      string[]
+    >;
+    out[group] = {};
+    for (const [field, names] of Object.entries(fields)) {
+      if (!(field in known))
+        throw new Error(
+          `Column map: unknown field "${field}" in "${group}" (known: ${Object.keys(known).join(', ')})`,
+        );
+      if (
+        !Array.isArray(names) ||
+        !names.every((n) => typeof n === 'string' && n.trim())
+      )
+        throw new Error(
+          `Column map: "${group}.${field}" must be an array of header names`,
+        );
+      out[group][field] = names;
+    }
+  }
+  return out as ColumnOverrides;
+}
+
 const SERMON_REQUIRED = ['title', 'date', 'speaker', 'book'] as const;
 const SERIES_REQUIRED = ['title'] as const;
 
@@ -131,9 +184,9 @@ export type SermonDoc = {
   _type: 'sermon';
   title: string;
   date: string;
-  speaker: Ref;
+  speaker?: Ref;
   series: Ref;
-  book: string;
+  book?: string;
   passage?: string;
   vimeoUrl?: string;
   slug: Slug;
@@ -147,6 +200,8 @@ export type TransformStats = {
   skippedDraftOrArchived: number;
   skippedInvalid: number;
   sermons: number;
+  withoutBook: number;
+  withoutSpeaker: number;
   series: number;
   speakers: number;
 };
@@ -336,34 +391,34 @@ const slugOf = (text: string) => sermonSlug(text, '');
 export function transformRows(
   sermonsCsv: Row[],
   seriesCsv: Row[],
+  overrides: ColumnOverrides = {},
 ): TransformResult {
+  const sc = mergeColumns(SERMON_COLUMNS, overrides.sermons);
+  const rc = mergeColumns(SERIES_COLUMNS, overrides.series);
   const problems: string[] = [];
   problems.push(
-    ...missingColumns(sermonsCsv, SERMON_COLUMNS, SERMON_REQUIRED, 'Sermons'),
-    ...missingColumns(seriesCsv, SERIES_COLUMNS, SERIES_REQUIRED, 'Series'),
+    ...missingColumns(sermonsCsv, sc, SERMON_REQUIRED, 'Sermons'),
+    ...missingColumns(seriesCsv, rc, SERIES_REQUIRED, 'Series'),
   );
 
   const seriesBySlug = new Map<string, SeriesDoc>();
-  const seriesLookup = new Map<string, SeriesDoc>();
+  const seriesBySlugKey = new Map<string, SeriesDoc>();
+  const seriesByName = new Map<string, SeriesDoc>();
   seriesCsv.forEach((row, i) => {
-    if (
-      isTrue(cell(row, SERIES_COLUMNS.draft)) ||
-      isTrue(cell(row, SERIES_COLUMNS.archived))
-    )
-      return;
-    const title = clean(cell(row, SERIES_COLUMNS.title));
+    if (isTrue(cell(row, rc.draft)) || isTrue(cell(row, rc.archived))) return;
+    const title = clean(cell(row, rc.title));
     if (!title) {
       problems.push(`series row ${i + 2}: no title - skipped`);
       return;
     }
-    let slug = clean(cell(row, SERIES_COLUMNS.slug));
+    let slug = clean(cell(row, rc.slug));
     if (!slug) {
       slug = slugOf(title);
       problems.push(`series "${title}": no slug, using "${slug}"`);
     }
     if (seriesBySlug.has(slug)) return;
-    const artwork = cell(row, SERIES_COLUMNS.artwork);
-    const description = plainText(cell(row, SERIES_COLUMNS.description));
+    const artwork = cell(row, rc.artwork);
+    const description = plainText(cell(row, rc.description));
     if (artwork && !/^https?:\/\//i.test(artwork))
       problems.push(
         `series "${slug}": artwork "${artwork}" is not an http(s) URL - ignored`,
@@ -380,14 +435,17 @@ export function transformRows(
       ...(/^https?:\/\//i.test(artwork) && { artworkUrl: artwork }),
     };
     seriesBySlug.set(slug, doc);
-    seriesLookup.set(normName(title), doc);
-    seriesLookup.set(normName(slug), doc);
+    seriesBySlugKey.set(normName(slug), doc);
+    if (!seriesByName.has(normName(title)))
+      seriesByName.set(normName(title), doc);
   });
 
   type Candidate = Omit<SermonDoc, 'speaker'> & {
     speakerKey: string;
     speakerName: string;
   };
+  let withoutBook = 0;
+  let withoutSpeaker = 0;
   const candidates: Candidate[] = [];
   const seenSlugs = new Set<string>();
   let standaloneUsed = false;
@@ -395,15 +453,12 @@ export function transformRows(
   let skippedInvalid = 0;
 
   sermonsCsv.forEach((row, i) => {
-    if (
-      isTrue(cell(row, SERMON_COLUMNS.draft)) ||
-      isTrue(cell(row, SERMON_COLUMNS.archived))
-    ) {
+    if (isTrue(cell(row, sc.draft)) || isTrue(cell(row, sc.archived))) {
       skippedDraftOrArchived++;
       return;
     }
-    const title = clean(cell(row, SERMON_COLUMNS.title));
-    let slug = clean(cell(row, SERMON_COLUMNS.slug));
+    const title = clean(cell(row, sc.title));
+    let slug = clean(cell(row, sc.slug));
     const label = slug || title || `row ${i + 2}`;
     let valid = true;
     const fail = (message: string) => {
@@ -414,12 +469,12 @@ export function transformRows(
     if (!title) fail('no title - skipped');
 
     let date: string | undefined;
-    const rawDate = cell(row, SERMON_COLUMNS.date);
+    const rawDate = cell(row, sc.date);
     if (rawDate) {
       date = parseSermonDate(rawDate);
       if (!date) fail(`could not parse date "${rawDate}" - skipped`);
     } else {
-      const published = cell(row, SERMON_COLUMNS.publishedOn);
+      const published = cell(row, sc.publishedOn);
       date = parseSermonDate(published);
       if (date)
         problems.push(
@@ -436,26 +491,34 @@ export function transformRows(
     }
     if (slug && seenSlugs.has(slug)) fail('duplicate slug - skipped');
 
-    const speakerName = clean(cell(row, SERMON_COLUMNS.speaker));
+    const speakerName = clean(cell(row, sc.speaker));
     const speakerKey = slugOf(speakerName);
-    if (!speakerKey) fail('no speaker - skipped');
-
-    const rawBook = cell(row, SERMON_COLUMNS.book);
-    const book = normalizeBook(rawBook);
-    if (!rawBook) fail('no book - skipped');
-    else if (!book)
-      fail(
-        `unknown book "${rawBook}" - skipped (add it to BOOK_ALIASES in scripts/lib/webflow-transform.ts)`,
+    if (!speakerKey) {
+      withoutSpeaker++;
+      problems.push(
+        `sermon "${label}": no speaker${speakerName ? ` ("${speakerName}")` : ''} - imported without speaker`,
       );
+    }
 
-    const vimeoValues = cells(row, SERMON_COLUMNS.vimeo);
+    const rawBook = cell(row, sc.book);
+    const book = normalizeBook(rawBook);
+    if (!book) {
+      withoutBook++;
+      problems.push(
+        rawBook
+          ? `sermon "${label}": unknown book "${rawBook}" - imported without book (add it to BOOK_ALIASES in scripts/lib/webflow-transform.ts)`
+          : `sermon "${label}": no book - imported without book`,
+      );
+    }
+
+    const vimeoValues = cells(row, sc.vimeo);
     const vimeoUrl = vimeoValues.map(extractVimeoUrl).find(Boolean);
     if (vimeoValues.length && !vimeoUrl)
       problems.push(
         `sermon "${label}": no Vimeo id found in "${vimeoValues[0].slice(0, 80)}" - imported without video`,
       );
 
-    const spreakerValues = cells(row, SERMON_COLUMNS.spreaker);
+    const spreakerValues = cells(row, sc.spreaker);
     const spreakerEpisodeId = spreakerValues
       .map(extractSpreakerId)
       .find(Boolean);
@@ -464,9 +527,10 @@ export function transformRows(
         `sermon "${label}": no Spreaker episode id found in "${spreakerValues[0].slice(0, 80)}" - imported without audio id`,
       );
 
-    const rawSeries = clean(cell(row, SERMON_COLUMNS.series));
+    const rawSeries = clean(cell(row, sc.series));
     let seriesDoc = rawSeries
-      ? seriesLookup.get(normName(rawSeries))
+      ? (seriesBySlugKey.get(normName(rawSeries)) ??
+        seriesByName.get(normName(rawSeries)))
       : undefined;
     if (rawSeries && !seriesDoc)
       problems.push(
@@ -481,7 +545,7 @@ export function transformRows(
         `sermon "${label}": date ${date} does not match the slug date ${slugDate}`,
       );
 
-    if (!valid || !book || !date) {
+    if (!valid || !date) {
       skippedInvalid++;
       return;
     }
@@ -494,15 +558,15 @@ export function transformRows(
     }
     const seriesId = seriesDoc?._id ?? `series-${STANDALONE_SLUG}`;
 
-    const description = plainText(cell(row, SERMON_COLUMNS.description));
-    const passage = clean(cell(row, SERMON_COLUMNS.passage)) || book.passage;
+    const description = plainText(cell(row, sc.description));
+    const passage = clean(cell(row, sc.passage)) || book?.passage;
     candidates.push({
       _id: `sermon-${slug}`,
       _type: 'sermon',
       title,
       date,
       series: { _type: 'reference', _ref: seriesId },
-      book: book.book,
+      ...(book && { book: book.book }),
       ...(passage && { passage }),
       ...(vimeoUrl && { vimeoUrl }),
       slug: { _type: 'slug', current: slug },
@@ -526,6 +590,7 @@ export function transformRows(
 
   const spellings = new Map<string, Map<string, number>>();
   for (const c of candidates) {
+    if (!c.speakerKey) continue;
     const counts = spellings.get(c.speakerKey) ?? new Map<string, number>();
     counts.set(c.speakerName, (counts.get(c.speakerName) ?? 0) + 1);
     spellings.set(c.speakerKey, counts);
@@ -547,7 +612,9 @@ export function transformRows(
   const sermons: SermonDoc[] = candidates.map(
     ({ speakerKey, speakerName: _name, ...rest }) => ({
       ...rest,
-      speaker: { _type: 'reference', _ref: `speaker-${speakerKey}` },
+      ...(speakerKey && {
+        speaker: { _type: 'reference' as const, _ref: `speaker-${speakerKey}` },
+      }),
     }),
   );
 
@@ -561,6 +628,8 @@ export function transformRows(
       skippedDraftOrArchived,
       skippedInvalid,
       sermons: sermons.length,
+      withoutBook,
+      withoutSpeaker,
       series: series.length,
       speakers: speakers.length,
     },

@@ -30,9 +30,9 @@ export type Sermon = {
   _id: string;
   title: string;
   date: string;
-  speaker: Speaker;
+  speaker?: Speaker;
   series: Series;
-  book: string;
+  book?: string;
   passage?: string;
   vimeoUrl?: string;
   slug: string;
