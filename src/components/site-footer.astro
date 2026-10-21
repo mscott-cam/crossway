@@ -1,0 +1,195 @@
+---
+import LogoLockup from './logo-lockup.astro';
+import NavLink from './nav-link.astro';
+import { nav, site } from '../lib/site';
+import type { NavItem } from '../lib/site';
+
+const year = new Date().getFullYear();
+const { city, region, postalCode } = site.address;
+const cityLine = `${city}, ${region} ${postalCode}`;
+const [first, second] = site.fallbackServiceTimes;
+
+type FooterLink = NavItem & { sameTab?: boolean };
+type Column = { heading: string; links: FooterLink[] };
+
+const give = nav.find((item) => item.label === 'Give')!;
+const columns: Column[] = [
+  {
+    heading: 'Crossway',
+    links: nav.filter((item) => item.href && item !== give),
+  },
+  ...nav
+    .filter((item) => item.children)
+    .map((item) => ({ heading: item.label, links: item.children! })),
+  {
+    heading: 'Stay connected',
+    links: [
+      {
+        label: 'Church Center',
+        href: site.links.churchCenter,
+        external: true,
+        sameTab: true,
+      },
+      {
+        label: 'Facebook',
+        href: site.links.facebook,
+        external: true,
+        sameTab: true,
+      },
+      {
+        label: 'Instagram',
+        href: site.links.instagram,
+        external: true,
+        sameTab: true,
+      },
+      { label: 'Watch Live', href: site.links.live, external: true },
+      give,
+    ],
+  },
+];
+---
+
+<footer class="site-footer on-navy">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__brand">
+        <a class="site-footer__logo" href="/">
+          <LogoLockup tone="dark" />
+        </a>
+        <p class="site-footer__times">
+          Meeting Sundays {first} &amp; {second}a
+        </p>
+        <address class="site-footer__address">
+          <NavLink href={site.mapsUrl} external newTab={false}>
+            {site.address.street}
+            <br />
+            {cityLine}
+          </NavLink>
+        </address>
+      </div>
+
+      <nav id="footer-nav" class="site-footer__nav" aria-label="Footer">
+        {columns.map((column) => (
+          <div class="site-footer__column">
+            <h2 class="site-footer__heading">{column.heading}</h2>
+            <ul>
+              {column.links.map((link) => (
+                <li>
+                  <NavLink
+                    href={link.href!}
+                    external={link.external}
+                    newTab={link.external && !link.sameTab}
+                  >
+                    {link.label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </nav>
+    </div>
+
+    <p class="site-footer__legal">© {year} Crossway Bible Church</p>
+  </div>
+</footer>
+
+<style is:global>
+  .site-footer {
+    margin-top: var(--section-space);
+    padding-block: clamp(3rem, 6vw, 5rem) 2rem;
+  }
+
+  .site-footer__top {
+    display: grid;
+    gap: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .site-footer .site-footer__logo {
+    display: inline-block;
+    border-radius: 6px;
+  }
+
+  .site-footer .site-footer__logo .logo-lockup {
+    height: clamp(1.5rem, 2.4vw, 2rem);
+  }
+
+  .site-footer__times {
+    margin: 2rem 0 0.75rem;
+    color: var(--paper);
+    font-family: var(--font-display);
+    font-size: var(--step-h3);
+    line-height: 1.15;
+  }
+
+  .site-footer__address {
+    color: var(--mist);
+    font-style: normal;
+    line-height: 1.55;
+  }
+
+  .site-footer a {
+    color: var(--paper);
+    text-decoration-color: color-mix(in srgb, var(--paper) 35%, transparent);
+    transition: text-decoration-color 0.2s ease;
+  }
+
+  .site-footer a:hover {
+    text-decoration-color: var(--amber);
+  }
+
+  .site-footer__address a {
+    color: var(--mist);
+  }
+
+  .site-footer__nav {
+    padding-top: clamp(2rem, 4vw, 3rem);
+    border-top: 1px solid color-mix(in srgb, var(--paper) 16%, transparent);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+    gap: 2.5rem 2rem;
+  }
+
+  .site-footer .site-footer__heading {
+    margin: 0 0 1rem;
+    color: var(--mist);
+    font-family: var(--font-ui);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+  }
+
+  .site-footer__column ul {
+    display: grid;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-footer__column a {
+    font-size: 1rem;
+    text-decoration: none;
+  }
+
+  .site-footer__column a:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--amber);
+  }
+
+  .site-footer__legal {
+    margin: 3.5rem 0 0;
+    padding-top: 1.5rem;
+    border-top: 1px solid color-mix(in srgb, var(--paper) 16%, transparent);
+    color: var(--mist);
+    font-size: 0.875rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-footer a {
+      transition: none;
+    }
+  }
+</style>

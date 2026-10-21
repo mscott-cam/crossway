@@ -26,9 +26,17 @@
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  scroll-padding-top: 6rem;
+}
+
+html.menu-open {
+  overflow: hidden;
 }
 
 body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
   margin: 0;
   background: var(--paper);
   color: var(--charcoal);
@@ -38,6 +46,14 @@ body {
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+main:focus {
+  outline: none;
 }
 
 img,
@@ -108,18 +124,49 @@ a {
 }
 
 :focus-visible {
-  outline: 2px solid var(--navy);
+  outline: 2px solid var(--focus, var(--navy));
   outline-offset: 3px;
 }
 
 .on-navy {
+  --focus: var(--amber);
   background: var(--navy);
   color: var(--paper);
 }
 
-.on-navy :focus-visible,
-.on-navy:focus-visible {
-  outline-color: var(--amber);
+.pill-navy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.9rem 1.5rem;
+  border-radius: 999px;
+  background: var(--navy);
+  color: var(--paper);
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.2s ease;
+}
+
+.pill-navy:hover {
+  background: color-mix(in srgb, var(--navy) 82%, black);
+}
+
+.pill-navy:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 3px;
+  box-shadow: inset 0 0 0 2px var(--amber);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pill-navy {
+    transition: none;
+  }
 }
 
 .on-navy h1,

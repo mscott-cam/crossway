@@ -1,0 +1,137 @@
+---
+import NavLink from './nav-link.astro';
+import { nav } from '../lib/site';
+import { isCurrent } from '../lib/nav-state';
+
+interface Props {
+  pathname: string;
+}
+
+const { pathname } = Astro.props;
+---
+
+<nav id="mobile-menu" class="mobile-menu" aria-label="Mobile" data-mobile-menu>
+  <ul class="mobile-menu__list">
+    {nav.map((item, index) =>
+      item.children ? (
+        <li class="mobile-menu__group">
+          <p class="eyebrow" id={`mobile-group-${index}`}>
+            {item.label}
+          </p>
+          <ul aria-labelledby={`mobile-group-${index}`}>
+            {item.children.map((child) => (
+              <li>
+                <NavLink
+                  class="mobile-link mobile-link--child"
+                  href={child.href!}
+                  external={child.external}
+                  current={isCurrent(pathname, child.href)}
+                >
+                  {child.label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </li>
+      ) : (
+        <li>
+          <NavLink
+            class="mobile-link"
+            href={item.href!}
+            external={item.external}
+            current={isCurrent(pathname, item.href)}
+          >
+            {item.label}
+          </NavLink>
+        </li>
+      ),
+    )}
+  </ul>
+  <a class="pill-navy mobile-menu__cta" href="/visit">
+    Plan a Visit
+  </a>
+</nav>
+
+<style is:global>
+  .mobile-menu {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 6.5rem var(--gutter) 3rem;
+    background: var(--paper);
+    visibility: hidden;
+    opacity: 0;
+    transition:
+      opacity 0.2s ease,
+      visibility 0s linear 0.2s;
+  }
+
+  .mobile-menu[data-open] {
+    visibility: visible;
+    opacity: 1;
+    transition-delay: 0s;
+  }
+
+  .mobile-menu__list,
+  .mobile-menu__list ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .mobile-menu__list {
+    max-width: 36rem;
+    margin-inline: auto;
+  }
+
+  .mobile-menu__group {
+    margin-block: 1.75rem 0.75rem;
+  }
+
+  .mobile-menu__group .eyebrow {
+    margin-bottom: 0.5rem;
+  }
+
+  .mobile-link {
+    display: block;
+    padding: 0.3rem 0;
+    color: var(--navy);
+    font-family: var(--font-display);
+    font-size: clamp(2.25rem, 9.5vw, 3rem);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    text-decoration: none;
+  }
+
+  .mobile-link--child {
+    font-size: clamp(1.625rem, 6.6vw, 2rem);
+    line-height: 1.2;
+  }
+
+  .mobile-link[aria-current='page'] {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.18em;
+  }
+
+  .mobile-menu .mobile-menu__cta {
+    display: flex;
+    max-width: 36rem;
+    margin: 2.25rem auto 0;
+    padding-block: 1.15rem;
+  }
+
+  @media (min-width: 1100px) {
+    .mobile-menu {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mobile-menu {
+      transition: none;
+    }
+  }
+</style>

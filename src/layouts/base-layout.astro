@@ -8,6 +8,8 @@ import '@fontsource/hanken-grotesk/latin-600.css';
 import '@fontsource/hanken-grotesk/latin-700.css';
 import '../styles/global.css';
 import { tokensToCss } from '../lib/tokens';
+import SiteHeader from '../components/site-header.astro';
+import SiteFooter from '../components/site-footer.astro';
 
 interface Props {
   title: string;
@@ -53,13 +55,18 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).href : undefined;
     />
     {ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
     <style is:inline set:html={tokensToCss()}></style>
+    <script is:inline>
+      document.documentElement.classList.add('js');
+    </script>
   </head>
   <body class={bodyClass} data-over-hero={overHero ? '' : undefined}>
     <a class="skip-link" href="#main">
       Skip to content
     </a>
+    <SiteHeader overHero={overHero} />
     <main id="main" tabindex="-1">
       <slot />
     </main>
+    <SiteFooter />
   </body>
 </html>

@@ -1,0 +1,382 @@
+---
+import LogoLockup from './logo-lockup.astro';
+import MobileMenu from './mobile-menu.astro';
+import NavLink from './nav-link.astro';
+import { nav } from '../lib/site';
+import { hasCurrentChild, isCurrent } from '../lib/nav-state';
+
+interface Props {
+  overHero?: boolean;
+}
+
+const { overHero = false } = Astro.props;
+const pathname = Astro.url.pathname;
+---
+
+<header
+  class="site-header"
+  data-site-header
+  data-over-hero={overHero ? '' : undefined}
+>
+  <div class="site-header__bar">
+    <a class="site-header__logo" href="/">
+      <LogoLockup tone="light" />
+    </a>
+
+    <nav class="primary-nav" aria-label="Primary">
+      <ul>
+        {nav.map((item, index) =>
+          item.children ? (
+            <li class="nav-item" data-nav-item>
+              <button
+                type="button"
+                class="nav-link nav-trigger"
+                aria-expanded="false"
+                aria-controls={`dropdown-${index}`}
+                data-dropdown-trigger
+                data-current={hasCurrentChild(pathname, item) ? '' : undefined}
+              >
+                {item.label}
+                <svg
+                  class="nav-chevron"
+                  viewBox="0 0 12 8"
+                  width="10"
+                  height="7"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path
+                    d="M1 1.5 6 6.5 11 1.5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+              <ul
+                class="nav-dropdown"
+                id={`dropdown-${index}`}
+                hidden
+                data-dropdown-panel
+              >
+                {item.children.map((child) => (
+                  <li>
+                    <NavLink
+                      class="dropdown-link"
+                      href={child.href!}
+                      external={child.external}
+                      current={isCurrent(pathname, child.href)}
+                    >
+                      {child.label}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ) : (
+            <li>
+              <NavLink
+                class="nav-link"
+                href={item.href!}
+                external={item.external}
+                current={isCurrent(pathname, item.href)}
+              >
+                {item.label}
+              </NavLink>
+            </li>
+          ),
+        )}
+      </ul>
+    </nav>
+
+    <div class="site-header__actions">
+      <a class="pill-navy plan-visit" href="/visit">
+        Plan a Visit
+      </a>
+      <button
+        type="button"
+        class="menu-button"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        data-menu-toggle
+      >
+        <span>Menu</span>
+        <svg
+          class="menu-icon"
+          viewBox="0 0 20 14"
+          width="18"
+          height="13"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path
+            class="menu-icon__open"
+            d="M1 2h18M1 12h18"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+          />
+          <path
+            class="menu-icon__close"
+            d="M3 1l14 12M17 1 3 13"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+          />
+        </svg>
+      </button>
+      <a class="menu-fallback" href="#footer-nav">
+        Menu
+      </a>
+    </div>
+  </div>
+
+  <MobileMenu pathname={pathname} />
+</header>
+
+<script>
+  import { initNav } from '../scripts/nav';
+  initNav();
+</script>
+
+<style is:global>
+  .site-header {
+    --header-gutter: clamp(0.75rem, 2vw, 1.75rem);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    padding: 0.75rem var(--header-gutter);
+    pointer-events: none;
+  }
+
+  .site-header[data-over-hero] {
+    position: absolute;
+    inset-inline: 0;
+  }
+
+  .site-header[data-over-hero][data-menu-open] {
+    position: fixed;
+  }
+
+  .site-header__bar {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: clamp(0.75rem, 1.5vw, 1.5rem);
+    max-width: var(--container);
+    margin-inline: auto;
+    padding: 0.5rem 0.5rem 0.5rem clamp(1.25rem, 2vw, 1.625rem);
+    border: 1px solid color-mix(in srgb, var(--navy) 12%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--paper) 86%, transparent);
+    -webkit-backdrop-filter: blur(18px) saturate(1.2);
+    backdrop-filter: blur(18px) saturate(1.2);
+    box-shadow: 0 10px 30px -18px rgba(0, 0, 0, 0.28);
+    pointer-events: auto;
+    color: var(--navy);
+  }
+
+  @supports not (
+    (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+  ) {
+    .site-header__bar {
+      background: color-mix(in srgb, var(--paper) 97%, transparent);
+    }
+  }
+
+  .site-header__logo {
+    display: block;
+    flex: none;
+    border-radius: 6px;
+  }
+
+  .site-header .site-header__logo .logo-lockup {
+    height: 1.25rem;
+  }
+
+  .primary-nav > ul {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nav-item {
+    position: relative;
+  }
+
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    padding: 0.75rem clamp(0.5rem, 0.95vw, 0.9rem);
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--navy);
+    font-family: var(--font-ui);
+    font-size: clamp(0.71rem, 0.5rem + 0.22vw, 0.8125rem);
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .nav-link:hover,
+  .nav-trigger[aria-expanded='true'] {
+    background: color-mix(in srgb, var(--navy) 7%, transparent);
+  }
+
+  .nav-link:focus-visible {
+    outline-offset: 1px;
+  }
+
+  .nav-link[aria-current='page'],
+  .nav-trigger[data-current] {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.5em;
+  }
+
+  .nav-chevron {
+    flex: none;
+  }
+
+  .nav-trigger[aria-expanded='true'] .nav-chevron {
+    transform: rotate(180deg);
+  }
+
+  .nav-dropdown {
+    position: absolute;
+    top: calc(100% + 0.9rem);
+    left: 0;
+    z-index: 3;
+    min-width: 15rem;
+    margin: 0;
+    padding: 0.5rem;
+    list-style: none;
+    border: 1px solid color-mix(in srgb, var(--navy) 12%, transparent);
+    border-radius: 1.25rem;
+    background: color-mix(in srgb, var(--paper) 97%, transparent);
+    -webkit-backdrop-filter: blur(18px) saturate(1.2);
+    backdrop-filter: blur(18px) saturate(1.2);
+    box-shadow: 0 18px 40px -20px rgba(0, 0, 0, 0.28);
+  }
+
+  html:not(.js) .nav-item:hover > .nav-dropdown[hidden],
+  html:not(.js) .nav-item:focus-within > .nav-dropdown[hidden] {
+    display: block;
+  }
+
+  .dropdown-link {
+    display: block;
+    padding: 0.65rem 1rem;
+    border-radius: 0.75rem;
+    color: var(--navy);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.3;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+  }
+
+  .dropdown-link:hover {
+    background: color-mix(in srgb, var(--navy) 7%, transparent);
+  }
+
+  .dropdown-link:focus-visible {
+    outline-offset: -2px;
+  }
+
+  .dropdown-link[aria-current='page'] {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.3em;
+  }
+
+  .site-header__actions {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .site-header .plan-visit {
+    padding: 0.875rem 1.35rem;
+    font-size: clamp(0.71rem, 0.5rem + 0.22vw, 0.8125rem);
+    letter-spacing: 0.1em;
+  }
+
+  .menu-button,
+  .menu-fallback {
+    display: none;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.8rem 1.2rem;
+    border: 1px solid color-mix(in srgb, var(--navy) 22%, transparent);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--navy);
+    font-family: var(--font-ui);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .menu-button:hover,
+  .menu-fallback:hover {
+    background: color-mix(in srgb, var(--navy) 7%, transparent);
+  }
+
+  .menu-icon__close,
+  .menu-button[aria-expanded='true'] .menu-icon__open {
+    display: none;
+  }
+
+  .menu-button[aria-expanded='true'] .menu-icon__close {
+    display: inline;
+  }
+
+  @media (max-width: 1099.98px) {
+    .primary-nav,
+    .site-header .plan-visit {
+      display: none;
+    }
+
+    .menu-button {
+      display: inline-flex;
+    }
+
+    html:not(.js) .menu-button {
+      display: none;
+    }
+
+    html:not(.js) .menu-fallback {
+      display: inline-flex;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-link,
+    .dropdown-link,
+    .menu-button,
+    .menu-fallback {
+      transition: none;
+    }
+  }
+</style>

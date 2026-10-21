@@ -1,0 +1,45 @@
+---
+interface Props {
+  href: string;
+  external?: boolean;
+  newTab?: boolean;
+  current?: boolean;
+  class?: string;
+}
+
+const {
+  href,
+  external = false,
+  newTab = external,
+  current = false,
+  class: className,
+} = Astro.props;
+
+const rel = newTab ? 'noopener noreferrer' : external ? 'noopener' : undefined;
+---
+
+<a
+  href={href}
+  class={className}
+  target={newTab ? '_blank' : undefined}
+  rel={rel}
+  aria-current={current ? 'page' : undefined}
+>
+  <slot />
+  {external && (
+    <span class="ext" aria-hidden="true">
+      ↗
+    </span>
+  )}
+  {newTab && <span class="sr-only"> (opens in a new tab)</span>}
+</a>
+
+<style>
+  .ext {
+    display: inline-block;
+    margin-left: 0.3em;
+    font-size: 0.8em;
+    line-height: 1;
+    letter-spacing: 0;
+  }
+</style>
