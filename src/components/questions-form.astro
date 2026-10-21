@@ -1,0 +1,279 @@
+---
+import Eyebrow from './eyebrow.astro';
+
+const siteKey = (
+  process.env.TURNSTILE_SITE_KEY ??
+  import.meta.env.TURNSTILE_SITE_KEY ??
+  ''
+).trim();
+const returnTo = Astro.url.pathname;
+---
+
+<section
+  id="questions"
+  class="questions"
+  aria-labelledby="questions-heading"
+  data-sitekey={siteKey || undefined}
+>
+  <div class="container">
+    <div class="questions__inner">
+      <div class="questions__intro">
+        <Eyebrow>Questions &amp; Prayer</Eyebrow>
+        <h2 id="questions-heading">Have questions? Need prayer?</h2>
+        <p class="questions__lede">
+          Ask us anything about Crossway, or let us know how we can pray for
+          you.
+        </p>
+      </div>
+
+      <form
+        class="questions__form"
+        method="post"
+        action="/api/contact"
+        data-contact-form
+      >
+        <input type="hidden" name="returnTo" value={returnTo} />
+
+        <div class="questions__row">
+          <div class="questions__field">
+            <label for="questions-name">Name</label>
+            <input
+              id="questions-name"
+              name="name"
+              type="text"
+              autocomplete="name"
+              required
+              maxlength="100"
+              aria-describedby="questions-name-error"
+            />
+            <p class="questions__error" id="questions-name-error" hidden></p>
+          </div>
+          <div class="questions__field">
+            <label for="questions-email">Email</label>
+            <input
+              id="questions-email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              required
+              maxlength="254"
+              aria-describedby="questions-email-error"
+            />
+            <p class="questions__error" id="questions-email-error" hidden></p>
+          </div>
+        </div>
+
+        <div class="questions__field">
+          <label for="questions-heard">How'd you hear about us?</label>
+          <input
+            id="questions-heard"
+            name="heardFrom"
+            type="text"
+            autocomplete="off"
+            maxlength="200"
+            aria-describedby="questions-heardFrom-error"
+          />
+          <p class="questions__error" id="questions-heardFrom-error" hidden></p>
+        </div>
+
+        <div class="questions__field">
+          <label for="questions-message">Question // Prayer Request</label>
+          <textarea
+            id="questions-message"
+            name="message"
+            rows="5"
+            required
+            maxlength="5000"
+            aria-describedby="questions-message-error"
+          ></textarea>
+          <p class="questions__error" id="questions-message-error" hidden></p>
+        </div>
+
+        <div class="questions__trap" aria-hidden="true">
+          <label for="questions-company">Company</label>
+          <input
+            id="questions-company"
+            name="company"
+            type="text"
+            tabindex="-1"
+            autocomplete="off"
+          />
+        </div>
+
+        {siteKey && <div class="questions__turnstile" data-turnstile-mount />}
+
+        <div class="questions__actions">
+          <button class="pill-navy questions__send" type="submit">
+            Send
+          </button>
+          <p class="questions__status" role="status" data-status></p>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<script>
+  import '../scripts/contact-form';
+</script>
+
+<style>
+  .questions {
+    --error: #9b2c1c;
+    padding-top: clamp(2rem, 5vw, 4rem);
+  }
+
+  .questions__inner {
+    display: grid;
+    gap: clamp(2rem, 5vw, 3rem);
+    padding-top: clamp(2.5rem, 6vw, 4.5rem);
+    border-top: 1px solid var(--rule);
+  }
+
+  .questions__intro h2 {
+    margin-top: 1rem;
+    font-size: var(--step-h3);
+    line-height: 1.1;
+  }
+
+  .questions__lede {
+    max-width: 30ch;
+    margin: 1rem 0 0;
+    font-size: 1.0625rem;
+  }
+
+  .questions__form {
+    display: grid;
+    gap: 1.25rem;
+    min-width: 0;
+  }
+
+  .questions__row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
+    gap: 1.25rem;
+  }
+
+  .questions__field {
+    display: grid;
+    gap: 0.4rem;
+    min-width: 0;
+  }
+
+  .questions__field label {
+    color: var(--navy);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .questions__field input,
+  .questions__field textarea {
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid color-mix(in srgb, var(--navy) 62%, var(--paper));
+    border-radius: 8px;
+    background: color-mix(in srgb, white 55%, var(--paper));
+    color: var(--charcoal);
+    font: inherit;
+    font-size: 1rem;
+    line-height: 1.5;
+    transition: border-color 0.2s ease;
+  }
+
+  .questions__field textarea {
+    min-height: 9rem;
+    resize: vertical;
+  }
+
+  .questions__field input:hover,
+  .questions__field textarea:hover {
+    border-color: var(--navy);
+  }
+
+  .questions__field input:focus-visible,
+  .questions__field textarea:focus-visible {
+    outline: 2px solid var(--navy);
+    outline-offset: 2px;
+    border-color: var(--navy);
+  }
+
+  .questions__field input[aria-invalid='true'],
+  .questions__field textarea[aria-invalid='true'] {
+    border-color: var(--error);
+    border-width: 2px;
+  }
+
+  .questions__error {
+    margin: 0;
+    color: var(--error);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  .questions__error[hidden] {
+    display: none;
+  }
+
+  .questions__trap {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .questions__actions {
+    display: grid;
+    gap: 0.75rem;
+    justify-items: start;
+    margin-top: 0.25rem;
+  }
+
+  .questions__send {
+    min-height: 3rem;
+    padding-inline: 2.25rem;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .questions__send[aria-disabled='true'] {
+    opacity: 0.65;
+    cursor: progress;
+  }
+
+  .questions__status {
+    min-height: 4.5em;
+    margin: 0;
+    color: var(--navy);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  .questions__status[data-state='error'] {
+    color: var(--error);
+  }
+
+  @media (min-width: 40rem) {
+    .questions__status {
+      min-height: 3em;
+    }
+  }
+
+  @media (min-width: 60rem) {
+    .questions__inner {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: clamp(3rem, 6vw, 6rem);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .questions__field input,
+    .questions__field textarea {
+      transition: none;
+    }
+  }
+</style>

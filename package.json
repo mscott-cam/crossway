@@ -11,7 +11,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "test": "vitest run",
-    "test:e2e": "SANITY_FIXTURES=1 E2E=1 astro build && SANITY_FIXTURES=1 E2E=1 playwright test",
+    "test:e2e": "SANITY_FIXTURES=1 E2E=1 TURNSTILE_SITE_KEY=e2e-site-key astro build && SANITY_FIXTURES=1 E2E=1 playwright test",
     "format": "prettier --write ."
   },
   "dependencies": {
@@ -24,7 +24,8 @@
     "astro": "^7.4.1",
     "fast-xml-parser": "^5.11.2",
     "fast-xml-validator": "^1.4.2",
-    "gsap": "^3.15.0"
+    "gsap": "^3.15.0",
+    "resend": "^6.34.1"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.11",

@@ -10,6 +10,7 @@ import '../styles/global.css';
 import { tokensToCss } from '../lib/tokens';
 import SiteHeader from '../components/site-header.astro';
 import SiteFooter from '../components/site-footer.astro';
+import QuestionsForm from '../components/questions-form.astro';
 
 interface Props {
   title: string;
@@ -18,6 +19,7 @@ interface Props {
   bodyClass?: string;
   overHero?: boolean;
   noindex?: boolean;
+  questions?: boolean;
 }
 
 const {
@@ -27,6 +29,7 @@ const {
   bodyClass,
   overHero = false,
   noindex = false,
+  questions = true,
 } = Astro.props;
 
 const siteName = 'Crossway Bible Church';
@@ -76,6 +79,7 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).href : undefined;
     <main id="main" tabindex="-1">
       <slot />
     </main>
+    {questions && <QuestionsForm />}
     <SiteFooter />
     <script>
       import '../scripts/motion';

@@ -17,4 +17,5 @@ export default defineConfig({
   site: 'https://crosswaysa.org',
   trailingSlash: 'never',
   redirects,
+  vite: { define: { __E2E__: JSON.stringify(isE2E) } },
 });

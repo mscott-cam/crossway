@@ -14,5 +14,9 @@ export default defineConfig({
     command: 'astro preview --port 4321 --ignore-lock',
     url: 'http://localhost:4321',
     reuseExistingServer: !process.env.CI,
+    env: {
+      RESEND_API_KEY: 'e2e-fake',
+      CONTACT_TO_EMAIL: 'e2e@example.com',
+    },
   },
 });
