@@ -241,6 +241,7 @@ test.describe('mobile menu', () => {
       }),
     ).toBeVisible();
     await expect(page.locator('#mobile-menu')).toHaveCSS('opacity', '1');
+    await expect(page.locator('.mobile-menu__cta')).toHaveCSS('opacity', '1');
     results = await new AxeBuilder({ page }).include('.site-header').analyze();
     expect(results.violations).toEqual([]);
   });

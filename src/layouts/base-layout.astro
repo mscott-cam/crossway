@@ -36,6 +36,20 @@ const {
   questions = true,
 } = Astro.props;
 
+const speculationRules = JSON.stringify({
+  prerender: [
+    {
+      where: {
+        and: [
+          { href_matches: '/*' },
+          { not: { href_matches: '/api/*' } },
+          { not: { selector_matches: '[target=_blank]' } },
+        ],
+      },
+      eagerness: 'moderate',
+    },
+  ],
+});
 const settings = await getSiteSettings();
 const siteName = 'Crossway Bible Church';
 const fullTitle = title.includes(siteName) ? title : `${title} | ${siteName}`;
@@ -79,6 +93,7 @@ const ogImageIsDefault = !ogImage;
       crossorigin
     />
     <link rel="preload" href={uiFont} as="font" type="font/woff2" crossorigin />
+    <script type="speculationrules" is:inline set:html={speculationRules} />
     <slot name="head" />
     <style is:inline set:html={tokensToCss()}></style>
     <script is:inline>

@@ -33,12 +33,7 @@ const steps = [
     </h2>
     <ol class="steps__list">
       {steps.map((step, index) => (
-        <li
-          class="step"
-          data-step
-          data-reveal="fade"
-          data-reveal-delay={String(index * 0.12)}
-        >
+        <li class="step" data-step data-reveal="fade">
           <span class="step__number" aria-hidden="true">
             {String(index + 1).padStart(2, '0')}
           </span>
@@ -120,7 +115,12 @@ const steps = [
     transition:
       background-color 0.2s ease,
       border-color 0.2s ease,
-      color 0.2s ease;
+      color 0.2s ease,
+      transform 0.2s var(--ease-out);
+  }
+
+  .step__link:active {
+    transform: scale(0.97);
   }
 
   .step__link:hover {

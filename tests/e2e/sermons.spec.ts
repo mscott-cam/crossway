@@ -635,6 +635,13 @@ test.describe('titles and accessibility', () => {
     test(`axe passes on ${url}`, async ({ page }) => {
       await page.goto(url);
       await page.waitForLoadState('load');
+      await page.waitForFunction(() =>
+        Array.from(document.querySelectorAll('[data-reveal]')).every(
+          (el) =>
+            getComputedStyle(el).opacity === '1' ||
+            el.getBoundingClientRect().top >= window.innerHeight,
+        ),
+      );
       const results = await new AxeBuilder({ page }).analyze();
       expect(results.violations).toEqual([]);
     });

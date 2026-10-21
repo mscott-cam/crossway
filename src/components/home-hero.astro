@@ -11,7 +11,7 @@ import { HERO_POSTER } from '../lib/video/hero-poster';
       </div>
       <div class="hero__wash" aria-hidden="true"></div>
       <div class="container hero__inner">
-        <p class="eyebrow" data-reveal="fade" data-reveal-delay="0.7">
+        <p class="eyebrow" data-reveal="fade" data-reveal-delay="0.15">
           Crossway Bible Church · San Antonio
         </p>
         <h1
@@ -24,7 +24,7 @@ import { HERO_POSTER } from '../lib/video/hero-poster';
             <em>loved.</em>
           </span>
         </h1>
-        <p class="hero__verse" data-reveal="fade" data-reveal-delay="0.95">
+        <p class="hero__verse" data-reveal="fade" data-reveal-delay="0.4">
           “We love because he first loved us.”
           <span class="verse-cite">1 John 4:19</span>
         </p>
@@ -64,13 +64,13 @@ import { HERO_POSTER } from '../lib/video/hero-poster';
 
   @media (prefers-reduced-motion: no-preference) {
     .hero__media {
-      animation: hero-settle 2.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation: hero-settle 1.6s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
   }
 
   @keyframes hero-settle {
     from {
-      transform: scale(1.08);
+      transform: scale(1.05);
     }
     to {
       transform: scale(1);

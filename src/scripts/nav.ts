@@ -1,5 +1,10 @@
+import { gsap } from 'gsap';
+
 const FOCUSABLE =
   'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+const motionAllowed = () =>
+  !document.documentElement.classList.contains('reduced');
 
 function initDropdowns(header: HTMLElement) {
   const items = Array.from(
@@ -14,7 +19,49 @@ function initDropdowns(header: HTMLElement) {
   const setOpen = (item: HTMLElement, open: boolean) => {
     const { trigger, panel } = parts(item);
     trigger.setAttribute('aria-expanded', String(open));
-    panel.hidden = !open;
+    if (!motionAllowed()) {
+      panel.hidden = !open;
+      return;
+    }
+    if (open) {
+      panel.hidden = false;
+      gsap.fromTo(
+        panel,
+        { opacity: 0, y: -8, scale: 0.98, transformOrigin: 'top left' },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.28,
+          ease: 'power3.out',
+          overwrite: true,
+          clearProps: 'opacity,transform,transformOrigin',
+        },
+      );
+      gsap.from(panel.children, {
+        opacity: 0,
+        y: -6,
+        duration: 0.3,
+        ease: 'power3.out',
+        stagger: 0.03,
+        delay: 0.04,
+        clearProps: 'opacity,transform',
+      });
+    } else if (!panel.hidden) {
+      gsap.killTweensOf(panel.children);
+      gsap.set(panel.children, { clearProps: 'opacity,transform' });
+      gsap.to(panel, {
+        opacity: 0,
+        y: -4,
+        duration: 0.14,
+        ease: 'power2.in',
+        overwrite: true,
+        onComplete: () => {
+          panel.hidden = true;
+          gsap.set(panel, { clearProps: 'opacity,transform,transformOrigin' });
+        },
+      });
+    }
   };
 
   const isOpen = (item: HTMLElement) =>
@@ -82,8 +129,27 @@ function initMenu(header: HTMLElement) {
     header.toggleAttribute('data-menu-open', open);
     root.classList.toggle('menu-open', open);
     for (const el of outside()) el.inert = open;
-    if (open) menu.querySelector<HTMLElement>(FOCUSABLE)?.focus();
-    else if (returnFocus) toggle.focus();
+    if (open) {
+      menu
+        .querySelector<HTMLElement>(FOCUSABLE)
+        ?.focus({ preventScroll: true });
+      if (motionAllowed()) {
+        gsap.fromTo(
+          menu.querySelectorAll('.mobile-menu__list > li, .mobile-menu__cta'),
+          { opacity: 0, y: 18 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+            ease: 'power3.out',
+            stagger: 0.035,
+            delay: 0.05,
+            overwrite: 'auto',
+            clearProps: 'opacity,transform',
+          },
+        );
+      }
+    } else if (returnFocus) toggle.focus();
   };
 
   const trapSet = () =>

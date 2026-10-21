@@ -26,6 +26,10 @@ const { items } = Astro.props;
   </div>
 )}
 
+<script>
+  import '../scripts/faq';
+</script>
+
 <style>
   .faq-list {
     border-top: 1px solid var(--rule);
@@ -65,7 +69,7 @@ const { items } = Astro.props;
     width: 0.875rem;
     height: 0.875rem;
     color: var(--amber-ink);
-    transition: transform 0.25s ease;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .faq-question__mark::before,
@@ -80,7 +84,7 @@ const { items } = Astro.props;
 
   .faq-question__mark::after {
     transform: rotate(90deg);
-    transition: transform 0.25s ease;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .faq-item[open] > .faq-question .faq-question__mark {

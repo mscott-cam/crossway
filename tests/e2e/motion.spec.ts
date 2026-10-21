@@ -82,6 +82,28 @@ test.describe('motion allowed', () => {
     }
   });
 
+  test('a first-viewport reveal fades through partial opacity instead of popping in', async ({
+    page,
+  }) => {
+    await page.goto('/dev/motion');
+    const opacities = await page.evaluate(
+      () =>
+        new Promise<number[]>((resolve) => {
+          const el = document.querySelector('[data-reveal="fade"]')!;
+          const seen: number[] = [];
+          const end = performance.now() + 1500;
+          const sample = () => {
+            seen.push(Number(getComputedStyle(el).opacity));
+            if (performance.now() < end) requestAnimationFrame(sample);
+            else resolve(seen);
+          };
+          sample();
+        }),
+    );
+    expect(opacities.some((value) => value > 0.05 && value < 0.95)).toBe(true);
+    expect(opacities.at(-1)).toBe(1);
+  });
+
   test('a reveal below the fold stays hidden until scrolled to', async ({
     page,
   }) => {

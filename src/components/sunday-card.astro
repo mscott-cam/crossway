@@ -23,7 +23,7 @@ const rows = settings.sundayCardRows.map((row) => {
   class="sunday-card on-navy"
   data-sunday-card
   data-reveal="up"
-  data-reveal-delay="0.5"
+  data-reveal-delay="0.3"
   aria-labelledby="sunday-card-title"
 >
   <div class="sunday-card__head">
@@ -192,11 +192,17 @@ const rows = settings.sundayCardRows.map((row) => {
     letter-spacing: 0.12em;
     text-decoration: none;
     text-transform: uppercase;
-    transition: background-color 0.2s ease;
+    transition:
+      background-color 0.2s ease,
+      transform 0.2s var(--ease-out);
   }
 
   .sunday-card__go:hover {
     background: color-mix(in srgb, var(--amber) 88%, var(--paper));
+  }
+
+  .sunday-card__go:active {
+    transform: scale(0.97);
   }
 
   .sunday-card__go:focus-visible {

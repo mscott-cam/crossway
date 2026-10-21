@@ -261,6 +261,10 @@ const pathname = Astro.url.pathname;
     flex: none;
   }
 
+  .nav-chevron {
+    transition: transform 0.3s var(--ease-out);
+  }
+
   .nav-trigger[aria-expanded='true'] .nav-chevron {
     transform: rotate(180deg);
   }
@@ -344,7 +348,13 @@ const pathname = Astro.url.pathname;
     text-transform: uppercase;
     text-decoration: none;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition:
+      background-color 0.2s ease,
+      transform 0.2s var(--ease-out);
+  }
+
+  .menu-button:active {
+    transform: scale(0.97);
   }
 
   .menu-button:hover,
