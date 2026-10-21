@@ -1,4 +1,13 @@
 import { SEEK_GRACE_MS, readyToReveal } from '../lib/video/hero-reveal';
+import {
+  HERO_PAUSED_KEY,
+  controlLabel,
+  readStoredPause,
+  serializePause,
+  shouldPlay,
+  showsControl,
+  type PlaybackInput,
+} from '../lib/video/hero-playback';
 
 interface VideoSource {
   src: string;
@@ -13,10 +22,37 @@ const saveData = () =>
       .connection?.saveData,
   );
 
-const mayPlay = () =>
-  !reduceMotion.matches &&
-  !saveData() &&
-  document.visibilityState === 'visible';
+function loadPaused() {
+  try {
+    return readStoredPause(sessionStorage.getItem(HERO_PAUSED_KEY));
+  } catch {
+    return false;
+  }
+}
+
+function storePaused(paused: boolean) {
+  try {
+    const value = serializePause(paused);
+    if (value === null) sessionStorage.removeItem(HERO_PAUSED_KEY);
+    else sessionStorage.setItem(HERO_PAUSED_KEY, value);
+  } catch {
+    return;
+  }
+}
+
+const PAUSE_ICON =
+  '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M3.5 2h3v12h-3zM9.5 2h3v12h-3z"/></svg>';
+const PLAY_ICON =
+  '<svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M4 2.2v11.6a.4.4 0 0 0 .6.35l9.4-5.8a.4.4 0 0 0 0-.7L4.6 1.85A.4.4 0 0 0 4 2.2z"/></svg>';
+
+function createToggle(host: HTMLElement) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'hero-video-toggle';
+  button.hidden = true;
+  host.append(button);
+  return button;
+}
 
 function attachSources(video: HTMLVideoElement, start: number) {
   const sources: VideoSource[] = JSON.parse(video.dataset.sources ?? '[]');
@@ -44,6 +80,19 @@ function setup(root: HTMLElement) {
   if (!video) return;
   let attached = false;
   const start = Math.max(0, parseFloat(video.dataset.start ?? '') || 0);
+  let userPaused = loadPaused();
+  const toggle = createToggle(root.closest<HTMLElement>('[data-hero]') ?? root);
+  const input = (): PlaybackInput => ({
+    reduceMotion: reduceMotion.matches,
+    saveData: saveData(),
+    visible: document.visibilityState === 'visible',
+    userPaused,
+  });
+  const renderToggle = () => {
+    toggle.hidden = !showsControl(input());
+    toggle.setAttribute('aria-label', controlLabel(userPaused));
+    toggle.innerHTML = userPaused ? PLAY_ICON : PAUSE_ICON;
+  };
 
   let revealed = false;
   let waitStart = performance.now();
@@ -63,7 +112,8 @@ function setup(root: HTMLElement) {
     video.addEventListener(type, reveal);
 
   const sync = () => {
-    if (!mayPlay()) {
+    renderToggle();
+    if (!shouldPlay(input())) {
       video.pause();
       if (reduceMotion.matches) {
         revealed = false;
@@ -80,6 +130,11 @@ function setup(root: HTMLElement) {
     video.play().catch(() => {});
   };
 
+  toggle.addEventListener('click', () => {
+    userPaused = !userPaused;
+    storePaused(userPaused);
+    sync();
+  });
   document.addEventListener('visibilitychange', sync);
   reduceMotion.addEventListener('change', sync);
   sync();

@@ -103,3 +103,45 @@ const sources = [
     }
   }
 </style>
+
+<style is:global>
+  .hero-video-toggle {
+    position: absolute;
+    z-index: 3;
+    bottom: 0.75rem;
+    left: calc(max(0px, (100% - var(--container)) / 2) + var(--gutter));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid color-mix(in srgb, var(--navy) 14%, transparent);
+    border-radius: 50%;
+    background: var(--paper);
+    color: var(--navy);
+    box-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .hero-video-toggle[hidden] {
+    display: none;
+  }
+
+  .hero-video-toggle:hover {
+    background: color-mix(in srgb, var(--paper) 90%, var(--navy));
+  }
+
+  .hero-video-toggle:focus-visible {
+    outline: 2px solid var(--navy);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 3px var(--paper);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-video-toggle {
+      transition: none;
+    }
+  }
+</style>
