@@ -28,7 +28,6 @@ describe('entrusted page content', () => {
 
   it('has a title and description unique across the pages collection', () => {
     const others = [
-      'culture',
       'who-we-are',
       'what-we-believe',
       'child-safety',

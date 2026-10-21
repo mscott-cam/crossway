@@ -122,6 +122,12 @@ describe('Vercel output redirects', () => {
     expect(redirectFor('/sermons/faith-that-works-2026-08-16')).toBeUndefined();
   });
 
+  it('redirects the retired culture page to its home section', () => {
+    const route = redirectFor('/culture');
+    expect(route?.status).toBe(301);
+    expect(route?.headers?.Location).toBe('/#culture');
+  });
+
   it('redirects trailing-slash variants to the canonical path', () => {
     const route = redirectFor('/culture/');
     expect([301, 308]).toContain(route?.status);

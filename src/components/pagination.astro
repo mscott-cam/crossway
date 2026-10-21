@@ -1,4 +1,5 @@
 ---
+import Arrow from './arrow.astro';
 import { pageHref, pageItems } from '../lib/pagination';
 
 interface Props {
@@ -45,7 +46,8 @@ const items = pageItems(current, last);
     </ol>
     {current < last ? (
       <a class="pagination__step" href={href(current + 1)} rel="next">
-        Next <span aria-hidden="true">→</span>
+        Next
+        <Arrow />
       </a>
     ) : (
       <span class="pagination__step pagination__step--off" aria-hidden="true" />
@@ -63,7 +65,7 @@ const items = pageItems(current, last);
     margin-top: 2.5rem;
     padding-top: 1.5rem;
     border-top: 1px solid var(--rule);
-    font-size: 0.9375rem;
+    font-size: 1.125rem;
   }
 
   .pagination__pages {

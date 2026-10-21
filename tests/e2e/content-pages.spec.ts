@@ -2,7 +2,6 @@ import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
 const PAGES = [
-  { path: '/culture', h1: 'Culture' },
   { path: '/who-we-are', h1: 'Who We Are' },
   { path: '/what-we-believe', h1: 'What We Believe' },
   { path: '/child-safety', h1: 'Child Safety' },
@@ -136,34 +135,6 @@ test.describe('content pages', () => {
       });
     });
   }
-});
-
-test.describe('/culture', () => {
-  test('shows the six commitments with their verse references', async ({
-    page,
-  }) => {
-    await page.goto('/culture');
-    const values = page.locator('[data-culture-value]');
-    await expect(values).toHaveCount(6);
-    const rows = await values.evaluateAll((els) =>
-      els.map((el) => ({
-        title: el.querySelector('h3')?.textContent?.trim(),
-        verse: el.querySelector('[data-culture-verse]')?.textContent?.trim(),
-      })),
-    );
-    expect(rows).toEqual([
-      { title: 'Bold Preaching', verse: '2 Timothy 4:2' },
-      { title: 'Passionate Worship', verse: 'Psalm 95:6' },
-      { title: 'Purposeful Discipleship', verse: '1 Thess. 2:8' },
-      { title: 'Fervent Prayer', verse: 'Romans 12:12' },
-      { title: 'Courageous Evangelism', verse: 'John 20:21' },
-      { title: 'Church Planting', verse: 'Acts 14:23' },
-    ]);
-    for (const row of rows) expect(row.verse).toMatch(/\d+:\d+/);
-    await expect(page.locator('main')).toContainText(
-      'We exist to glorify God through the fulfillment of the Great Commission.',
-    );
-  });
 });
 
 test.describe('/who-we-are', () => {
@@ -301,14 +272,4 @@ test.describe('navigation to the content pages', () => {
       await expect(page.locator('h1')).toHaveCount(1);
     });
   }
-
-  test('Culture opens /culture', async ({ page }) => {
-    await page.goto('/');
-    await page
-      .getByRole('navigation', { name: 'Primary' })
-      .getByRole('link', { name: 'Culture' })
-      .click();
-    await expect(page).toHaveURL(/\/culture$/);
-    await expect(page.locator('h1')).toHaveText('Culture');
-  });
 });

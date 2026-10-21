@@ -83,15 +83,17 @@ import { HERO_POSTER } from '../lib/video/hero-poster';
     background:
       linear-gradient(
         90deg,
-        color-mix(in srgb, var(--paper) 97%, transparent) 0%,
-        color-mix(in srgb, var(--paper) 92%, transparent) 32%,
-        color-mix(in srgb, var(--paper) 55%, transparent) 52%,
-        color-mix(in srgb, var(--paper) 0%, transparent) 74%
+        color-mix(in srgb, var(--paper) 96%, transparent) 0%,
+        color-mix(in srgb, var(--paper) 88%, transparent) 30%,
+        color-mix(in srgb, var(--paper) 58%, transparent) 50%,
+        color-mix(in srgb, var(--paper) 22%, transparent) 70%,
+        color-mix(in srgb, var(--paper) 0%, transparent) 90%
       ),
       linear-gradient(
         0deg,
-        color-mix(in srgb, var(--paper) 60%, transparent) 0%,
-        color-mix(in srgb, var(--paper) 0%, transparent) 30%
+        var(--paper) 0%,
+        color-mix(in srgb, var(--paper) 70%, transparent) 10%,
+        color-mix(in srgb, var(--paper) 0%, transparent) 38%
       );
   }
 
@@ -114,7 +116,7 @@ import { HERO_POSTER } from '../lib/video/hero-poster';
     margin: 2rem 0 0;
     color: color-mix(in srgb, var(--navy) 82%, var(--charcoal));
     font-family: var(--font-text);
-    font-size: clamp(1.125rem, 1rem + 0.5vw, 1.3125rem);
+    font-size: clamp(1.3125rem, 1.15rem + 0.6vw, 1.625rem);
     font-style: italic;
     line-height: 1.45;
   }
@@ -165,16 +167,31 @@ import { HERO_POSTER } from '../lib/video/hero-poster';
 
   @container (min-width: 68.75rem) {
     .hero-stage__inner {
-      margin-bottom: 6rem;
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100svh - var(--announcement-h, 0px));
+    }
+
+    .hero {
+      flex: 1 0 auto;
+      min-height: 30rem;
     }
 
     .hero-stage__card {
-      position: absolute;
-      z-index: 3;
-      right: calc(max(0px, (100% - var(--container)) / 2) + var(--gutter));
-      bottom: -64px;
-      width: 25rem;
-      padding: 0;
+      max-width: var(--container);
+      margin-inline: auto;
+      padding-block: 2.25rem 2.5rem;
     }
   }
 </style>
+
+<script>
+  const bar = document.querySelector<HTMLElement>('[data-announcement]');
+  if (bar) {
+    const root = document.documentElement;
+    const sync = () =>
+      root.style.setProperty('--announcement-h', `${bar.offsetHeight}px`);
+    sync();
+    new ResizeObserver(sync).observe(bar);
+  }
+</script>

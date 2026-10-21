@@ -17,7 +17,13 @@ const archive = {
   permanent: true,
 };
 
-const statics = [connect, archive];
+const culture = {
+  source: '/culture',
+  destination: '/#culture',
+  permanent: true,
+};
+
+const statics = [connect, culture, archive];
 
 describe('buildRedirects', () => {
   it('redirects the bare archive path to its first page', () => {
@@ -114,7 +120,7 @@ describe('buildRedirects', () => {
     }));
     const out = buildRedirects(sermons, { max: 4, warn });
     expect(out).toHaveLength(4);
-    expect(out.slice(0, 2)).toEqual(statics);
+    expect(out.slice(0, statics.length)).toEqual(statics);
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('cap'));
   });
 });
@@ -123,6 +129,7 @@ describe('toAstroRedirects', () => {
   it('maps entries to Astro redirect config with status 301', () => {
     expect(toAstroRedirects(buildRedirects([]))).toEqual({
       '/connect': { status: 301, destination: '/visit' },
+      '/culture': { status: 301, destination: '/#culture' },
       '/sermons/archive': { status: 301, destination: '/sermons/archive/1' },
     });
   });
@@ -145,7 +152,11 @@ describe('loadAstroRedirects', () => {
     const out = await loadAstroRedirects(async () => {
       throw new Error('boom');
     }, warn);
-    expect(Object.keys(out)).toEqual(['/connect', '/sermons/archive']);
+    expect(Object.keys(out)).toEqual([
+      '/connect',
+      '/culture',
+      '/sermons/archive',
+    ]);
     expect(warn).toHaveBeenCalledTimes(1);
     expect(warn.mock.calls[0]![0]).toContain('boom');
   });

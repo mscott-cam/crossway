@@ -1,4 +1,5 @@
 ---
+import Arrow from './arrow.astro';
 import { serviceTimeParts } from '../lib/format-times';
 import { safeHref } from '../lib/safe-href';
 import type { SiteSettings } from '../lib/sanity/types';
@@ -57,9 +58,7 @@ const rows = settings.sundayCardRows.map((row) => {
                 rel={row.external ? 'noopener noreferrer' : undefined}
               >
                 {row.value}
-                <span class="sunday-card__arrow" aria-hidden="true">
-                  →
-                </span>
+                <Arrow />
                 {row.external && (
                   <span class="sr-only"> (opens in a new tab)</span>
                 )}
@@ -73,7 +72,8 @@ const rows = settings.sundayCardRows.map((row) => {
     </dl>
   )}
   <a class="sunday-card__go" href="/visit">
-    Plan your visit <span aria-hidden="true">→</span>
+    Plan your visit
+    <Arrow />
   </a>
 </aside>
 
@@ -127,7 +127,7 @@ const rows = settings.sundayCardRows.map((row) => {
   .sunday-card__meridiem {
     color: var(--mist);
     font-family: var(--font-ui);
-    font-size: max(0.8125rem, 0.2em);
+    font-size: max(1rem, 0.2em);
     font-weight: 600;
     letter-spacing: 0.1em;
     white-space: nowrap;
@@ -146,7 +146,7 @@ const rows = settings.sundayCardRows.map((row) => {
     gap: 0.15rem 1rem;
     padding: 0.8rem 0;
     border-bottom: 1px solid color-mix(in srgb, var(--paper) 15%, transparent);
-    font-size: 0.9375rem;
+    font-size: 1.125rem;
     line-height: 1.45;
   }
 
@@ -173,10 +173,6 @@ const rows = settings.sundayCardRows.map((row) => {
     text-underline-offset: 0.25em;
   }
 
-  .sunday-card__arrow {
-    margin-left: 0.35em;
-  }
-
   .sunday-card__go {
     display: flex;
     align-items: center;
@@ -187,7 +183,7 @@ const rows = settings.sundayCardRows.map((row) => {
     border-radius: 999px;
     background: var(--amber);
     color: var(--navy);
-    font-size: 0.8125rem;
+    font-size: 1rem;
     font-weight: 700;
     letter-spacing: 0.12em;
     text-decoration: none;
@@ -250,7 +246,101 @@ const rows = settings.sundayCardRows.map((row) => {
 
   @container (min-width: 68.75rem) {
     .sunday-card {
-      width: 100%;
+      flex-direction: row;
+      align-items: stretch;
+      gap: 1.25rem 1.5rem;
+      padding: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      color: var(--navy);
+      --focus: var(--navy);
+    }
+
+    .sunday-card .sunday-card__label {
+      color: var(--amber-ink);
+    }
+
+    .sunday-card__times {
+      margin-top: 0.5rem;
+      color: var(--navy);
+      font-size: clamp(2.25rem, 1.25rem + 2vw, 3rem);
+    }
+
+    .sunday-card__sep,
+    .sunday-card__meridiem {
+      color: color-mix(in srgb, var(--navy) 80%, var(--paper));
+    }
+
+    .sunday-card__rows {
+      display: flex;
+      flex: 1 1 0;
+      flex-wrap: nowrap;
+      align-items: stretch;
+      gap: 0;
+      min-width: 0;
+      margin: 0;
+      border-top: 0;
+    }
+
+    .sunday-card__row {
+      display: block;
+      flex: 0 1 auto;
+      min-width: 0;
+      padding: 0 1.25rem;
+      border-bottom: 0;
+      border-left: 1px solid var(--rule);
+      font-size: 1.0625rem;
+      line-height: 1.4;
+    }
+
+    .sunday-card__row:nth-child(2) {
+      flex: 1 1 auto;
+    }
+
+    .sunday-card__row:not(:nth-child(2)) {
+      min-width: max-content;
+    }
+
+    .sunday-card__row dt {
+      color: color-mix(in srgb, var(--navy) 80%, var(--paper));
+      font-size: 0.9375rem;
+      line-height: 1.4;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .sunday-card__row dd {
+      margin: 0.6rem 0 0;
+      color: var(--navy);
+      text-align: left;
+      text-wrap: balance;
+    }
+
+    .sunday-card__row:not(:nth-child(2)) dd {
+      white-space: nowrap;
+    }
+
+    .sunday-card__row dd a {
+      color: var(--navy);
+      font-weight: 500;
+    }
+
+    .sunday-card__head {
+      flex: none;
+    }
+
+    .sunday-card__go {
+      flex: none;
+      align-self: center;
+      gap: 0.75rem;
+      margin-top: 0;
+      padding-inline: 1.25rem;
+    }
+
+    .sunday-card__go:focus-visible {
+      outline-color: var(--navy);
     }
   }
 </style>

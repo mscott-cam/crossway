@@ -4,8 +4,10 @@
       Why we gather
     </h2>
     <p class="mission__text">
-      We exist to glorify God through the fulfillment of the{' '}
-      <em>Great Commission.</em>
+      We exist to glorify God through the fulfillment of{' '}
+      <span class="mission__nowrap">
+        the <em>Great Commission.</em>
+      </span>
     </p>
   </div>
 </section>
@@ -29,7 +31,7 @@
   }
 
   .mission__text {
-    max-width: 22ch;
+    max-width: 24ch;
     margin: 1.75rem auto 0;
     color: var(--paper);
     font-family: var(--font-display);
@@ -37,6 +39,12 @@
     line-height: 1.1;
     letter-spacing: -0.015em;
     text-wrap: balance;
+  }
+
+  @media (min-width: 48rem) {
+    .mission__nowrap {
+      white-space: nowrap;
+    }
   }
 
   .mission__text em {

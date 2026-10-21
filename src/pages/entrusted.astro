@@ -69,7 +69,7 @@ const jumps = [
     min-height: 2.75rem;
     color: var(--navy);
     font-family: var(--font-ui);
-    font-size: 0.9375rem;
+    font-size: 1.125rem;
     font-weight: 500;
     text-decoration-color: var(--amber-ink);
     text-decoration-thickness: 2px;
@@ -121,7 +121,7 @@ const jumps = [
     padding-block: 1rem;
     color: var(--navy);
     font-family: var(--font-text);
-    font-size: clamp(1.125rem, 1.03rem + 0.45vw, 1.375rem);
+    font-size: clamp(1.3125rem, 1.2rem + 0.45vw, 1.625rem);
     line-height: 1.3;
     cursor: pointer;
     list-style: none;
@@ -160,7 +160,7 @@ const jumps = [
   .entrusted-body :global(.chart-text table) {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.9375rem;
+    font-size: 1.125rem;
     font-variant-numeric: tabular-nums;
     line-height: 1.4;
   }
@@ -169,7 +169,7 @@ const jumps = [
     padding-bottom: 0.75rem;
     color: var(--navy);
     font-family: var(--font-text);
-    font-size: 1rem;
+    font-size: 1.1875rem;
     font-style: italic;
     text-align: left;
   }
@@ -190,7 +190,7 @@ const jumps = [
   }
 
   .entrusted-body :global(.chart-text thead th) {
-    font-size: 0.8125rem;
+    font-size: 1rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
@@ -204,9 +204,9 @@ const jumps = [
     font-weight: 700;
   }
 
-  @media (max-width: 22.5rem) {
+  @media (max-width: 30rem) {
     .entrusted-body :global(.chart-text table) {
-      font-size: 0.875rem;
+      font-size: 1.0625rem;
     }
 
     .entrusted-body :global(.chart-text :is(th, td)) {
@@ -214,8 +214,23 @@ const jumps = [
     }
 
     .entrusted-body :global(.chart-text thead th) {
-      font-size: 0.75rem;
-      letter-spacing: 0.03em;
+      font-size: 0.875rem;
+      letter-spacing: 0.04em;
+    }
+  }
+
+  @media (max-width: 22.5rem) {
+    .entrusted-body :global(.chart-text table) {
+      font-size: 0.9375rem;
+    }
+
+    .entrusted-body :global(.chart-text :is(th, td)) {
+      padding-inline: 0.1875rem;
+    }
+
+    .entrusted-body :global(.chart-text thead th) {
+      font-size: 0.8125rem;
+      letter-spacing: 0.02em;
     }
   }
 

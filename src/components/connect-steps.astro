@@ -1,4 +1,5 @@
 ---
+import Arrow from './arrow.astro';
 import { site } from '../lib/site';
 
 const steps = [
@@ -13,7 +14,7 @@ const steps = [
     title: 'Consider',
     copy: 'Learn more about us.',
     label: 'Tell me more',
-    href: '/culture',
+    href: '/who-we-are',
     external: false,
   },
   {
@@ -46,7 +47,7 @@ const steps = [
             rel={step.external ? 'noopener noreferrer' : undefined}
           >
             {step.label}
-            <span aria-hidden="true">→</span>
+            <Arrow />
             {step.external && (
               <span class="sr-only"> (opens in a new tab)</span>
             )}
@@ -64,6 +65,7 @@ const steps = [
 
   .steps__list {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 0;
     margin: clamp(2rem, 5vw, 3.5rem) 0 0;
     padding: 0;
@@ -81,7 +83,7 @@ const steps = [
   .step__number {
     color: var(--amber);
     font-family: var(--font-text);
-    font-size: 1rem;
+    font-size: 1.1875rem;
     font-style: italic;
     line-height: 1;
   }
@@ -94,22 +96,25 @@ const steps = [
   .step__copy {
     margin: 0.75rem 0 0;
     color: var(--mist);
-    font-size: 1.125rem;
+    font-size: 1.3125rem;
   }
 
   .step__link {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
+    max-width: 100%;
     min-height: 44px;
+    overflow-wrap: anywhere;
     margin-top: 1.75rem;
-    padding: 0.8rem 1.4rem;
-    border: 1px solid color-mix(in srgb, var(--paper) 35%, transparent);
+    padding: 0.95rem 1.6rem;
+    border: 0;
     border-radius: 999px;
-    color: var(--paper);
-    font-size: 0.8125rem;
+    background: var(--amber);
+    color: var(--navy);
+    font-size: 1rem;
     font-weight: 600;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.08em;
     text-decoration: none;
     text-transform: uppercase;
     transition:
@@ -124,9 +129,7 @@ const steps = [
   }
 
   .step__link:hover {
-    border-color: var(--amber);
-    background: var(--amber);
-    color: var(--navy);
+    background: color-mix(in srgb, var(--amber) 88%, var(--paper));
   }
 
   @media (min-width: 60rem) {

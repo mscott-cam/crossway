@@ -107,14 +107,12 @@ const { pathname } = Astro.props;
   }
 
   .mobile-link--child {
-    font-size: clamp(1.625rem, 6.6vw, 2rem);
+    font-size: clamp(1.75rem, 7vw, 2.25rem);
     line-height: 1.2;
   }
 
   .mobile-link[aria-current='page'] {
-    text-decoration: underline;
-    text-decoration-thickness: 2px;
-    text-underline-offset: 0.18em;
+    color: var(--amber-ink);
   }
 
   .mobile-menu .mobile-menu__cta {

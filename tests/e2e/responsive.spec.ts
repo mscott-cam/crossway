@@ -19,7 +19,6 @@ const ROUTES = [
   '/entrusted',
   '/who-we-are',
   '/what-we-believe',
-  '/culture',
   '/small-groups',
   '/students',
   '/crossway-kids',

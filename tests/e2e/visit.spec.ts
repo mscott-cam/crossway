@@ -164,18 +164,10 @@ test.describe('plan a visit page', () => {
     await expect(page.locator('[data-steps]')).toHaveCount(0);
   });
 
-  test('the header pill and the Connect nav item reach /visit', async ({
-    page,
-  }) => {
+  test('the header pill reaches /visit', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/events');
     await page.locator('.site-header .plan-visit').click();
-    await expect(page).toHaveURL(/\/visit$/);
-    await page.goto('/events');
-    await page
-      .locator('.primary-nav')
-      .getByRole('link', { name: 'Connect' })
-      .click();
     await expect(page).toHaveURL(/\/visit$/);
   });
 

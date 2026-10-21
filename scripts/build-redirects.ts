@@ -23,6 +23,7 @@ export const MAX_REDIRECTS = 2000;
 
 const STATIC_REDIRECTS: RedirectEntry[] = [
   { source: '/connect', destination: '/visit', permanent: true },
+  { source: '/culture', destination: '/#culture', permanent: true },
   {
     source: '/sermons/archive',
     destination: '/sermons/archive/1',

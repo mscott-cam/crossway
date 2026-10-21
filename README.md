@@ -224,7 +224,7 @@ Steps 3 to 5 produce values (keys, tokens). Collect them now and enter them in V
 - [ ] Set every [environment variable](#environment-variables) for Production, and the content ones (Sanity, PCO, Turnstile site key, Resend) for Preview too.
 - [ ] Create the Deploy Hook and set `VERCEL_DEPLOY_HOOK_URL` and `CRON_SECRET` ([Content freshness](#content-freshness-and-rebuilds)). Create the Sanity webhook and publish a test edit.
 - [ ] First preview deploy. Read the build log: warnings from `[sanity]`, `[audio]`, `[events]`; the redirects warnings for unusual Webflow slugs; and the audio report line.
-- [ ] Check that `/culture`, `/who-we-are`, `/what-we-believe` and the other no-slash pages load on Vercel. With `trailingSlash: 'never'` Vercel serves `x/index.html`; that was only verified locally.
+- [ ] Check that `/who-we-are`, `/what-we-believe` and the other no-slash pages load on Vercel. With `trailingSlash: 'never'` Vercel serves `x/index.html`; that was only verified locally.
 - [ ] Run Lighthouse (mobile) on the preview URL for `/`, `/sermons`, one sermon, `/visit` and `/entrusted`. Targets: all four categories at least 90, LCP under 2.5 s, CLS under 0.1. If Deployment Protection blocks PageSpeed Insights, use Chrome DevTools.
 - [ ] Production deploy from the production branch. Confirm the guard did not fire and the cron is listed (look for Cron Jobs in the project settings).
 
@@ -263,7 +263,7 @@ These descriptions and names are summaries or inferences written during the buil
 - [ ] Confirm the church's email still sends and receives after the switch (send one message each way).
 - [ ] Confirm the Español link (`crossway-espanol.webflow.io`) still works after the cutover.
 - [ ] Spot-check 10 old sermon URLs. The legacy-slug 301s only exist for sermons whose slug differs from the Webflow path; the rest keep the same path.
-- [ ] Open every preserved path: `/culture`, `/who-we-are`, `/what-we-believe`, `/child-safety`, `/networks`, `/small-groups`, `/students`, `/crossway-kids`, `/biblical-counseling`, `/christian-stewardship`, `/entrusted`, `/sermons`, and a few `/series/...`.
+- [ ] Open every preserved path: `/who-we-are`, `/what-we-believe`, `/child-safety`, `/networks`, `/small-groups`, `/students`, `/crossway-kids`, `/biblical-counseling`, `/christian-stewardship`, `/entrusted`, `/sermons`, and a few `/series/...`.
 - [ ] Send a real test message through the production contact form and confirm it reaches the church inbox.
 
 ### 11. After launch

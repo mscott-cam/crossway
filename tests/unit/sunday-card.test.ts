@@ -38,7 +38,7 @@ describe('SundayCard row links', () => {
     expect(html).not.toContain('href="javascript');
     expect(html).not.toContain('evil.example.com');
     expect(html).not.toMatch(/<dd>\s*<a /);
-    expect(html).not.toContain('sunday-card__arrow');
+    expect(html.match(/arrow__glyph/g)).toHaveLength(1);
   });
 
   it('renders a row without an href as plain text', async () => {

@@ -46,7 +46,6 @@ const expectedPaths = [
   '/sermons',
   '/series',
   '/entrusted',
-  '/culture',
   '/who-we-are',
   '/what-we-believe',
   '/small-groups',
@@ -156,7 +155,7 @@ describe.each([
   });
 
   it('is not on other pages', () => {
-    expect(jsonLdBlocks(get(), 'culture/index.html')).toEqual([]);
+    expect(jsonLdBlocks(get(), 'who-we-are/index.html')).toEqual([]);
   });
 });
 

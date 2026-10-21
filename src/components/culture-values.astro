@@ -33,7 +33,7 @@ const { values } = Astro.props;
 
   .culture-value {
     display: grid;
-    grid-template-columns: 2.25rem minmax(0, 1fr);
+    grid-template-columns: 2.75rem minmax(0, 1fr);
     column-gap: clamp(0.75rem, 3vw, 1.75rem);
     align-items: baseline;
     margin: 0;
@@ -47,20 +47,20 @@ const { values } = Astro.props;
     grid-row: 1 / span 2;
     color: var(--amber-ink);
     font-family: var(--font-display);
-    font-size: 1.5rem;
-    line-height: 1.1;
+    font-size: 1.875rem;
+    line-height: 1;
   }
 
   .culture-values :global(.culture-value__title) {
     margin: 0;
-    font-size: var(--step-h3);
-    line-height: 1.1;
+    font-size: var(--step-h4);
+    line-height: 1.15;
     overflow-wrap: anywhere;
   }
 
   .culture-value__verse {
     margin: 0.5rem 0 0;
-    font-size: 0.8125rem;
+    font-size: 1rem;
     line-height: 1.4;
   }
 </style>

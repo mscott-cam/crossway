@@ -209,7 +209,7 @@ const pathname = Astro.url.pathname;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     gap: 2px;
     margin: 0;
     padding: 0;
@@ -230,10 +230,10 @@ const pathname = Astro.url.pathname;
     background: transparent;
     color: var(--navy);
     font-family: var(--font-ui);
-    font-size: clamp(0.71rem, 0.5rem + 0.22vw, 0.8125rem);
+    font-size: 1rem;
     font-weight: 600;
     line-height: 1.2;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     text-decoration: none;
     white-space: nowrap;
@@ -252,9 +252,7 @@ const pathname = Astro.url.pathname;
 
   .nav-link[aria-current='page'],
   .nav-trigger[data-current] {
-    text-decoration: underline;
-    text-decoration-thickness: 2px;
-    text-underline-offset: 0.5em;
+    background: color-mix(in srgb, var(--navy) 10%, transparent);
   }
 
   .nav-chevron {
@@ -296,7 +294,7 @@ const pathname = Astro.url.pathname;
     padding: 0.65rem 1rem;
     border-radius: 0.75rem;
     color: var(--navy);
-    font-size: 0.9375rem;
+    font-size: 1.1875rem;
     font-weight: 500;
     line-height: 1.3;
     text-decoration: none;
@@ -312,9 +310,8 @@ const pathname = Astro.url.pathname;
   }
 
   .dropdown-link[aria-current='page'] {
-    text-decoration: underline;
-    text-decoration-thickness: 2px;
-    text-underline-offset: 0.3em;
+    background: color-mix(in srgb, var(--navy) 10%, transparent);
+    font-weight: 700;
   }
 
   .site-header__actions {
@@ -322,12 +319,14 @@ const pathname = Astro.url.pathname;
     flex: none;
     align-items: center;
     gap: 0.5rem;
+    margin-left: 0.5rem;
   }
 
   .site-header .plan-visit {
-    padding: 0.875rem 1.35rem;
-    font-size: clamp(0.71rem, 0.5rem + 0.22vw, 0.8125rem);
-    letter-spacing: 0.1em;
+    white-space: nowrap;
+    padding: 0.95rem 1.5rem;
+    font-size: 1rem;
+    letter-spacing: 0.08em;
   }
 
   .menu-button,
@@ -341,10 +340,10 @@ const pathname = Astro.url.pathname;
     background: transparent;
     color: var(--navy);
     font-family: var(--font-ui);
-    font-size: 0.8125rem;
+    font-size: 1.0625rem;
     font-weight: 600;
     line-height: 1.2;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     text-decoration: none;
     cursor: pointer;

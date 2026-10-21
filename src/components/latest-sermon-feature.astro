@@ -1,4 +1,5 @@
 ---
+import Arrow from './arrow.astro';
 import CrossMark from './cross-mark.astro';
 import { sermonMeta } from '../lib/sermon-groups';
 import type { Sermon } from '../lib/sanity/types';
@@ -45,10 +46,15 @@ const caption = sermon.passage ?? sermon.series.title;
             {sermon.title}
           </a>
         </h3>
-        {meta.length > 0 && <p class="latest__meta">{meta.join(' · ')}</p>}
+        {meta.length > 0 && (
+          <p class="latest__meta">
+            {meta.map((part) => part.replaceAll(' ', '\u00a0')).join(' · ')}
+          </p>
+        )}
         <p class="latest__more">
           <a class="latest__all" href="/sermons">
-            All messages <span aria-hidden="true">→</span>
+            All messages
+            <Arrow />
           </a>
         </p>
       </div>
@@ -95,22 +101,31 @@ const caption = sermon.passage ?? sermon.series.title;
     gap: 1.25rem;
     width: 100%;
     height: 100%;
-    padding: 1.5rem;
+    padding: 2rem;
+    background:
+      radial-gradient(
+        120% 90% at 50% 0%,
+        color-mix(in srgb, var(--paper) 10%, transparent),
+        transparent 70%
+      ),
+      var(--navy);
     text-align: center;
   }
 
   .latest__caption {
-    color: var(--mist);
+    color: var(--paper);
     font-family: var(--font-text);
-    font-size: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
+    font-size: var(--step-h3);
     font-style: italic;
+    line-height: 1.2;
     overflow-wrap: anywhere;
+    text-wrap: balance;
   }
 
   .latest__title {
     margin-top: 1.25rem;
-    font-size: var(--step-h2);
-    line-height: 1.06;
+    font-size: clamp(1.875rem, 1.4rem + 1.5vw, 2.75rem);
+    line-height: 1.1;
     overflow-wrap: anywhere;
     text-wrap: balance;
   }
@@ -144,9 +159,8 @@ const caption = sermon.passage ?? sermon.series.title;
 
   .latest__meta {
     margin: 1.1rem 0 0;
-    font-size: 1rem;
+    font-size: 1.1875rem;
     overflow-wrap: anywhere;
-    text-wrap: balance;
   }
 
   .latest__more {
@@ -159,6 +173,8 @@ const caption = sermon.passage ?? sermon.series.title;
     align-items: center;
     gap: 0.4em;
     min-height: 44px;
+    max-width: 100%;
+    overflow-wrap: anywhere;
     color: var(--navy);
     font-weight: 600;
     text-decoration-color: var(--amber-ink);
@@ -167,7 +183,12 @@ const caption = sermon.passage ?? sermon.series.title;
 
   @media (min-width: 60rem) {
     .latest__card {
-      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      column-gap: clamp(2rem, 6vw, 5rem);
+    }
+
+    .latest__media {
+      order: 2;
     }
   }
 </style>

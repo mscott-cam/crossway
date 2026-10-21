@@ -18,14 +18,6 @@ test.describe('desktop header', () => {
   test('top-level items are present in order', async ({ page }) => {
     await page.goto('/');
     const nav = page.getByRole('navigation', { name: 'Primary' });
-    await expect(nav.getByRole('link', { name: 'Connect' })).toHaveAttribute(
-      'href',
-      '/visit',
-    );
-    await expect(nav.getByRole('link', { name: 'Culture' })).toHaveAttribute(
-      'href',
-      '/culture',
-    );
     await expect(nav.getByRole('link', { name: 'Events' })).toHaveAttribute(
       'href',
       '/events',
@@ -162,7 +154,7 @@ test.describe('mobile menu', () => {
     await expect(page.locator('html')).toHaveClass(/menu-open/);
 
     const panel = page.getByRole('navigation', { name: 'Mobile' });
-    for (const name of ['Connect', 'Culture', 'Events']) {
+    for (const name of ['Events']) {
       await expect(panel.getByRole('link', { name })).toBeVisible();
     }
     for (const name of ['About Us', 'Church Life', 'Resources']) {
@@ -175,7 +167,9 @@ test.describe('mobile menu', () => {
 
     await page.keyboard.press('Escape');
     await expect(menu).toHaveAttribute('aria-expanded', 'false');
-    await expect(panel.getByRole('link', { name: 'Connect' })).toBeHidden();
+    await expect(
+      panel.getByRole('link', { name: 'Our Leadership' }),
+    ).toBeHidden();
     await expect(menu).toBeFocused();
     await expect(page.locator('html')).not.toHaveClass(/menu-open/);
   });
@@ -183,19 +177,19 @@ test.describe('mobile menu', () => {
   test('menu links receive pointer events and navigate', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: 'Menu' }).click();
-    const culture = page
+    const connect = page
       .getByRole('navigation', { name: 'Mobile' })
-      .getByRole('link', { name: 'Culture' });
-    await expect(culture).toBeVisible();
-    const hit = await culture.evaluate((el) => {
+      .getByRole('link', { name: 'Our Leadership' });
+    await expect(connect).toBeVisible();
+    const hit = await connect.evaluate((el) => {
       const r = el.getBoundingClientRect();
       return el.contains(
         document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2),
       );
     });
     expect(hit).toBe(true);
-    await culture.click({ timeout: 3000 });
-    await page.waitForURL('**/culture');
+    await connect.click({ timeout: 3000 });
+    await page.waitForURL('**/who-we-are');
   });
 
   test('traps focus while open and releases the page afterwards', async ({
@@ -237,7 +231,7 @@ test.describe('mobile menu', () => {
     await page.getByRole('button', { name: 'Menu' }).click();
     await expect(
       page.getByRole('navigation', { name: 'Mobile' }).getByRole('link', {
-        name: 'Connect',
+        name: 'Our Leadership',
       }),
     ).toBeVisible();
     await expect(page.locator('#mobile-menu')).toHaveCSS('opacity', '1');
@@ -361,7 +355,6 @@ test.describe('without JavaScript', () => {
   }) => {
     await page.goto('/');
     const header = page.getByRole('banner');
-    await expect(header.getByRole('link', { name: 'Connect' })).toBeVisible();
     await expect(header.getByRole('link', { name: 'Events' })).toBeVisible();
     await expect(
       header.getByRole('link', { name: 'Our Beliefs' }),

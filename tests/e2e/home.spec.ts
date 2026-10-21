@@ -159,7 +159,7 @@ test.describe('layout', () => {
     expect(await noOverflow(page)).toBe(true);
   });
 
-  test('stacks below the hero at 1099px and overlaps at 1100px', async ({
+  test('switches from the stacked card to the Sunday strip at 1100px, below the hero in both', async ({
     page,
   }) => {
     await page.setViewportSize({ width: 1099, height: 900 });
@@ -168,14 +168,17 @@ test.describe('layout', () => {
     let h = (await hero(page).boundingBox())!;
     let c = (await card(page).boundingBox())!;
     expect(c.y).toBeGreaterThanOrEqual(h.y + h.height - 0.5);
+    await expect(card(page)).toHaveCSS('border-top-left-radius', '22px');
     await page.setViewportSize({ width: 1100, height: 900 });
     await settled(page);
     h = (await hero(page).boundingBox())!;
     c = (await card(page).boundingBox())!;
-    expect(c.y).toBeLessThan(h.y + h.height);
+    expect(c.y).toBeGreaterThanOrEqual(h.y + h.height - 0.5);
+    await expect(card(page)).toHaveCSS('border-top-left-radius', '0px');
+    await expect(card(page)).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
   });
 
-  test('overlaps the hero bottom edge by 64px at 1440px and stays in the viewport', async ({
+  test('shows the Sunday strip in the band under the hero at 1440px, inside the container', async ({
     page,
   }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
@@ -183,10 +186,13 @@ test.describe('layout', () => {
     await settled(page);
     const h = (await hero(page).boundingBox())!;
     const c = (await card(page).boundingBox())!;
-    expect(c.y).toBeLessThan(h.y + h.height);
-    expect(c.y + c.height - (h.y + h.height)).toBeCloseTo(64, 0);
+    const m = (await page.locator('[data-mission]').boundingBox())!;
+    expect(c.y).toBeGreaterThanOrEqual(h.y + h.height - 0.5);
+    expect(c.y + c.height).toBeLessThanOrEqual(m.y + 0.5);
     expect(c.x).toBeGreaterThanOrEqual(0);
     expect(c.x + c.width).toBeLessThanOrEqual(1440);
+    const link = card(page).getByRole('link', { name: 'Plan your visit' });
+    await expect(link).toBeVisible();
   });
 
   test('has no horizontal overflow at 320x640', async ({ page }) => {
@@ -316,7 +322,7 @@ test.describe('enlarged text', () => {
     });
   }
 
-  test('at 1x the desktop nav and the overlapping card are unchanged at 1280px', async ({
+  test('at 1x the desktop nav is unchanged and the Sunday strip sits below the hero at 1280px', async ({
     page,
   }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
@@ -328,7 +334,7 @@ test.describe('enlarged text', () => {
     expect(bar.height).toBeLessThan(80);
     const h = (await hero(page).boundingBox())!;
     const c = (await card(page).boundingBox())!;
-    expect(c.y).toBeLessThan(h.y + h.height);
+    expect(c.y).toBeGreaterThanOrEqual(h.y + h.height - 0.5);
   });
 });
 
@@ -452,7 +458,7 @@ test.describe('sections', () => {
     ).toHaveAttribute('href', '/visit');
     await expect(
       section.getByRole('link', { name: /Tell me more/ }),
-    ).toHaveAttribute('href', '/culture');
+    ).toHaveAttribute('href', '/who-we-are');
     const ready = section.getByRole('link', { name: /I’m ready/ });
     await expect(ready).toHaveAttribute(
       'href',
@@ -468,6 +474,32 @@ test.describe('sections', () => {
     await expect(band).toContainText(
       'We exist to glorify God through the fulfillment of the Great Commission.',
     );
+  });
+
+  test('culture section shows the vision and six commitments', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const section = page.locator('[data-culture]');
+    await expect(section.getByRole('heading', { level: 2 })).toHaveText(
+      /Lost people saved,\s*Saved people matured,\s*Matured people multiplied,\s*All to the glory of God\./,
+    );
+    const rows = await section
+      .locator('[data-culture-value]')
+      .evaluateAll((els) =>
+        els.map((el) => ({
+          title: el.querySelector('h3')?.textContent?.trim(),
+          verse: el.querySelector('[data-culture-verse]')?.textContent?.trim(),
+        })),
+      );
+    expect(rows).toEqual([
+      { title: 'Bold Preaching', verse: '2 Timothy 4:2' },
+      { title: 'Passionate Worship', verse: 'Psalm 95:6' },
+      { title: 'Purposeful Discipleship', verse: '1 Thess. 2:8' },
+      { title: 'Fervent Prayer', verse: 'Romans 12:12' },
+      { title: 'Courageous Evangelism', verse: 'John 20:21' },
+      { title: 'Church Planting', verse: 'Acts 14:23' },
+    ]);
   });
 
   test('Entrusted feature shows by default and links to /entrusted', async ({

@@ -1,8 +1,10 @@
 ---
+import Arrow from '../components/arrow.astro';
 import BaseLayout from '../layouts/base-layout.astro';
 import HomeHero from '../components/home-hero.astro';
 import SundayCard from '../components/sunday-card.astro';
 import MissionBand from '../components/mission-band.astro';
+import CultureSection from '../components/culture-section.astro';
 import EventList from '../components/event-list.astro';
 import LatestSermonFeature from '../components/latest-sermon-feature.astro';
 import SeoJsonld from '../components/seo-jsonld.astro';
@@ -56,6 +58,8 @@ const description = `Crossway Bible Church is a church family in San Antonio, Te
 
   <MissionBand />
 
+  <CultureSection />
+
   <section
     class="home-events"
     data-home-events
@@ -71,7 +75,8 @@ const description = `Crossway Bible Church is a church family in San Antonio, Te
       </div>
       <p class="home-events__more" data-reveal="fade">
         <a href="/events">
-          See all events <span aria-hidden="true">→</span>
+          See all events
+          <Arrow />
         </a>
       </p>
     </div>
@@ -86,7 +91,8 @@ const description = `Crossway Bible Church is a church family in San Antonio, Te
 
 <style>
   .home-events {
-    padding-block: clamp(3.5rem, 7vw, 6rem) clamp(3rem, 6vw, 5rem);
+    padding-block: clamp(3.5rem, 7vw, 6rem);
+    background: color-mix(in srgb, var(--navy) 3%, var(--paper));
   }
 
   .home-events__inner {
@@ -107,6 +113,8 @@ const description = `Crossway Bible Church is a church family in San Antonio, Te
     align-items: center;
     gap: 0.4em;
     min-height: 44px;
+    max-width: 100%;
+    overflow-wrap: anywhere;
     color: var(--navy);
     font-weight: 600;
     text-decoration-color: var(--amber-ink);
@@ -118,7 +126,7 @@ const description = `Crossway Bible Church is a church family in San Antonio, Te
       grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
       grid-template-areas:
         'head list'
-        'more list';
+        'head more';
       align-items: start;
     }
 

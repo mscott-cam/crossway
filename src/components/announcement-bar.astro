@@ -1,4 +1,5 @@
 ---
+import Arrow from './arrow.astro';
 import type { Announcement } from '../lib/sanity/types';
 import { safeHref } from '../lib/safe-href';
 
@@ -29,9 +30,7 @@ const external = Boolean(href && /^https?:\/\//i.test(href));
           rel={external ? 'noopener noreferrer' : undefined}
         >
           {text}
-          <span class="announcement__arrow" aria-hidden="true">
-            →
-          </span>
+          <Arrow />
           {external && <span class="sr-only"> (opens in a new tab)</span>}
         </a>
       ) : (
@@ -51,7 +50,7 @@ const external = Boolean(href && /^https?:\/\//i.test(href));
   .announcement__text {
     max-width: var(--container);
     margin: 0 auto;
-    font-size: 0.875rem;
+    font-size: 1.0625rem;
     font-weight: 500;
     line-height: 1.45;
     letter-spacing: 0.01em;
@@ -69,8 +68,7 @@ const external = Boolean(href && /^https?:\/\//i.test(href));
     text-decoration-thickness: 2px;
   }
 
-  .announcement__arrow {
-    margin-left: 0.4em;
+  .announcement :global(.arrow) {
     color: var(--amber);
   }
 </style>

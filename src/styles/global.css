@@ -58,8 +58,8 @@
   --step-hero: clamp(5rem, 86px + 6.5vw, 13rem);
   --step-h1: clamp(2.75rem, 1.9rem + 4.2vw, 5.5rem);
   --step-h2: clamp(2rem, 1.5rem + 2.4vw, 3.75rem);
-  --step-h3: clamp(1.5rem, 1.25rem + 1.1vw, 2.25rem);
-  --step-h4: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+  --step-h3: clamp(1.75rem, 1.4rem + 1.2vw, 2.5rem);
+  --step-h4: clamp(1.4375rem, 1.3rem + 0.6vw, 1.75rem);
 
   --gutter: clamp(1.25rem, 4vw, 3.5rem);
   --section-space: clamp(4.5rem, 9vw, 8rem);
@@ -94,7 +94,7 @@ body {
   background: var(--paper);
   color: var(--charcoal);
   font-family: var(--font-ui);
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   line-height: 1.6;
   font-weight: 400;
   overflow-wrap: break-word;
@@ -139,13 +139,15 @@ h2 {
 }
 
 h3 {
+  font-family: var(--font-text);
   font-size: var(--step-h3);
-  line-height: 1.12;
+  line-height: 1.15;
 }
 
 h4 {
+  font-family: var(--font-text);
   font-size: var(--step-h4);
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 h1 em,
@@ -173,8 +175,21 @@ p {
 
 a {
   color: inherit;
-  text-decoration-thickness: 1px;
+}
+
+:where(a) {
+  text-decoration: none;
+  text-decoration-color: var(--amber-ink);
+  text-decoration-thickness: 2px;
   text-underline-offset: 0.2em;
+}
+
+:where(a):hover {
+  text-decoration-line: underline;
+}
+
+.on-navy :where(a) {
+  text-decoration-color: var(--amber);
 }
 
 :focus-visible {
@@ -197,13 +212,15 @@ a {
   background: var(--navy);
   color: var(--paper);
   font-family: var(--font-ui);
-  font-size: 0.8125rem;
+  font-size: 1rem;
   font-weight: 600;
   line-height: 1.2;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   text-decoration: none;
-  white-space: nowrap;
+  text-align: center;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   transition:
     background-color 0.2s ease,
     transform 0.2s var(--ease-out);
@@ -313,10 +330,10 @@ html.js:not(.reduced):not(.motion-ready) [data-draw] {
   margin: 0;
   color: var(--amber-ink);
   font-family: var(--font-ui);
-  font-size: 0.75rem;
+  font-size: 0.9375rem;
   font-weight: 600;
   line-height: 1.4;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   overflow-wrap: anywhere;
 }
@@ -335,9 +352,9 @@ html.js:not(.reduced):not(.motion-ready) [data-draw] {
 
 .verse-cite {
   font-family: var(--font-ui);
-  font-size: 0.6875rem;
+  font-size: 0.875rem;
   font-weight: 600;
-  letter-spacing: 0.24em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--amber-ink);
 }
@@ -360,7 +377,7 @@ html.js:not(.reduced):not(.motion-ready) [data-draw] {
   padding: 0.75rem 1.25rem;
   background: var(--navy);
   color: var(--paper);
-  font-size: 0.875rem;
+  font-size: 1.0625rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -395,14 +412,14 @@ html.js:not(.reduced):not(.motion-ready) [data-draw] {
   border-radius: 8px;
   background: var(--paper);
   color: var(--amber-ink);
-  font-size: 0.9375rem;
+  font-size: 1.125rem;
   font-weight: 500;
   line-height: 1.45;
 }
 
 .prose {
   max-width: var(--measure);
-  font-size: 1.1875rem;
+  font-size: 1.375rem;
   line-height: 1.7;
 }
 
@@ -433,7 +450,7 @@ html.js:not(.reduced):not(.motion-ready) [data-draw] {
 .prose h4 {
   margin-top: 1.75em;
   font-family: var(--font-ui);
-  font-size: 1.0625rem;
+  font-size: 1.25rem;
   font-weight: 600;
   letter-spacing: 0;
   line-height: 1.35;
@@ -457,7 +474,7 @@ html.js:not(.reduced):not(.motion-ready) [data-draw] {
   padding-left: 1.25rem;
   border-left: 2px solid var(--amber);
   font-family: var(--font-text);
-  font-size: 1.1875rem;
+  font-size: 1.375rem;
   font-style: italic;
   line-height: 1.65;
 }
@@ -475,7 +492,7 @@ html.js:not(.reduced):not(.motion-ready) [data-draw] {
 .prose .verse-refs {
   margin-top: 0.75em;
   color: var(--amber-ink);
-  font-size: 1rem;
+  font-size: 1.1875rem;
   font-variant-caps: all-small-caps;
   font-weight: 600;
   letter-spacing: 0.07em;
@@ -484,7 +501,6 @@ html.js:not(.reduced):not(.motion-ready) [data-draw] {
 
 .prose a {
   color: var(--navy);
-  text-decoration-color: var(--amber-ink);
-  text-decoration-thickness: 2px;
+  font-weight: 600;
   overflow-wrap: anywhere;
 }

@@ -1,3 +1,7 @@
+---
+import Arrow from './arrow.astro';
+---
+
 <section
   class="entrusted"
   data-entrusted-feature
@@ -18,8 +22,9 @@
         disciple-making.
       </p>
       <p class="entrusted__more">
-        <a class="entrusted__link" href="/entrusted">
-          Learn about Entrusted <span aria-hidden="true">→</span>
+        <a class="pill-navy entrusted__link" href="/entrusted">
+          Learn about Entrusted
+          <Arrow />
         </a>
       </p>
     </div>
@@ -28,14 +33,14 @@
 
 <style>
   .entrusted {
-    padding-block: clamp(3.5rem, 7vw, 6rem);
-    border-top: 1px solid var(--rule);
+    padding-block: clamp(4rem, 8vw, 7rem);
+    background: color-mix(in srgb, var(--amber) 10%, var(--paper));
   }
 
   .entrusted__inner {
     display: grid;
     gap: 1.75rem clamp(2rem, 6vw, 5rem);
-    align-items: end;
+    align-items: start;
   }
 
   .entrusted__title {
@@ -44,29 +49,35 @@
     text-wrap: balance;
   }
 
+  .entrusted__title em {
+    display: inline-block;
+    padding-left: 0.08em;
+  }
+
   .entrusted__body p:first-child {
-    max-width: 38ch;
+    max-width: 46ch;
     margin: 0;
+    font-size: 1.375rem;
+    line-height: 1.6;
   }
 
   .entrusted__more {
-    margin: 1.25rem 0 0;
+    margin: 2rem 0 0;
   }
 
   .entrusted__link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4em;
-    min-height: 44px;
-    color: var(--navy);
-    font-weight: 600;
-    text-decoration-color: var(--amber-ink);
-    text-decoration-thickness: 2px;
+    gap: 0.75rem;
+    min-height: 3.25rem;
+    padding-inline: 1.75rem;
   }
 
   @media (min-width: 60rem) {
     .entrusted__inner {
-      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    }
+
+    .entrusted__body {
+      padding-top: 2.5rem;
     }
   }
 </style>

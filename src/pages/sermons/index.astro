@@ -1,4 +1,5 @@
 ---
+import Arrow from '../../components/arrow.astro';
 import BaseLayout from '../../layouts/base-layout.astro';
 import Eyebrow from '../../components/eyebrow.astro';
 import PodcastLinks from '../../components/podcast-links.astro';
@@ -89,7 +90,8 @@ const latestHasMedia = Boolean(
         </SeriesGrid>
         <p class="block__more">
           <a href="/series">
-            All series <span aria-hidden="true">→</span>
+            All series
+            <Arrow />
           </a>
         </p>
       </section>
@@ -112,7 +114,8 @@ const latestHasMedia = Boolean(
         </ul>
         <p class="block__more">
           <a href="/sermons/archive/1">
-            Browse all messages <span aria-hidden="true">→</span>
+            Browse all messages
+            <Arrow />
           </a>
         </p>
       </section>
@@ -168,7 +171,7 @@ const latestHasMedia = Boolean(
 
   .feature__meta {
     margin: 1.25rem 0 0;
-    font-size: 1rem;
+    font-size: 1.1875rem;
   }
 
   .block__more a {
@@ -176,6 +179,8 @@ const latestHasMedia = Boolean(
     align-items: center;
     gap: 0.4em;
     min-height: 44px;
+    max-width: 100%;
+    overflow-wrap: anywhere;
     color: var(--navy);
     text-decoration-color: var(--amber-ink);
     text-decoration-thickness: 2px;

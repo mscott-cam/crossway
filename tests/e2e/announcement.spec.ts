@@ -84,7 +84,9 @@ test.describe('announcement on, mobile menu', () => {
     expect(menu.y).toBe(0);
     expect(menu.height).toBeGreaterThanOrEqual(844 - 1);
     await expect(
-      page.locator('[data-mobile-menu]').getByRole('link', { name: 'Connect' }),
+      page
+        .locator('[data-mobile-menu]')
+        .getByRole('link', { name: 'Our Leadership' }),
     ).toBeVisible();
   });
 });

@@ -1,0 +1,86 @@
+---
+import CultureValues from './culture-values.astro';
+import { culture } from '../lib/culture';
+
+const { vision, commitmentsHeading, values } = culture;
+const lastLine = vision.length - 1;
+---
+
+<section
+  class="culture"
+  id="culture"
+  data-culture
+  aria-labelledby="culture-title"
+>
+  <div class="container culture__inner">
+    <div class="culture__vision" data-reveal="fade">
+      <p class="eyebrow">Our vision</p>
+      <h2 class="culture__statement" id="culture-title">
+        {vision.map((line, index) => (
+          <span class="culture__line">
+            {index === lastLine ? <em>{line}</em> : line}
+          </span>
+        ))}
+      </h2>
+    </div>
+    <div
+      class="culture__commitments"
+      data-reveal="fade"
+      data-reveal-delay="0.1"
+    >
+      <p class="eyebrow">{commitmentsHeading}</p>
+      <CultureValues values={values} />
+    </div>
+  </div>
+</section>
+
+<style>
+  .culture {
+    padding-block: clamp(3.5rem, 7vw, 6rem);
+  }
+
+  .culture__inner {
+    display: grid;
+    gap: 2.5rem clamp(2rem, 6vw, 5rem);
+  }
+
+  .culture__statement {
+    margin: 1.25rem 0 0;
+    font-size: clamp(1.875rem, 1.3rem + 1.9vw, 2.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+  }
+
+  .culture__line {
+    display: block;
+  }
+
+  .culture__statement em {
+    display: inline-block;
+    margin-top: 0.15em;
+    padding-left: 0.06em;
+    color: var(--amber-ink);
+    font-family: var(--font-text);
+    line-height: 1.05;
+  }
+
+  .culture__commitments :global(.culture-values) {
+    margin-top: 1.25rem;
+  }
+
+  @media (min-width: 60rem) {
+    .culture__line {
+      white-space: nowrap;
+    }
+
+    .culture__inner {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      align-items: start;
+    }
+
+    .culture__vision {
+      position: sticky;
+      top: 7.5rem;
+    }
+  }
+</style>

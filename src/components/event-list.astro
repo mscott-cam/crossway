@@ -1,4 +1,5 @@
 ---
+import Arrow from './arrow.astro';
 import { describeEventWhen } from '../lib/dates';
 import type { ChurchEvent } from '../lib/events/pco';
 import { site } from '../lib/site';
@@ -30,7 +31,8 @@ const EAGER_ROWS = 3;
 {rows.length === 0 ? (
   <p class="event-fallback">
     <a href={site.links.calendar} target="_blank" rel="noopener noreferrer">
-      See all upcoming events on Church Center <span aria-hidden="true">→</span>
+      See all upcoming events on Church Center
+      <Arrow />
       <span class="sr-only"> (opens in a new tab)</span>
     </a>
   </p>
@@ -105,6 +107,8 @@ const EAGER_ROWS = 3;
     align-items: center;
     gap: 0.4em;
     min-height: 44px;
+    max-width: 100%;
+    overflow-wrap: anywhere;
     color: var(--navy);
     text-decoration-color: var(--amber-ink);
     text-decoration-thickness: 2px;
@@ -145,7 +149,7 @@ const EAGER_ROWS = 3;
   .event__month {
     margin-top: 0.4rem;
     color: var(--amber-ink);
-    font-size: 0.75rem;
+    font-size: 0.9375rem;
     font-weight: 600;
     letter-spacing: 0.16em;
     text-transform: uppercase;
@@ -186,13 +190,19 @@ const EAGER_ROWS = 3;
   .event__when,
   .event__where {
     margin: 0.4rem 0 0;
-    font-size: 0.9375rem;
+    font-size: 1.125rem;
     line-height: 1.5;
     overflow-wrap: anywhere;
   }
 
   .event__time {
     white-space: nowrap;
+  }
+
+  @container (max-width: 16rem) {
+    .event__time {
+      white-space: normal;
+    }
   }
 
   .event__where {
@@ -211,16 +221,20 @@ const EAGER_ROWS = 3;
   }
 
   .event-list--home .event {
-    grid-template-columns: 3.5rem minmax(0, 1fr);
-    padding-block: 1.1rem;
+    grid-template-columns: 4.25rem minmax(0, 1fr);
+    padding-block: 1.5rem;
   }
 
   .event-list--home .event__day {
-    font-size: 2rem;
+    font-size: 2.5rem;
   }
 
   .event-list--home .event__title {
-    font-size: 1.125rem;
+    font-size: var(--step-h4);
+  }
+
+  .event-list--home .event__when {
+    font-size: 1.1875rem;
   }
 
   @container (max-width: 15rem) {

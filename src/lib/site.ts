@@ -34,8 +34,6 @@ export const site = {
 } as const;
 
 export const nav: NavItem[] = [
-  { label: 'Connect', href: '/visit' },
-  { label: 'Culture', href: '/culture' },
   {
     label: 'About Us',
     children: [

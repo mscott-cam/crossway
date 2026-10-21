@@ -2,10 +2,10 @@ import { existsSync, readFileSync } from 'node:fs';
 import { parse } from 'yaml';
 import { describe, expect, it } from 'vitest';
 import { ageGroups } from '../../src/lib/kids';
+import { culture } from '../../src/lib/culture';
 import { pagesSchema } from '../../src/lib/pages-schema';
 
 const SLUGS = [
-  'culture',
   'who-we-are',
   'what-we-believe',
   'child-safety',
@@ -27,7 +27,7 @@ function load(slug: string) {
 const pages = SLUGS.map((slug) => ({ slug, ...load(slug) }));
 
 describe('content pages carried over from the live site', () => {
-  it('has an entry for each of the ten pages', () => {
+  it('has an entry for each of the nine pages', () => {
     for (const slug of SLUGS) {
       expect(existsSync(`src/content/pages/${slug}.md`)).toBe(true);
     }
@@ -101,10 +101,8 @@ describe('content pages carried over from the live site', () => {
 });
 
 describe('culture', () => {
-  const { data } = pages.find((p) => p.slug === 'culture')!;
-
   it('lists the six commitments as on the live page, each with a verse reference', () => {
-    expect(data.values.map((v: { title: string }) => v.title)).toEqual([
+    expect(culture.values.map((v: { title: string }) => v.title)).toEqual([
       'Bold Preaching',
       'Passionate Worship',
       'Purposeful Discipleship',
@@ -112,17 +110,17 @@ describe('culture', () => {
       'Courageous Evangelism',
       'Church Planting',
     ]);
-    expect(data.values).toHaveLength(6);
-    for (const value of data.values) {
+    expect(culture.values).toHaveLength(6);
+    for (const value of culture.values) {
       expect(value.verse).toMatch(/\d+:\d+/);
     }
   });
 
   it('carries the mission and vision from the live page', () => {
-    expect(data.mission).toBe(
+    expect(culture.mission).toBe(
       'We exist to glorify God through the fulfillment of the Great Commission.',
     );
-    expect(data.vision).toEqual([
+    expect(culture.vision).toEqual([
       'Lost people saved,',
       'Saved people matured,',
       'Matured people multiplied,',

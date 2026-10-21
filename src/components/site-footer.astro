@@ -166,7 +166,7 @@ const columns: Column[] = [
     margin: 0 0 1rem;
     color: var(--mist);
     font-family: var(--font-ui);
-    font-size: 0.6875rem;
+    font-size: 0.875rem;
     font-weight: 600;
     line-height: 1.4;
     letter-spacing: 0.24em;
@@ -182,7 +182,7 @@ const columns: Column[] = [
   }
 
   .site-footer__column a {
-    font-size: 1rem;
+    font-size: 1.1875rem;
     text-decoration: none;
   }
 
@@ -196,7 +196,29 @@ const columns: Column[] = [
     padding-top: 1.5rem;
     border-top: 1px solid color-mix(in srgb, var(--paper) 16%, transparent);
     color: var(--mist);
-    font-size: 0.875rem;
+    font-size: 1.0625rem;
+  }
+
+  @media (min-width: 60rem) {
+    .site-footer__brand {
+      display: grid;
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      column-gap: clamp(2rem, 6vw, 5rem);
+      align-items: start;
+    }
+
+    .site-footer__brand .site-footer__logo {
+      grid-row: 1 / span 2;
+    }
+
+    .site-footer__brand .site-footer__times {
+      grid-column: 2;
+      margin: 0 0 0.75rem;
+    }
+
+    .site-footer__brand .site-footer__address {
+      grid-column: 2;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

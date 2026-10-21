@@ -1,4 +1,5 @@
 ---
+import Arrow from '../components/arrow.astro';
 import { getEntry, render } from 'astro:content';
 import { z } from 'astro/zod';
 import BaseLayout from '../layouts/base-layout.astro';
@@ -75,7 +76,8 @@ const { street, city, region, postalCode } = site.address;
             target="_blank"
             rel="noopener noreferrer"
           >
-            Get directions <span aria-hidden="true">→</span>
+            Get directions
+            <Arrow />
             <span class="sr-only"> (opens in a new tab)</span>
           </a>
           <a
@@ -84,7 +86,8 @@ const { street, city, region, postalCode } = site.address;
             target="_blank"
             rel="noopener noreferrer"
           >
-            Can’t make it? Watch live <span aria-hidden="true">→</span>
+            Can’t make it? Watch live
+            <Arrow />
             <span class="sr-only"> (opens in a new tab)</span>
           </a>
         </div>
@@ -128,7 +131,8 @@ const { street, city, region, postalCode } = site.address;
         </ul>
         <p class="visit-block__more">
           <a class="visit-link" href="/crossway-kids">
-            Learn more about Crossway Kids <span aria-hidden="true">→</span>
+            Learn more about Crossway Kids
+            <Arrow />
           </a>
         </p>
         <Placeholder label="kids check-in process" />
@@ -151,7 +155,8 @@ const { street, city, region, postalCode } = site.address;
       </p>
       <p class="visit-block__more">
         <a class="visit-link" href="/students">
-          Learn more about Students <span aria-hidden="true">→</span>
+          Learn more about Students
+          <Arrow />
         </a>
       </p>
     </div>
@@ -181,8 +186,8 @@ const { street, city, region, postalCode } = site.address;
     <div data-reveal="fade">
       <h2 id="visit-questions-title">
         <a class="visit-closing__link" href="#questions">
-          Questions? We’d love to hear from you.&nbsp;
-          <span aria-hidden="true">→</span>
+          Questions? We’d love to hear from you.
+          <Arrow />
         </a>
       </h2>
     </div>
@@ -209,7 +214,7 @@ const { street, city, region, postalCode } = site.address;
     margin: 1.5rem 0 0;
     color: var(--charcoal);
     font-family: var(--font-text);
-    font-size: clamp(1.25rem, 1.05rem + 0.9vw, 1.75rem);
+    font-size: clamp(1.4375rem, 1.2rem + 0.9vw, 1.875rem);
     font-style: italic;
     line-height: 1.35;
   }
@@ -248,7 +253,7 @@ const { street, city, region, postalCode } = site.address;
   .visit-when__meridiem {
     color: var(--mist);
     font-family: var(--font-ui);
-    font-size: max(0.8125rem, 0.2em);
+    font-size: max(1rem, 0.2em);
     font-weight: 600;
     letter-spacing: 0.1em;
     white-space: nowrap;
@@ -257,7 +262,7 @@ const { street, city, region, postalCode } = site.address;
   .visit-when__label {
     margin: 0;
     color: var(--mist);
-    font-size: 0.75rem;
+    font-size: 0.9375rem;
     font-weight: 600;
     letter-spacing: 0.28em;
     text-transform: uppercase;
@@ -291,7 +296,7 @@ const { street, city, region, postalCode } = site.address;
     min-height: 44px;
     padding: 0.85rem 1.4rem;
     border-radius: 999px;
-    font-size: 0.8125rem;
+    font-size: 1rem;
     font-weight: 700;
     letter-spacing: 0.12em;
     line-height: 1.3;
@@ -358,13 +363,13 @@ const { street, city, region, postalCode } = site.address;
   }
 
   .visit-block__intro {
-    font-size: 1.25rem;
+    font-size: 1.4375rem;
     line-height: 1.5;
   }
 
   .visit-prose {
     max-width: 38rem;
-    font-size: 1.25rem;
+    font-size: 1.4375rem;
     line-height: 1.6;
   }
 
@@ -392,7 +397,7 @@ const { street, city, region, postalCode } = site.address;
     background: var(--paper);
     color: var(--navy);
     font-family: var(--font-display);
-    font-size: 1.3125rem;
+    font-size: 1.5rem;
     line-height: 1.15;
     overflow-wrap: break-word;
   }
@@ -402,6 +407,8 @@ const { street, city, region, postalCode } = site.address;
     align-items: center;
     gap: 0.4em;
     min-height: 44px;
+    max-width: 100%;
+    overflow-wrap: anywhere;
     color: var(--navy);
     font-weight: 600;
     text-decoration-color: var(--amber-ink);

@@ -3,7 +3,7 @@ import { hasCurrentChild, isCurrent } from '../../src/lib/nav-state';
 import { nav } from '../../src/lib/site';
 
 const aboutUs = nav.find((item) => item.label === 'About Us')!;
-const connect = nav.find((item) => item.label === 'Connect')!;
+const events = nav.find((item) => item.label === 'Events')!;
 const give = nav.find((item) => item.label === 'Give')!;
 
 describe('isCurrent', () => {
@@ -36,8 +36,8 @@ describe('isCurrent', () => {
     expect(isCurrent('/', give.href)).toBe(false);
   });
 
-  it('marks Connect current on /visit', () => {
-    expect(isCurrent('/visit', connect.href)).toBe(true);
+  it('marks Events current on /events', () => {
+    expect(isCurrent('/events', events.href)).toBe(true);
   });
 });
 
@@ -53,7 +53,7 @@ describe('hasCurrentChild', () => {
   });
 
   it('is false for items without children', () => {
-    expect(hasCurrentChild('/visit', connect)).toBe(false);
+    expect(hasCurrentChild('/events', events)).toBe(false);
   });
 
   it('ignores external children', () => {
