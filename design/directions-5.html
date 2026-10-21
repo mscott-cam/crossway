@@ -1,0 +1,555 @@
+<title>Crossway Night Service Cream</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Figtree:wght@400;500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+:root {
+  --bg: #f3f6f8;
+  --fg: #142331;
+  --muted: #4b5f6e;
+  --line: #d3dde4;
+  --panel: #ffffff;
+  --amber: #f5a707;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1822;
+    --fg: #e8eef2;
+    --muted: #a5b5c1;
+    --line: #26394a;
+    --panel: #14242f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1822;
+  --fg: #e8eef2;
+  --muted: #a5b5c1;
+  --line: #26394a;
+  --panel: #14242f;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Figtree', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 80px;
+}
+.wrap { max-width: 1280px; margin: 0 auto; display: grid; gap: 28px; }
+.wrap > * { min-width: 0; }
+.intro { display: grid; gap: 14px; max-width: 76ch; }
+.intro h1 { margin: 0; font-size: clamp(1.8rem, 3.6vw, 2.7rem); line-height: 1.1; font-weight: 700; text-wrap: balance; letter-spacing: -0.015em; }
+.intro p { margin: 0; color: var(--muted); font-size: 1.05rem; }
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.tab { text-align: left; padding: 14px 18px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); border-radius: 10px; font: inherit; cursor: pointer; display: grid; gap: 2px; }
+.tab strong { font-size: 1.05rem; }
+.tab span { color: var(--muted); font-size: 0.92rem; }
+.tab:hover { border-color: var(--muted); }
+.tab[aria-selected="true"] { border-color: var(--fg); box-shadow: inset 0 0 0 1px var(--fg); }
+.tab:focus-visible, .replay:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.spec { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; gap: 24px; padding: 20px 22px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+.spec > div { min-width: 0; display: grid; gap: 6px; align-content: start; }
+.spec h2 { margin: 0; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.spec p { margin: 0; font-size: 0.97rem; }
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+.sw { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--muted); }
+.sw i { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--line); display: block; }
+.bar { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.bar p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+.replay { font: inherit; font-weight: 600; padding: 9px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; }
+.replay:hover { border-color: var(--fg); }
+.needs { display: grid; gap: 10px; padding: 22px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+.needs h2 { margin: 0; font-size: 1.15rem; }
+.needs ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 4px; columns: 2; column-gap: 40px; }
+.needs p { margin: 0; color: var(--muted); }
+@media (max-width: 900px) {
+  .spec { grid-template-columns: 1fr 1fr; }
+  .needs ul { columns: 1; }
+}
+@media (max-width: 760px) {
+  .tabs { grid-template-columns: 1fr; }
+  .spec { grid-template-columns: 1fr; }
+}
+
+.mock { border: 1px solid var(--line); border-radius: 14px; overflow: clip; position: relative; isolation: isolate; font-family: 'Hanken Grotesk', system-ui, sans-serif; font-size: 1.125rem; line-height: 1.5; }
+.mock a { color: inherit; }
+.mock :focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
+.mock ul, .mock ol, .mock dl { list-style: none; margin: 0; padding: 0; }
+:where(.mock) :is(p, h1, h2, h3, dd) { margin: 0; }
+.mock button { font-family: inherit; }
+.wide { font-family: 'Archivo', system-ui, sans-serif; font-stretch: 125%; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; }
+.serif-i { font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: 0; }
+.ico { width: 18px; height: 18px; flex: none; }
+.grain::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 40; opacity: 0.55; mix-blend-mode: multiply; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .1 0 0 0 0 .16 0 0 0 0 .22 0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.lock { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; }
+.lock-box { display: grid; place-items: center; width: 48px; height: 36px; background: var(--amb); }
+.lock-mark { height: 24px; aspect-ratio: 154 / 182; }
+.lock-name { height: 15px; aspect-ratio: 692 / 98; }
+.cw-mark { aspect-ratio: 154 / 182; display: block; }
+.cw-full { aspect-ratio: 1590 / 98; display: block; width: 100%; }
+.menu-btn { display: inline-flex; align-items: center; gap: 10px; border: 0; padding: 11px 18px; font: 800 0.78rem 'Archivo', sans-serif; font-stretch: 112%; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; background: var(--amb); color: var(--navy); }
+.blk { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 50px; padding: 0 22px; font: 800 0.78rem 'Archivo', sans-serif; font-stretch: 112%; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; border: 2px solid var(--blk-bg); background: var(--blk-bg); color: var(--blk-fg); cursor: pointer; transition: background-color 0.2s, color 0.2s; }
+.blk:hover { background: transparent; color: var(--blk-bg); }
+.mock a.blk { color: var(--blk-fg); }
+.mock a.blk:hover { color: var(--blk-bg); }
+.blk--line { background: transparent; color: var(--blk-bg); }
+.mock a.blk--line { color: var(--blk-bg); }
+.blk--line:hover { background: var(--blk-bg); }
+.mock a.blk--line:hover { color: var(--blk-fg); }
+.photo { position: relative; overflow: hidden; display: grid; align-items: end; background: var(--ph, #a9b9c9); }
+.photo-in { position: absolute; inset: 0; background: var(--ph-in, none); }
+.photo .photo-tag { position: relative; justify-self: start; margin: 14px; padding: 5px 12px; background: rgba(12, 28, 40, 0.84); color: #e8eff4; font: 500 0.8rem 'Hanken Grotesk', sans-serif; letter-spacing: 0; text-transform: none; font-style: normal; }
+.ph { border-bottom: 2px dashed #c98a00; }
+.ph-tag { display: inline-block; margin-left: 6px; padding: 0 8px; border-radius: 999px; background: #fff0c7; color: #4a3500; font: 600 0.74rem 'Hanken Grotesk', sans-serif; white-space: nowrap; vertical-align: 1px; letter-spacing: 0; text-transform: none; font-style: normal; }
+.menu { position: absolute; left: 0; right: 0; top: 0; height: min(100%, 700px); z-index: 60; display: grid; grid-template-rows: auto 1fr; padding: 0 clamp(16px, 3.4vw, 48px) 32px; background: var(--menu-bg); color: var(--menu-fg); }
+.menu-top { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; }
+.menu-links { display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; align-content: center; }
+.menu-links a { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--menu-rule); text-decoration: none; font: 800 clamp(1rem, 2.6vw, 2rem) 'Archivo', sans-serif; font-stretch: 125%; text-transform: uppercase; letter-spacing: 0.02em; }
+.menu-links a:hover { color: var(--menu-hover); }
+.lit span { display: inline-block; }
+
+.m2 { --night: #12293a; --amb: #f5a707; --navy: #12293a; --cream: #f1efe6; --slate: #2c4b62; --rule: rgba(241, 239, 230, 0.24); --blk-bg: var(--amb); --blk-fg: #12293a; --ph: #2c4b62; --ph-in: linear-gradient(160deg, rgba(255, 255, 255, 0.12), rgba(0, 0, 0, 0.18)); --menu-bg: #f5a707; --menu-fg: #12293a; --menu-rule: rgba(18, 41, 58, 0.35); --menu-hover: #f1efe6; --body: #e3e8e6; --soft: var(--soft); --label: #f5a707; --ink: #f1efe6; --menu-mark: #12293a; --menu-btn-bg: #12293a; --menu-btn-fg: #f5a707; background-color: var(--night); color: var(--cream); }
+.m2 .lock-mark { color: var(--amb); height: 34px; }
+.m2 .lock-name { color: var(--ink); }
+.m2 .lock { gap: 14px; }
+.m2-bar { background: var(--cream); color: #12293a; text-align: center; padding: 7px 16px; font: 700 0.7rem 'Archivo', sans-serif; font-stretch: 112%; letter-spacing: 0.08em; text-transform: uppercase; }
+.m2-bar a { text-decoration: none; display: inline-flex; gap: 8px; align-items: center; }
+.m2-head { display: flex; align-items: center; justify-content: space-between; padding: 18px clamp(16px, 3.4vw, 48px); position: relative; z-index: 3; }
+.m2-hero { position: relative; min-height: 640px; display: grid; align-content: end; padding: 24px clamp(16px, 3.4vw, 48px) clamp(40px, 6vw, 72px); overflow: clip; }
+.m2-hero-t { position: relative; z-index: 2; display: grid; gap: 28px; justify-items: start; }
+.m2-hero h1 { font-size: clamp(2.6rem, 7.2vw, 6.6rem); line-height: 0.94; letter-spacing: 0.01em; }
+.m2-hero h1 .ln { display: block; overflow: hidden; padding-bottom: 0.04em; }
+.m2-hero h1 .ln > span { display: block; }
+.m2-hero h1 i { color: var(--amb); font-style: normal; }
+.m2-bigmark { position: absolute; z-index: 1; right: -3%; top: 4%; height: 118%; width: auto; color: var(--amb); opacity: 0.95; }
+.m2-quote { border-left: 2px solid var(--amb); padding: 4px 0 4px 22px; max-width: 44ch; font-size: 1.2rem; line-height: 1.45; color: var(--body); }
+.m2-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.m2 .blk--line { --blk-bg: var(--cream); --blk-fg: #12293a; }
+.m2-strip { overflow: hidden; padding: 16px 0 clamp(48px, 7vw, 96px); }
+.m2-mq { display: flex; width: max-content; }
+.m2-mq .photo { width: clamp(220px, 24vw, 340px); aspect-ratio: 4 / 3; margin-right: 14px; flex: none; }
+.m2-mission { padding: clamp(32px, 6vw, 96px) clamp(16px, 7vw, 120px) clamp(64px, 9vw, 130px); display: grid; gap: 24px; justify-items: start; max-width: 1200px; }
+.m2-mission p { font: italic 400 clamp(2.4rem, 6.4vw, 5.6rem) / 1 'Instrument Serif', serif; text-wrap: balance; }
+.m2-mission .cite { color: var(--label); }
+.m2-visit { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 5vw, 80px); padding: clamp(48px, 7vw, 96px) clamp(16px, 3.4vw, 48px); border-top: 1px solid var(--rule); align-items: start; }
+.m2-visit > * { min-width: 0; }
+.m2-times { display: grid; line-height: 0.92; font: 800 clamp(4rem, 13vw, 10.5rem) 'Archivo', sans-serif; font-stretch: 125%; color: var(--label); letter-spacing: 0; }
+.m2-times em { font: 700 0.8rem 'Archivo', sans-serif; font-stretch: 112%; font-style: normal; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); margin-top: 18px; }
+.m2-visit-r { display: grid; gap: 20px; }
+.m2-visit-r h2 { font-size: clamp(1.8rem, 3.6vw, 3rem); line-height: 1; font-stretch: 125%; }
+.m2-rows > div { display: grid; grid-template-columns: 7.5rem 1fr; gap: 16px; padding: 14px 0; border-top: 1px solid var(--rule); }
+.m2-rows dt { font: 700 0.76rem 'Archivo', sans-serif; font-stretch: 112%; letter-spacing: 0.1em; text-transform: uppercase; color: var(--label); padding-top: 4px; }
+.m2-rows dd { color: var(--body); }
+.m2-btns { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+.m2-commit { padding: clamp(48px, 7vw, 96px) clamp(16px, 3.4vw, 48px); border-top: 1px solid var(--rule); }
+.m2-commit h2 { font-size: clamp(1.6rem, 3.6vw, 3rem); line-height: 1; font-stretch: 125%; margin-bottom: 28px; }
+.m2-crow { display: grid; grid-template-columns: 1fr auto auto; gap: 8px 28px; align-items: center; padding: 20px 10px; border-top: 1px solid var(--rule); transition: background-color 0.2s, color 0.2s; }
+.m2-crow:last-child { border-bottom: 1px solid var(--rule); }
+.m2-crow:hover { background: var(--amb); color: #12293a; }
+.m2-crow .wide { font-size: clamp(1.3rem, 3.4vw, 3rem); line-height: 1.05; }
+.m2-crow em { font: italic 400 clamp(1.2rem, 2vw, 1.7rem) 'Instrument Serif', serif; }
+.m2-stack { padding: clamp(32px, 5vw, 64px) clamp(16px, 3.4vw, 48px) clamp(64px, 9vw, 120px); }
+.m2-stack > h2 { font-size: clamp(1.6rem, 3.6vw, 3rem); line-height: 1; font-stretch: 125%; margin-bottom: 28px; }
+.m2-scard { position: sticky; top: calc(14px + var(--i) * 16px); height: clamp(300px, 34vw, 400px); margin-bottom: 18px; padding: clamp(20px, 3vw, 40px); display: grid; grid-template-columns: 1fr auto; align-content: space-between; gap: 16px 32px; transform-origin: 50% 0; }
+.m2-scard:nth-child(1) { background: var(--slate); color: var(--cream); }
+.m2-scard:nth-child(2) { background: var(--amb); color: #12293a; }
+.m2-scard:nth-child(3) { background: var(--cream); color: #12293a; }
+.m2-scard .num { font: 800 clamp(3rem, 9vw, 8rem) / 0.9 'Archivo', sans-serif; font-stretch: 125%; justify-self: end; -webkit-text-stroke: 2px currentColor; color: transparent; }
+.m2-scard h3 { font: 800 clamp(2.2rem, 7vw, 6rem) / 0.95 'Archivo', sans-serif; font-stretch: 125%; text-transform: uppercase; align-self: end; }
+.m2-scard .row { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: center; justify-content: space-between; }
+.m2-scard p { font-size: 1.25rem; }
+.m2-scard .blk { --blk-bg: #12293a; --blk-fg: var(--cream); }
+.m2-scard:nth-child(1) .blk { --blk-bg: var(--amb); --blk-fg: #12293a; }
+.m2-news { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 5vw, 80px); padding: clamp(48px, 7vw, 96px) clamp(16px, 3.4vw, 48px); border-top: 1px solid var(--rule); align-items: start; }
+.m2-news > * { min-width: 0; }
+.m2-feat { display: grid; gap: 14px; }
+.m2-feat .photo { aspect-ratio: 4 / 3; }
+.m2-play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 92px; height: 92px; border-radius: 50%; background: var(--amb); color: #12293a; display: grid; place-items: center; text-decoration: none; }
+.m2-play .ico { width: 34px; height: 34px; margin-left: 4px; }
+.m2-feat h3 { font: italic 400 clamp(2.2rem, 4vw, 3.6rem) / 1 'Instrument Serif', serif; }
+.m2-feat .meta { color: var(--soft); }
+.m2-slist h2 { font-size: 1.2rem; font-stretch: 125%; margin-bottom: 8px; }
+.m2 .sm { display: grid; grid-template-columns: 5.5rem 1fr auto; gap: 4px 20px; align-items: center; padding: 20px 0; border-top: 1px solid var(--rule); }
+.m2 .sm-date { font-variant-numeric: tabular-nums; color: var(--soft); }
+.m2 .sm-t { font: italic 400 1.7rem / 1.1 'Instrument Serif', serif; }
+.m2 .sm-by { grid-column: 2; color: var(--soft); font-size: 0.95rem; }
+.m2 .sm .blk { grid-row: 1 / 3; grid-column: 3; min-height: 44px; }
+.m2-events { padding: 0 clamp(16px, 3.4vw, 48px) clamp(48px, 7vw, 96px); }
+.m2-events h2 { font-size: clamp(1.6rem, 3.6vw, 3rem); line-height: 1; font-stretch: 125%; margin-bottom: 28px; }
+.m2-events ul { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--rule); }
+.m2 .ev { display: grid; gap: 12px; align-content: start; padding: 24px 22px 28px 0; border-left: 1px solid var(--rule); padding-left: 22px; }
+.m2 .ev:first-child { border-left: 0; padding-left: 0; }
+.m2 .ev-date { display: flex; align-items: baseline; gap: 10px; color: var(--label); font: 800 clamp(2.6rem, 5vw, 4.4rem) / 1 'Archivo', sans-serif; font-stretch: 125%; }
+.m2 .ev-m { font-size: 0.34em; letter-spacing: 0.08em; text-transform: uppercase; order: 2; }
+.m2 .ev-t { font: italic 400 1.7rem / 1.1 'Instrument Serif', serif; }
+.m2-ent { background: var(--amb); color: #12293a; padding: clamp(40px, 6vw, 80px) clamp(16px, 3.4vw, 48px); display: grid; gap: 22px; justify-items: start; position: relative; overflow: clip; }
+.m2-ent h2 { font-size: clamp(2.4rem, 9vw, 8.4rem); line-height: 0.9; font-stretch: 125%; letter-spacing: 0; }
+.m2-ent p { max-width: 54ch; font-size: 1.2rem; }
+.m2-ent .blk { --blk-bg: #12293a; --blk-fg: var(--amb); }
+.m2-foot { padding: clamp(40px, 6vw, 72px) clamp(16px, 3.4vw, 48px) 0; overflow: clip; }
+.m2-foot-top { display: grid; grid-template-columns: auto 1fr auto; gap: 24px 48px; align-items: start; }
+.m2-foot-top .cw-mark { height: 72px; width: auto; color: var(--amb); }
+.m2-foot-top p { color: #cbd5d8; max-width: 38ch; }
+.m2-foot nav { display: grid; gap: 6px; font: 800 0.76rem 'Archivo', sans-serif; font-stretch: 112%; letter-spacing: 0.08em; text-transform: uppercase; }
+.m2-foot .cw-full { color: var(--cream); margin-top: clamp(32px, 6vw, 72px); transform-origin: 50% 100%; }
+@media (max-width: 900px) {
+  .m2-visit, .m2-news { grid-template-columns: 1fr; }
+  .m2-foot-top { grid-template-columns: 1fr; }
+  .m2-events ul { grid-template-columns: 1fr 1fr; }
+  .m2 .ev:nth-child(3) { border-left: 0; padding-left: 0; }
+  .m2-bigmark { opacity: 0.2; right: -34%; top: 0; height: 80%; }
+  .m2-crow { grid-template-columns: 1fr; }
+  .m2-crow .go-i { display: none; }
+  .m2 .sm { grid-template-columns: 5rem 1fr; }
+  .m2 .sm .blk { grid-column: 2; grid-row: auto; justify-self: start; }
+}
+
+
+.menu .cw-mark { color: var(--menu-mark); }
+.menu .lock-name { color: var(--menu-fg); }
+.menu .menu-btn { background: var(--menu-btn-bg); color: var(--menu-btn-fg); }
+.m2.is-day { --night: #f4f2ea; --body: #1f3547; --soft: #3d5565; --label: #12293a; --ink: #12293a; --rule: rgba(18, 41, 58, 0.3); --ph: #a9b9c9; --ph-in: none; --menu-bg: #12293a; --menu-fg: #f1efe6; --menu-rule: rgba(241, 239, 230, 0.24); --menu-hover: #f5a707; --menu-mark: #f5a707; --menu-btn-bg: #f5a707; --menu-btn-fg: #12293a; color: #12293a; }
+.m2.is-day .m2-bar { background: #12293a; color: #f1efe6; }
+.m2.is-day .blk--line { --blk-bg: #12293a; --blk-fg: #f1efe6; }
+.m2.is-day .sm .blk { --blk-bg: #12293a; --blk-fg: #f1efe6; }
+.m2.is-day .m2-times { background: var(--amb); color: #12293a; padding: clamp(24px, 4vw, 56px); font-size: clamp(3.4rem, 7.4vw, 6rem); min-width: 0; }
+.m2.is-day .m2-scard:nth-child(1) { background: #12293a; color: #f1efe6; }
+.m2.is-day .m2-scard:nth-child(3) { background: #a9b9c9; color: #12293a; }
+.m2.is-day .m2-foot { background: #12293a; color: #f1efe6; }
+.m2.is-day .m2-ent { background: var(--amb); }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs><path id="cw-text-p" d="M249.0 52L264 51.8L272 53.7L279 56.8L285 60.8L290.4 66L295.4 73L298.3 79L298 80.2L280 87.2L275.3 80L270 74.7L264 71.7L260 70.7L254 70.7L249 71.7L243 74.7L237.7 80L234.9 85L233.6 89L232.5 97L233.9 107L236.7 113L239.2 116L242 118.5L247 121.3L255 123.3L261 123.3L268 121.4L273 118.4L277.4 114L282 105.3L283 104.6L301.3 111L296.3 122L291.2 129L288 132.2L279 138.2L270 141.3L262 142.5L251 142.3L242 140.3L233 136.4L226 131.4L218.7 123L214.6 115L212.7 109L211.5 101L211.8 89L213.6 81L217.7 72L223.2 65L231 58.6L239 54.6ZM416.0 52L428 51.5L435 52.7L441 54.6L449 58.7L454 62.6L461.3 71L465.1 78L468.3 89L468.7 101L467.3 110L463.2 120L459.2 126L454 131.4L447 136.5L441 139.4L430 142.3L419 142.5L412 141.3L406 139.4L398 135.3L391 129.6L385.6 123L380.6 113L378.7 105L378.7 89L381.8 78L385.7 71L393 62.6L398 58.7L406 54.6ZM498.0 52L510 51.5L516 52.6L522 54.8L527 57.8L532 62.5L535.2 67L536.7 71L536.8 72L536 72.5L519 79.3L514 72.8L510 70.5L506 69.7L500 70.8L497 73.2L495.9 75L495.5 77L496.5 80L500 83.1L507 86.2L524 91.6L532 95.7L536.4 100L538.3 103L540.3 109L540.5 117L539.2 123L536.3 129L533.2 133L528 137.2L524 139.4L514 142.3L500 142.2L493 140.5L486 137.3L482 134.4L477.7 130L473.8 124L471.5 118L471.4 117L473 115.6L490 110.3L494.7 119L497 121.1L501 123.3L507 124.3L512 123.5L515 122.3L518.2 119L519.0 116L518.6 114L515.5 110L509 106.8L494 102.4L485 98.0L481.2 95L477.7 91L474.7 84L474.8 72L476.6 67L479.8 62L487 56.0L492 53.6ZM573.0 52L585 51.5L591 52.6L597 54.8L602 57.8L607 62.5L610.2 67L611.7 71L611.8 72L611 72.5L594 79.3L589 72.8L585 70.5L581 69.7L575 70.8L572 73.2L570.9 75L570.5 77L571.5 80L575 83.1L582 86.2L599 91.6L607 95.7L611.4 100L613.3 103L615.3 109L615.5 117L614.2 123L611.3 129L608.2 133L603 137.2L599 139.4L589 142.3L575 142.2L568 140.5L561 137.3L557 134.4L552.7 130L548.8 124L546.5 118L546.4 117L548 115.6L565 110.3L569.7 119L572 121.1L576 123.3L582 124.3L587 123.5L590 122.3L593.2 119L594.0 116L593.6 114L590.5 110L584 106.8L569 102.4L560 98.0L556.2 95L552.7 91L549.7 84L549.8 72L551.6 67L554.8 62L562 56.0L567 53.6ZM1323.0 52L1338 51.8L1346 53.7L1353 56.8L1359 60.8L1364.4 66L1369.4 73L1372.3 79L1372 80.2L1354 87.2L1349.3 80L1344 74.7L1338 71.7L1334 70.7L1328 70.7L1323 71.7L1317 74.7L1311.7 80L1308.9 85L1307.6 89L1306.5 97L1307.9 107L1310.7 113L1313.2 116L1316 118.5L1321 121.3L1329 123.3L1335 123.3L1342 121.4L1347 118.4L1351.4 114L1356 105.3L1357 104.6L1375.3 111L1370.3 122L1365.2 129L1362 132.2L1353 138.2L1344 141.3L1336 142.5L1325 142.3L1316 140.3L1307 136.4L1300 131.4L1292.7 123L1288.6 115L1286.7 109L1285.5 101L1285.8 89L1287.6 81L1291.7 72L1297.2 65L1305 58.6L1313 54.6ZM1661.0 52L1676 51.8L1684 53.7L1691 56.8L1697 60.8L1702.4 66L1707.4 73L1710.3 79L1710 80.2L1692 87.2L1687.3 80L1682 74.7L1676 71.7L1672 70.7L1666 70.7L1661 71.7L1655 74.7L1649.7 80L1646.9 85L1645.6 89L1644.5 97L1645.9 107L1648.7 113L1651.2 116L1654 118.5L1659 121.3L1667 123.3L1673 123.3L1680 121.4L1685 118.4L1689.4 114L1694 105.3L1695 104.6L1713.3 111L1708.3 122L1703.2 129L1700 132.2L1691 138.2L1682 141.3L1674 142.5L1663 142.3L1654 140.3L1645 136.4L1638 131.4L1630.7 123L1626.6 115L1624.7 109L1623.5 101L1623.8 89L1625.6 81L1629.7 72L1635.2 65L1643 58.6L1651 54.6ZM309.3 53L310 52.5L350 52.7L361 56.0L369.2 62L373.5 69L375.3 75L375.2 90L373.2 96L369.4 102L364 106.5L357.3 110L378.3 141L378 141.3L356 141.5L355 141.0L337.4 114L335 111.5L330 111.5L329.5 112L329.5 141L329 141.5L310 141.5L309.3 141ZM619.5 53L620 52.5L642 52.5L643.1 53L655.6 108L657 111.3L673.6 53L675 52.5L697 52.6L714 111.3L715.2 109L727.9 53L729 52.5L751 52.5L751.3 54L727.6 141L727 141.5L703 141.5L701.7 141L686.4 88L686 87.0L685 87.0L669.5 141L669 141.5L644 141.5L641.7 135ZM774.2 53L775 52.5L798 52.5L798.6 53L831 141.3L810 141.5L808.9 140L802.4 122L801 121.3L771 121.3L769.7 122L762.8 141L762 141.5L743 141.5L741.5 141ZM815.2 53L816 52.5L837 52.8L854.8 90L856 90.5L874 53.0L875 52.5L895 52.5L896.0 53L865.7 112L865.7 141L865 141.5L846 141.5L845.5 141L845.5 112ZM927.3 53L928 52.5L972 52.7L977 53.8L983 56.6L986 58.8L989.5 63L992.4 70L992.7 78L992.1 82L988.2 90L985 93.1L980.4 96L985 97.8L991 102.2L994.4 107L996.3 114L996.3 120L995.3 125L992.2 131L988 135.2L980 139.4L971 141.3L928 141.7L927.3 141ZM1010.3 53L1011 52.5L1030 52.5L1030.5 53L1030.5 141L1030 141.5L1011 141.5L1010.3 141ZM1046.3 53L1047 52.5L1091 52.7L1096 53.8L1102 56.6L1105 58.8L1108.5 63L1111.4 70L1111.7 78L1111.1 82L1107.2 90L1104 93.1L1099.4 96L1104 97.8L1110 102.2L1113.4 107L1115.3 114L1115.3 120L1114.3 125L1111.2 131L1107 135.2L1099 139.4L1090 141.3L1047 141.7L1046.3 141ZM1123.3 53L1124 52.5L1143 52.5L1143.5 53L1143.5 122L1144 122.7L1180 122.9L1180 141.4L1124 141.7L1123.3 141ZM1191.3 53L1192 52.5L1249 52.5L1250.3 53L1250 71.1L1212 71.3L1211.5 72L1211.5 86L1212 86.7L1247 86.7L1248.0 88L1248 106.0L1247 106.5L1212 106.5L1211.5 107L1211.5 122L1212 122.7L1251 122.7L1251.5 124L1251.5 141L1251 141.7L1192 141.7L1191.3 141ZM1383.3 53L1384 52.5L1403 52.5L1403.5 53L1403.5 87L1404 87.7L1438 87.7L1438.5 87L1438.5 53L1439 52.5L1458 52.5L1458.7 53L1458.7 141L1458 141.5L1439 141.5L1438.5 141L1438.5 108L1438 107.5L1404 107.5L1403.5 108L1403.5 141L1403 141.5L1384 141.5L1383.3 141ZM1471.3 53L1472 52.5L1491 52.5L1491.5 53L1491.5 104L1492.0 110L1492.8 114L1495.5 119L1500 122.4L1504 123.3L1509 123.2L1514 121.3L1516.4 119L1519.2 113L1520.3 104L1520.3 53L1521 52.5L1540 52.5L1540.5 53L1540.3 113L1539.3 119L1536.4 127L1532.4 133L1527 137.5L1521 140.4L1513 142.3L1499 142.3L1493 141.1L1486 138.3L1481.5 135L1477.7 131L1473.6 123L1471.5 113ZM1553.3 53L1554 52.5L1594 52.7L1605 56.0L1613.2 62L1617.5 69L1619.3 75L1619.2 90L1617.2 96L1613.4 102L1608 106.5L1601.3 110L1622.3 141L1622 141.3L1600 141.5L1599 141.0L1581.4 114L1579 111.5L1574 111.5L1573.5 112L1573.5 141L1573 141.5L1554 141.5L1553.3 141ZM1719.3 53L1720 52.5L1739 52.5L1739.5 53L1739.5 87L1740 87.7L1774 87.7L1774.5 87L1774.5 53L1775 52.5L1794 52.5L1794.7 53L1794.7 141L1794 141.5L1775 141.5L1774.5 141L1774.5 108L1774 107.5L1740 107.5L1739.5 108L1739.5 141L1739 141.5L1720 141.5L1719.3 141ZM329.7 71L341 70.7L347 71.8L350.7 74L353.2 77L354.5 82L354.2 85L352.4 89L348 92.2L344 93.3L330 93.5L329.5 93ZM419.5 71L426 70.7L431 71.7L438 75.6L441.4 79L444 83.0L446.4 89L447.3 94L447.3 101L446.2 106L442.3 114L439 117.5L435 120.4L431 122.3L426 123.3L421 123.3L416 122.2L409 118.4L403.5 112L400.8 106L399.7 101L399.7 94L400.6 89L403.6 82L409 75.7L414 72.6ZM1573.7 71L1585 70.7L1591 71.8L1594.7 74L1597.2 77L1598.5 82L1598.2 85L1596.4 89L1592 92.2L1588 93.3L1574 93.5L1573.5 93ZM947.5 72L948 71.3L961 71.3L967 72.5L969.2 74L971.1 77L971.5 80L970.3 84L968 86.1L965 87.4L948 88.0L947.5 87ZM1066.5 72L1067 71.3L1080 71.3L1086 72.5L1088.2 74L1090.1 77L1090.5 80L1089.3 84L1087 86.1L1084 87.4L1067 88.0L1066.5 87ZM785.9 78L787.2 80L794.4 100L794 101.5L778 101.5L777.5 101ZM947.5 106L948 105.5L962 105.5L969 106.7L972.5 109L974.2 112L974.4 115L973.5 118L971 120.5L966 122.3L948 122.7L947.5 122ZM1066.5 106L1067 105.5L1081 105.5L1088 106.7L1091.5 109L1093.2 112L1093.4 115L1092.5 118L1090 120.5L1085 122.3L1067 122.7L1066.5 122Z"/></defs>
+  <symbol id="cw-mark" viewBox="0 0 154 182"><path fill="currentColor" fill-rule="evenodd" d="M49.5 0H104.5V48.5H153.5V105H107L101.5 102L77 77.5L52.5 102L47 105H0.5V48.5H49.5ZM62 13H92V61.5H140.5V92.5H110L77 60L44 92.5H13.5V61.5H62ZM77 97L104.5 124V181.5H49.5V124ZM77 115L91 129V168H63V129Z"/></symbol>
+  <symbol id="cw-name" viewBox="208 48 692 98"><use href="#cw-text-p" fill="currentColor" fill-rule="evenodd"/></symbol>
+  <symbol id="cw-full" viewBox="208 48 1590 98"><use href="#cw-text-p" fill="currentColor" fill-rule="evenodd"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M3 12h17M14 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z" fill="currentColor"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/></symbol>
+</svg>
+
+<div class="wrap">
+  <header class="intro">
+    <h1>Night Service, in a cream version</h1>
+    <p>This is the same concept on warm paper, with the original navy version one tab away for comparison. The logo is used directly: the cross mark in the header, cropped large in the hero, and the full lettering in the footer. Items marked "to confirm" are placeholders, and flat blue panels show where the church's own photos go.</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Versions" style="grid-template-columns:repeat(2,1fr)">
+    <button class="tab" role="tab" id="tab-cream" aria-controls="mock-main" aria-selected="true" data-dir="cream"><strong>Night Service, cream</strong><span>The new light version on warm paper</span></button>
+    <button class="tab" role="tab" id="tab-navy" aria-controls="mock-main" aria-selected="false" data-dir="navy"><strong>Night Service, navy</strong><span>The previous dark version, for comparison</span></button>
+  </div>
+
+  <section class="spec" id="spec-cream" aria-label="Cream version details">
+    <div>
+      <h2>Idea</h2>
+      <p>Night Service with the lights on. The same giant headline, cropped cross mark, slow photo strip and stacking step cards, now on warm paper. Navy is the ink and amber becomes solid blocks: the cross mark, the Sunday times, buttons and the ENTRUSTED band. The footer returns to navy to anchor the page.</p>
+    </div>
+    <div>
+      <h2>Look</h2>
+      <div class="swatches"><span class="sw"><i style="background:#f4f2ea"></i>Paper</span><span class="sw"><i style="background:#12293a"></i>Navy</span><span class="sw"><i style="background:#f5a707"></i>Amber</span><span class="sw"><i style="background:#a9b9c9"></i>Mist</span></div>
+      <p>Archivo Expanded capitals, Instrument Serif Italic, Hanken Grotesk for reading.</p>
+    </div>
+    <div>
+      <h2>Motion</h2>
+      <p>The headline lifts in line by line, the photo strip drifts slowly, step cards stack and settle as you scroll, and the wordmark rises into the footer.</p>
+    </div>
+    <div>
+      <h2>Risk</h2>
+      <p>Amber text does not read on cream, so amber appears only as fills and the big mark, and labels and dates are navy. The giant amber cross is the page's one loud element, so photos and type have to stay calm around it.</p>
+    </div>
+  </section>
+
+  <section class="spec" id="spec-navy" aria-label="Navy version details" hidden>
+    <div>
+      <h2>Idea</h2>
+      <p>The previous dark version, shown here for comparison. Deep navy with the logo in its original amber and white, and amber used for text and numerals.</p>
+    </div>
+    <div>
+      <h2>Look</h2>
+      <div class="swatches"><span class="sw"><i style="background:#12293a"></i>Night</span><span class="sw"><i style="background:#f5a707"></i>Amber</span><span class="sw"><i style="background:#f1efe6"></i>Cream</span><span class="sw"><i style="background:#2c4b62"></i>Slate</span></div>
+      <p>Same type as the cream version.</p>
+    </div>
+    <div>
+      <h2>Motion</h2>
+      <p>Identical to the cream version.</p>
+    </div>
+    <div>
+      <h2>Risk</h2>
+      <p>Dark pages are harder for some older readers, so body text stays large and high contrast.</p>
+    </div>
+  </section>
+
+  <div class="bar">
+    <p>Scroll inside each mockup to see the page motion, and try the Menu button. Motion is off when your system asks for reduced motion.</p>
+    <button class="replay" id="replay" type="button">Replay motion</button>
+  </div>
+
+  <section class="mock m2 grain is-day" id="mock-main" role="tabpanel">
+    <div class="m2-bar"><a href="#">Advanced Commitment Night is Oct 25. Learn about ENTRUSTED <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+    <header class="m2-head">
+      <a class="lock" href="#" aria-label="Crossway Bible Church"><svg class="lock-mark" aria-hidden="true"><use href="#cw-mark"/></svg><svg class="lock-name" aria-hidden="true"><use href="#cw-name"/></svg></a>
+      <button class="menu-btn" type="button" data-menu-open><svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg> Menu</button>
+    </header>
+    <div class="menu" data-menu hidden>
+      <div class="menu-top"><a class="lock" href="#" aria-label="Crossway Bible Church"><svg class="cw-mark" style="height:34px" aria-hidden="true"><use href="#cw-mark"/></svg><svg class="lock-name" aria-hidden="true"><use href="#cw-name"/></svg></a><button class="menu-btn" type="button" data-menu-close><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg> Close</button></div>
+      <nav class="menu-links" data-mount="menu" aria-label="Main"></nav>
+    </div>
+
+    <div class="m2-hero">
+      <svg class="m2-bigmark cw-mark" aria-hidden="true"><use href="#cw-mark"/></svg>
+      <div class="m2-hero-t">
+        <h1 class="wide"><span class="ln"><span>You are</span></span><span class="ln"><span>loved<i>.</i></span></span></h1>
+        <p class="m2-quote">Crossway Bible Church exists to glorify God through the fulfillment of the Great Commission.</p>
+        <div class="m2-actions"><a class="blk" href="#">Plan your visit <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a><a class="blk blk--line" href="#">Watch live</a></div>
+      </div>
+    </div>
+
+    <div class="m2-strip" aria-hidden="true"><div class="m2-mq" data-mount="marquee"></div></div>
+
+    <div class="m2-mission">
+      <p class="lit" data-lit>Lost people saved. Saved people matured. Matured people multiplied.</p>
+      <p class="cite wide" style="font:700 0.8rem 'Archivo',sans-serif;font-stretch:112%;letter-spacing:.14em">Our aim, in three lines</p>
+    </div>
+
+    <div class="m2-visit">
+      <p class="m2-times"><span>9:00</span><span>10:45</span><em>AM &middot; every Sunday</em></p>
+      <div class="m2-visit-r">
+        <h2 class="wide">Visit on a Sunday</h2>
+        <p style="max-width:40ch">Here is what to expect when you walk in the door, so you can arrive knowing where to go.</p>
+        <dl class="m2-rows">
+          <div><dt>Where</dt><dd>15759 San Pedro Ave, San Antonio, TX 78232</dd></div>
+          <div><dt>Parking</dt><dd><span class="ph">Parking and arrival details</span><span class="ph-tag">to confirm</span></dd></div>
+          <div><dt>Kids</dt><dd>Crossway Kids meets at both services, from infants through 5th grade. <span class="ph">Check-in steps</span><span class="ph-tag">to confirm</span></dd></div>
+        </dl>
+        <div class="m2-btns"><a class="blk" href="#">Plan your visit <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a><a class="blk blk--line" href="#">Get directions</a></div>
+      </div>
+    </div>
+
+    <div class="m2-commit">
+      <h2 class="wide">Six commitments</h2>
+      <ul data-mount="m2-commit"></ul>
+    </div>
+
+    <div class="m2-stack">
+      <h2 class="wide">Three steps</h2>
+      <div data-mount="m2-steps"></div>
+    </div>
+
+    <div class="m2-news">
+      <div class="m2-feat">
+        <div class="photo" role="img" aria-label="Photo placeholder: the pulpit"><span class="photo-in"></span><span class="photo-tag">Photo: sermon artwork</span><a class="m2-play" href="#" aria-label="Watch the latest message"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg></a></div>
+        <h3>Entrusted With Resources: Putting Money in Its Place</h3>
+        <p class="meta">10.18.26 &middot; Josh de Koning &middot; 1 Timothy &middot; Stand Alone Messages</p>
+      </div>
+      <div class="m2-slist"><h2 class="wide">Recent messages</h2><ul data-mount="m2-sermons"></ul></div>
+    </div>
+
+    <div class="m2-events">
+      <h2 class="wide">Coming up</h2>
+      <ul data-mount="events"></ul>
+    </div>
+
+    <div class="m2-ent">
+      <h2 class="wide">Entrusted</h2>
+      <p>A two-year, church-wide initiative focused on discipleship, generosity and stewardship for God's glory. The commitment period begins Sunday, December 13.</p>
+      <a class="blk" href="#">Learn about ENTRUSTED <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    </div>
+
+    <footer class="m2-foot">
+      <div class="m2-foot-top">
+        <svg class="cw-mark" aria-hidden="true"><use href="#cw-mark"/></svg>
+        <p>Crossway Bible Church<br>Sundays at 9:00 and 10:45 am<br>15759 San Pedro Ave, San Antonio, TX 78232</p>
+        <nav aria-label="Footer"><a href="#">Give</a><a href="#">Events</a><a href="#">Church Center</a><a href="#">Sermons</a></nav>
+      </div>
+      <svg class="cw-full" aria-hidden="true"><use href="#cw-full"/></svg>
+    </footer>
+  </section>
+
+  <section class="needs">
+    <h2>Still needed from the church</h2>
+    <ul>
+      <li>Photos and short videos, ideally horizontal and vertical crops</li>
+      <li>A choice of three or four words for the hero (Connect, Consider and Commit are used here)</li>
+      <li>Parking and arrival details</li>
+      <li>How kids check-in works</li>
+      <li>The scripture the church wants quoted (Matthew 28 is a placeholder)</li>
+      <li>Child safety policy text, belief statements and leader bios</li>
+    </ul>
+    <p>The logo files are in <code>crossway/design/assets</code>: the cross mark in amber and navy, the lettering in navy and white, and ready-made lockups. Mix freely, for example the Night Service hero with the Directory list.</p>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+const esc = s => s.replace(/&/g, '&amp;');
+const arrow = '<svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg>';
+const events = [
+  { m: 'Oct', d: '25', t: 'Advanced Commitment Night' },
+  { m: 'Nov', d: '4', t: '1st Wednesday: Prayer & Praise' },
+  { m: 'Dec', d: '2', t: '1st Wednesday: Prayer & Praise' },
+  { m: 'Dec', d: '13', t: 'Student Ministry Christmas Party' }
+];
+const sermons = [
+  { date: '10.18.26', t: 'Entrusted With Resources: Putting Money in Its Place', by: 'Josh de Koning', ref: '1 Timothy' },
+  { date: '9.27.26', t: 'Treasuring Scripture Like Jesus', by: 'Josh de Koning', ref: 'Matthew' },
+  { date: '9.20.26', t: 'Main Character Energy', by: 'Josh Collins', ref: 'Joshua' },
+  { date: '9.13.26', t: 'How To Not Be a Pile of Rocks', by: 'Josh de Koning', ref: '1 Peter' }
+];
+const commitments = [
+  { t: 'Bold Preaching', v: '2 Timothy 4:2' },
+  { t: 'Passionate Worship', v: 'Psalm 95:6' },
+  { t: 'Purposeful Discipleship', v: '1 Thessalonians 2:8' },
+  { t: 'Fervent Prayer', v: 'Romans 12:12' },
+  { t: 'Courageous Evangelism', v: 'John 20:21' },
+  { t: 'Church Planting', v: 'Acts 14:23' }
+];
+const steps = [
+  { t: 'Connect', p: 'We want to meet you!', a: "Let's connect" },
+  { t: 'Consider', p: 'Learn more about us.', a: 'Tell me more' },
+  { t: 'Commit', p: 'Join our church!', a: "I'm ready" }
+];
+const menuItems = ['Visit', 'About', 'Small Groups', 'Students', 'Kids', 'Biblical Counseling', 'Sermons', 'Watch Live', 'Events', 'Give'];
+const directory = ['Plan your visit', 'Watch a sermon', 'Small groups', 'Kids and students', 'Events', 'Give'];
+
+const render = {
+  menu: () => menuItems.map(i => '<a href="#">' + i + arrow + '</a>').join(''),
+  events: () => events.map(e => '<li class="ev"><span class="ev-date"><span class="ev-m">' + e.m + '</span><span class="ev-d">' + e.d + '</span></span><span class="ev-t">' + esc(e.t) + '</span></li>').join(''),
+  marquee: () => {
+    const set = '<div style="display:flex">' + Array.from({ length: 8 }, (_, i) => '<div class="photo" role="img" aria-label="Photo placeholder"><span class="photo-in"></span><span class="photo-tag">Photo ' + (i + 1) + '</span></div>').join('') + '</div>';
+    return set + set;
+  },
+  'm2-commit': () => commitments.map(c => '<li class="m2-crow"><span class="wide">' + c.t + '</span><em>' + c.v + '</em><span class="go-i">' + arrow + '</span></li>').join(''),
+  'm2-steps': () => steps.map((s, i) => '<article class="m2-scard" style="--i:' + i + '"><h3>' + s.t + '</h3><span class="num" aria-hidden="true">' + (i + 1) + '</span><div class="row"><p>' + s.p + '</p><a class="blk" href="#">' + s.a + ' ' + arrow + '</a></div></article>').join(''),
+  'm2-sermons': () => sermons.slice(1).map(s => '<li class="sm"><span class="sm-date">' + s.date + '</span><span class="sm-t">' + s.t + '</span><span class="sm-by">' + s.by + ' &middot; ' + s.ref + '</span><a class="blk" href="#">Watch</a></li>').join(''),
+};
+document.querySelectorAll('[data-mount]').forEach(el => { const f = render[el.dataset.mount]; if (f) el.innerHTML = f(); });
+document.querySelectorAll('[data-lit]').forEach(el => {
+  el.innerHTML = el.textContent.split(' ').map(w => '<span>' + w + '</span>').join(' ');
+});
+
+document.addEventListener('click', e => {
+  if (e.target.closest('.mock a')) e.preventDefault();
+});
+
+const dirs = ['cream', 'navy'];
+const hasGsap = typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined';
+if (hasGsap) gsap.registerPlugin(ScrollTrigger);
+const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let mm = null;
+let current = null;
+
+function once(trigger, vars, start) {
+  return Object.assign({}, vars, { scrollTrigger: { trigger: trigger, start: start || 'top 88%', once: true } });
+}
+function reveal(targets, trigger, vars) {
+  if (!trigger) return;
+  gsap.from(targets, once(trigger, Object.assign({ opacity: 0, y: 22, duration: 0.8, stagger: 0.09, ease: 'power2.out' }, vars || {})));
+}
+function lightWords(q, sel) {
+  q(sel).forEach(el => {
+    gsap.fromTo(el.querySelectorAll('span'), { opacity: 0.18 }, { opacity: 1, stagger: 0.12, ease: 'none', scrollTrigger: { trigger: el, start: 'top 82%', end: 'bottom 48%', scrub: true } });
+  });
+}
+function menuSetup(root) {
+  const menu = root.querySelector('[data-menu]');
+  if (!menu) return;
+  const open = () => {
+    menu.hidden = false;
+    if (hasGsap && !reduce()) {
+      gsap.fromTo(menu, { clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)', duration: 0.6, ease: 'power3.out' });
+      gsap.from(menu.querySelectorAll('.menu-links a'), { opacity: 0, y: 24, duration: 0.6, stagger: 0.04, delay: 0.25, ease: 'power2.out' });
+    }
+  };
+  const close = () => {
+    if (hasGsap && !reduce()) {
+      gsap.to(menu, { clipPath: 'inset(0 0 100% 0)', duration: 0.45, ease: 'power3.in', onComplete: () => { menu.hidden = true; gsap.set(menu, { clearProps: 'clipPath' }); } });
+    } else menu.hidden = true;
+  };
+  root.querySelectorAll('[data-menu-open]').forEach(b => b.addEventListener('click', open));
+  root.querySelectorAll('[data-menu-close]').forEach(b => b.addEventListener('click', close));
+}
+document.querySelectorAll('.mock').forEach(menuSetup);
+document.querySelectorAll('.m1-commit').forEach(sec => {
+  const track = sec.querySelector('[data-track]');
+  const step = () => { const c = track.querySelector('.m1-ccard'); return c ? c.getBoundingClientRect().width + 14 : 300; };
+  sec.querySelector('[data-car-prev]').addEventListener('click', () => track.scrollBy({ left: -step(), behavior: 'smooth' }));
+  sec.querySelector('[data-car-next]').addEventListener('click', () => track.scrollBy({ left: step(), behavior: 'smooth' }));
+});
+
+function initNight(q) {
+  const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+  tl.from(q('.m2-bar, .m2-head'), { opacity: 0, y: -8, duration: 0.6, stagger: 0.1 })
+    .from(q('.m2-hero h1 .ln > span'), { yPercent: 105, duration: 1.1, stagger: 0.14 }, 0.2)
+    .from(q('.m2-bigmark'), { xPercent: 18, opacity: 0, duration: 1.4, ease: 'power3.out' }, 0.2)
+    .from(q('.m2-quote, .m2-actions'), { opacity: 0, y: 16, duration: 0.8, stagger: 0.12, ease: 'power2.out' }, 0.9);
+  gsap.to(q('.m2-mq'), { xPercent: -50, duration: 70, ease: 'none', repeat: -1 });
+  lightWords(q, '.m2-mission p.lit');
+  reveal(q('.m2-times > *'), q('.m2-visit')[0], { stagger: 0.14, y: 40 });
+  reveal(q('.m2-visit-r > *'), q('.m2-visit')[0], { stagger: 0.1 });
+  reveal(q('.m2-commit h2'), q('.m2-commit')[0]);
+  reveal(q('.m2-crow'), q('.m2-commit ul')[0], { y: 14, stagger: 0.07 });
+  reveal(q('.m2-stack > h2'), q('.m2-stack')[0]);
+  const cards = q('.m2-scard');
+  cards.forEach((card, i) => {
+    const next = cards[i + 1];
+    if (!next) return;
+    gsap.to(card, { scale: 0.94, opacity: 0.55, ease: 'none', scrollTrigger: { trigger: next, start: 'top 75%', end: 'top 25%', scrub: true } });
+  });
+  reveal(q('.m2-feat > *'), q('.m2-news')[0]);
+  reveal(q('.m2 .sm, .m2-slist h2'), q('.m2-slist')[0], { y: 14, stagger: 0.08 });
+  reveal(q('.m2-events h2'), q('.m2-events')[0]);
+  reveal(q('.m2 .ev'), q('.m2-events ul')[0], { stagger: 0.1 });
+  reveal(q('.m2-ent > *'), q('.m2-ent')[0], { stagger: 0.12 });
+  gsap.from(q('.m2-foot .cw-full'), { yPercent: 40, ease: 'none', scrollTrigger: { trigger: q('.m2-foot')[0], start: 'top 95%', end: 'bottom bottom', scrub: true } });
+}
+
+function show(id) {
+  if (mm) { mm.revert(); mm = null; }
+  current = id;
+  const root = document.getElementById('mock-main');
+  root.classList.toggle('is-day', id === 'cream');
+  dirs.forEach(d => {
+    const on = d === id;
+    document.getElementById('spec-' + d).hidden = !on;
+    const tab = document.getElementById('tab-' + d);
+    tab.setAttribute('aria-selected', on ? 'true' : 'false');
+    tab.tabIndex = on ? 0 : -1;
+  });
+  document.querySelectorAll('[data-menu]').forEach(m => { m.hidden = true; });
+  try { history.replaceState(null, '', '#' + id); } catch (err) {}
+  if (!hasGsap) return;
+  mm = gsap.matchMedia();
+  mm.add({ rm: '(prefers-reduced-motion: no-preference)' }, ctx => {
+    if (!ctx.conditions.rm) return;
+    initNight(gsap.utils.selector(root));
+  });
+  ScrollTrigger.refresh();
+}
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => show(tab.dataset.dir));
+  tab.addEventListener('keydown', e => {
+    const i = dirs.indexOf(tab.dataset.dir);
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      const next = dirs[(i + (e.key === 'ArrowRight' ? 1 : dirs.length - 1)) % dirs.length];
+      show(next);
+      document.getElementById('tab-' + next).focus();
+    }
+  });
+});
+document.getElementById('replay').addEventListener('click', () => show(current));
+
+const fromHash = location.hash.replace('#', '');
+show(dirs.indexOf(fromHash) > -1 ? fromHash : 'cream');
+</script>

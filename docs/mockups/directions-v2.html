@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crossway — Visual Directions v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&family=Libre+Caslon+Text:ital,wght@0,400;1,400&family=Big+Shoulders+Display:wght@600;800;900&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300;1,6..72,400&family=Hanken+Grotesk:wght@400;500;600;700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root {
+    --paper: #F3F0E8;
+    --navy: #182C42;
+    --amber: #EBA92F;
+    --mist: #A9B7C8;
+    --ink: #333333;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #0d1520; color: var(--paper); font-family: "Hanken Grotesk", sans-serif; }
+  .intro { max-width: 1100px; margin: 0 auto; padding: 56px 32px 32px; }
+  .intro h1 { font-family: "Hanken Grotesk"; font-weight: 600; font-size: 28px; letter-spacing: -0.01em; }
+  .intro p { color: var(--mist); margin-top: 10px; max-width: 70ch; line-height: 1.55; }
+  .dir { margin: 40px auto 80px; max-width: 1440px; padding: 0 24px; }
+  .dir-label { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; padding: 0 4px 14px; cursor: pointer; }
+  .dir-label h2 { font-size: 22px; font-weight: 600; }
+  .dir-label h2 span { color: var(--amber); margin-right: 10px; }
+  .dir-label p { color: var(--mist); font-size: 14px; max-width: 62ch; text-align: right; line-height: 1.5; }
+  .frame { border-radius: 14px; overflow: hidden; position: relative; outline: 3px solid transparent; outline-offset: 6px; transition: outline-color .3s; cursor: pointer; }
+  .dir.selected .frame { outline-color: var(--amber); }
+  .dir.selected .dir-label h2::after { content: " — selected"; color: var(--amber); font-weight: 500; font-size: 16px; }
+  .replay { font: 500 12px/1 "Hanken Grotesk"; letter-spacing: .08em; text-transform: uppercase; background: none; border: 1px solid #ffffff33; color: var(--mist); padding: 8px 12px; border-radius: 99px; cursor: pointer; }
+  video { display: block; width: 100%; height: 100%; object-fit: cover; transform: scale(1.08); }
+  .bg { position: absolute; inset: 0; overflow: hidden; }
+  .mark path { fill: none; stroke: var(--amber); stroke-width: 18; stroke-linejoin: miter; }
+
+  /* ---------- A · Sanctuary ---------- */
+  .a { background: var(--paper); color: var(--navy); }
+  .a .a-hero { position: relative; min-height: 720px; padding: 28px 56px 72px; display: flex; flex-direction: column; }
+  .a .a-wash { position: absolute; inset: 0; background:
+      linear-gradient(90deg, rgba(243,240,232,.97) 0%, rgba(243,240,232,.92) 32%, rgba(243,240,232,.55) 52%, rgba(243,240,232,0) 74%),
+      linear-gradient(0deg, rgba(243,240,232,.6) 0%, rgba(243,240,232,0) 30%); }
+  .a nav { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; }
+  .a nav img { height: 22px; }
+  .a nav ul { display: flex; gap: 34px; list-style: none; font: 500 13px "Hanken Grotesk"; letter-spacing: .14em; text-transform: uppercase; color: var(--navy); }
+  .a .btn { background: var(--navy); color: var(--paper); font: 600 13px "Hanken Grotesk"; letter-spacing: .12em; text-transform: uppercase; padding: 14px 22px; border-radius: 99px; }
+  .a .hero-copy { position: relative; z-index: 2; margin-top: auto; max-width: 760px; }
+  .a .eyebrow { font: 600 12px "Hanken Grotesk"; letter-spacing: .28em; text-transform: uppercase; color: #9a6b10; display: flex; align-items: center; gap: 14px; }
+  .a .eyebrow::before { content: ""; width: 40px; height: 1px; background: currentColor; }
+  .a h3 { font-family: "Libre Caslon Display"; font-weight: 400; font-size: clamp(96px, 12.5vw, 210px); line-height: .86; letter-spacing: -0.02em; margin: 28px 0 0; }
+  .a h3 em { font-family: "Libre Caslon Text"; font-style: italic; color: var(--navy); }
+  .a h3 .line { display: block; overflow: hidden; line-height: 1.1; padding-bottom: .1em; margin-bottom: -.32em; }
+  .a h3 .line > span { display: inline-block; }
+  .a .verse { margin-top: 34px; font-family: "Libre Caslon Text"; font-style: italic; font-size: 21px; color: #3a4a5c; max-width: 30ch; line-height: 1.45; }
+  .a .verse small { display: block; font: 600 11px "Hanken Grotesk"; font-style: normal; letter-spacing: .24em; text-transform: uppercase; margin-top: 10px; color: #9a6b10; }
+  .a .bulletin { border-top: 1.5px solid var(--navy); display: grid; grid-template-columns: repeat(3, 1fr); }
+  .a .bulletin div { padding: 22px 56px; font: 500 13px "Hanken Grotesk"; letter-spacing: .16em; text-transform: uppercase; }
+  .a .bulletin div + div { border-left: 1.5px solid var(--navy); }
+  .a .bulletin b { display: block; font-family: "Libre Caslon Text"; font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 24px; margin-top: 6px; }
+  .a .next { background: var(--navy); color: var(--paper); padding: 96px 56px 110px; text-align: center; }
+  .a .next .eyebrow { justify-content: center; color: var(--amber); }
+  .a .next .eyebrow::after { content: ""; width: 40px; height: 1px; background: currentColor; }
+  .a .next p { font-family: "Libre Caslon Display"; font-size: clamp(36px, 4.2vw, 64px); line-height: 1.1; max-width: 22ch; margin: 26px auto 0; }
+  .a .next p em { font-family: "Libre Caslon Text"; color: var(--amber); }
+
+  /* ---------- B · Wayfinder ---------- */
+  .b { background: var(--navy); color: var(--paper); position: relative; overflow: hidden; }
+  .b .b-hero { position: relative; min-height: 760px; }
+  .b .b-wash { position: absolute; inset: 0; background:
+      linear-gradient(90deg, rgba(24,44,66,.94) 0%, rgba(24,44,66,.8) 40%, rgba(24,44,66,.45) 75%, rgba(24,44,66,.35) 100%),
+      linear-gradient(0deg, rgba(24,44,66,.9) 0%, rgba(24,44,66,0) 40%); }
+  .b nav { display: flex; align-items: center; justify-content: space-between; padding: 28px 48px; position: relative; z-index: 3; }
+  .b nav img { height: 22px; }
+  .b nav ul { display: flex; gap: 30px; list-style: none; font: 600 14px "Hanken Grotesk"; color: var(--paper); }
+  .b .btn { background: var(--amber); color: var(--navy); font: 700 14px "Hanken Grotesk"; padding: 14px 22px; border-radius: 4px; }
+  .b .stage { position: relative; height: 660px; z-index: 2; }
+  .b .big-mark { position: absolute; right: 6%; top: -10px; width: 470px; }
+  .b .big-mark path { stroke-width: 3; }
+  .b h3 { position: absolute; left: 48px; bottom: 48px; font-family: "Big Shoulders Display"; font-weight: 900; text-transform: uppercase; font-size: clamp(120px, 15vw, 250px); line-height: .8; letter-spacing: -0.01em; }
+  .b h3 .row { display: block; overflow: hidden; line-height: 1; padding-top: .04em; margin-bottom: -.16em; }
+  .b h3 .row span { display: inline-block; }
+  .b h3 .amber { color: var(--amber); }
+  .b .side { position: absolute; left: 52px; top: 30px; max-width: 34ch; font-size: 18px; line-height: 1.55; color: #d5dde7; }
+  .b .side strong { color: var(--paper); font-weight: 600; }
+  .b .ticker { background: var(--amber); color: var(--navy); overflow: hidden; white-space: nowrap; position: relative; z-index: 2; }
+  .b .ticker div { display: inline-block; padding: 18px 0; font: 800 26px "Big Shoulders Display"; letter-spacing: .04em; text-transform: uppercase; }
+  .b .ticker i { font-style: normal; display: inline-block; width: 14px; height: 14px; border: 3px solid var(--navy); transform: rotate(45deg); margin: 0 28px 3px; }
+  .b .steps { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--paper); color: var(--navy); }
+  .b .steps div { padding: 48px; border-right: 2px solid var(--navy); }
+  .b .steps div:last-child { border-right: 0; }
+  .b .steps b { font: 900 92px/1 "Big Shoulders Display"; -webkit-text-stroke: 2px var(--navy); color: transparent; }
+  .b .steps h4 { font: 800 44px/1 "Big Shoulders Display"; text-transform: uppercase; margin-top: 16px; }
+  .b .steps p { margin-top: 10px; font-size: 16px; color: #3a4a5c; }
+
+  /* ---------- C · Morning Light ---------- */
+  .c { background: var(--paper); color: var(--navy); position: relative; overflow: hidden; font-family: "Figtree", sans-serif; }
+  .c .film { position: relative; height: 640px; margin: 14px 14px 0; border-radius: 28px; overflow: hidden; }
+  .c .film video { transform: scale(1.18); }
+  .c .film::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(24,44,66,.35) 0%, rgba(24,44,66,0) 30%, rgba(243,240,232,0) 55%, rgba(243,240,232,.92) 100%); }
+  .c .ray { position: absolute; border-radius: 50%; filter: blur(60px); mix-blend-mode: screen; pointer-events: none; z-index: 1; }
+  .c .ray.r1 { width: 520px; height: 520px; background: radial-gradient(circle, #EBA92Fcc, #EBA92F00 70%); top: -160px; right: 8%; }
+  .c .ray.r2 { width: 380px; height: 380px; background: radial-gradient(circle, #fff4d6cc, #fff4d600 70%); top: 80px; right: 30%; }
+  .c nav { position: absolute; z-index: 3; top: 28px; left: 42px; right: 42px; display: flex; align-items: center; justify-content: space-between; }
+  .c nav img { height: 22px; }
+  .c nav ul { display: flex; gap: 6px; list-style: none; background: rgba(243,240,232,.16); backdrop-filter: blur(14px); padding: 6px; border-radius: 99px; border: 1px solid rgba(255,255,255,.25); }
+  .c nav li { color: #fff; font: 500 14px "Figtree"; padding: 10px 16px; border-radius: 99px; }
+  .c nav li.on { background: var(--paper); color: var(--navy); }
+  .c .btn { background: var(--amber); color: var(--navy); font: 600 15px "Figtree"; padding: 14px 24px; border-radius: 99px; }
+  .c .copy { position: relative; z-index: 2; margin: -250px 0 0; padding: 0 56px; display: grid; grid-template-columns: 1.4fr 1fr; align-items: end; gap: 48px; }
+  .c h3 { font-family: "Newsreader"; font-weight: 300; font-size: clamp(96px, 11.5vw, 196px); line-height: .9; letter-spacing: -0.035em; }
+  .c h3 em { font-style: italic; font-weight: 300; color: #b9831a; }
+  .c h3 .w { display: inline-block; }
+  .c .info { padding-bottom: 22px; }
+  .c .info p { font-size: 19px; line-height: 1.55; color: #3a4a5c; max-width: 34ch; }
+  .c .chips { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+  .c .chip { border: 1px solid var(--mist); padding: 10px 16px; border-radius: 99px; font-size: 14px; font-weight: 500; background: #fff8; }
+  .c .chip b { color: #b9831a; font-weight: 600; margin-right: 6px; }
+  .c .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; padding: 72px 14px 14px; }
+  .c .steps div { background: #fff; border-radius: 22px; padding: 36px 32px 40px; position: relative; overflow: hidden; }
+  .c .steps div:nth-child(2) { background: var(--mist); }
+  .c .steps div:nth-child(3) { background: var(--navy); color: var(--paper); }
+  .c .steps b { font: 300 20px "Newsreader"; font-style: italic; color: #b9831a; }
+  .c .steps h4 { font: 400 46px/1 "Newsreader"; letter-spacing: -.02em; margin-top: 46px; }
+  .c .steps p { margin-top: 10px; font-size: 16px; opacity: .8; }
+  .c .steps span.arrow { position: absolute; top: 30px; right: 30px; width: 44px; height: 44px; border-radius: 50%; border: 1px solid currentColor; display: grid; place-items: center; opacity: .5; }
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>Three directions for Crossway (v2)</h1>
+  <p>A and B now run the lobby footage full-bleed behind the hero, like C. A washes it with Paper so the serif headline stays crisp, and B washes it with Navy so the big type and the amber cross outline pop. Click the one that feels closest, or tell me what you'd take from each.</p>
+</div>
+
+<!-- A -->
+<section class="dir" data-choice="a-sanctuary" onclick="toggleSelect(this)">
+  <div class="dir-label">
+    <h2><span>A</span>Sanctuary</h2>
+    <p>Warm, editorial and quietly established. Caslon serif (the typeface of old printed Bibles), footage glowing through a soft paper wash, small-caps details like a printed bulletin.</p>
+  </div>
+  <div class="frame a" data-anim="a">
+    <div class="a-hero">
+      <div class="bg"><video autoplay muted loop playsinline poster="./lobby.jpg" src="https://cdn.prod.website-files.com/662a778edf0dbc5f95970240%2F669ad776baab0822e5c3a6af_C008_03221843_C012-transcode.mp4"></video></div>
+      <div class="a-wash"></div>
+      <nav>
+        <img src="./logo.png" alt="Crossway Bible Church">
+        <ul><li>Visit</li><li>About</li><li>Church Life</li><li>Sermons</li><li>Events</li><li>Give</li></ul>
+        <span class="btn">Plan a Visit</span>
+      </nav>
+      <div class="hero-copy">
+        <div class="eyebrow a-fade">Crossway Bible Church · San Antonio</div>
+        <h3><span class="line"><span>You are</span></span><span class="line"><span><em>loved.</em></span></span></h3>
+        <p class="verse a-fade">“We love because he first loved us.”<small>1 John 4:19</small></p>
+      </div>
+    </div>
+    <div class="bulletin">
+      <div>Sundays<b>9:00 &amp; 10:45 am</b></div>
+      <div>Find Us<b>15759 San Pedro Ave</b></div>
+      <div>This Week<b>Entrusted With Resources</b></div>
+    </div>
+    <div class="next">
+      <div class="eyebrow">Why we gather</div>
+      <p>We exist to glorify God through the fulfillment of the <em>Great Commission.</em></p>
+    </div>
+  </div>
+</section>
+
+<!-- B -->
+<section class="dir" data-choice="b-wayfinder" onclick="toggleSelect(this)">
+  <div class="dir-label">
+    <h2><span>B</span>Wayfinder</h2>
+    <p>Bold and confident, closest to Table Fellowship. Huge condensed type over full-bleed footage, with the logo's cross outline drawing itself across the scene. Amber does the shouting.</p>
+  </div>
+  <div class="frame b" data-anim="b">
+    <div class="b-hero">
+      <div class="bg"><video autoplay muted loop playsinline poster="./lobby.jpg" src="https://cdn.prod.website-files.com/662a778edf0dbc5f95970240%2F669ad776baab0822e5c3a6af_C008_03221843_C012-transcode.mp4"></video></div>
+      <div class="b-wash"></div>
+      <nav>
+        <img src="./logo-white.png" alt="Crossway Bible Church">
+        <ul><li>Visit</li><li>About</li><li>Church Life</li><li>Sermons</li><li>Events</li><li>Give</li></ul>
+        <span class="btn">Plan a Visit →</span>
+      </nav>
+      <div class="stage">
+        <p class="side b-fade"><strong>Crossway is a Bible church in north San Antonio.</strong> Come as you are. The coffee's on, the kids are covered, and there's a seat saved for you.</p>
+        <svg class="mark big-mark" viewBox="0 0 254 300"><path d="M89 9H165V89H245V146H184L127 91L70 146H9V89H89Z"/><path d="M127 167L165 205V291H89V205Z"/></svg>
+        <h3><span class="row"><span>You are</span></span><span class="row"><span class="amber">loved.</span></span></h3>
+      </div>
+    </div>
+    <div class="ticker"><div class="track">Sundays 9:00 &amp; 10:45 <i></i> 15759 San Pedro Ave <i></i> Kids &amp; Students every Sunday <i></i> All are welcome <i></i> Sundays 9:00 &amp; 10:45 <i></i> 15759 San Pedro Ave <i></i> Kids &amp; Students every Sunday <i></i> All are welcome <i></i></div></div>
+    <div class="steps">
+      <div><b>01</b><h4>Connect</h4><p>We want to meet you.</p></div>
+      <div><b>02</b><h4>Consider</h4><p>Learn who we are and what we believe.</p></div>
+      <div><b>03</b><h4>Commit</h4><p>Make Crossway home.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- C -->
+<section class="dir" data-choice="c-morning-light" onclick="toggleSelect(this)">
+  <div class="dir-label">
+    <h2><span>C</span>Morning Light</h2>
+    <p>Bright and airy, like the building itself. The footage runs edge to edge with sunlight glowing across it, and soft rounded cards. A light, elegant serif in place of shouty type. Modern and gentle.</p>
+  </div>
+  <div class="frame c" data-anim="c">
+    <div class="film">
+      <div class="ray r1"></div><div class="ray r2"></div>
+      <nav>
+        <img src="./logo-white.png" alt="Crossway Bible Church">
+        <ul><li class="on">Visit</li><li>About</li><li>Church Life</li><li>Sermons</li><li>Events</li><li>Give</li></ul>
+        <span class="btn">Plan a Visit</span>
+      </nav>
+      <video autoplay muted loop playsinline poster="./lobby.jpg" src="https://cdn.prod.website-files.com/662a778edf0dbc5f95970240%2F669ad776baab0822e5c3a6af_C008_03221843_C012-transcode.mp4"></video>
+    </div>
+    <div class="copy">
+      <h3><span class="w">You</span> <span class="w">are</span><br><em class="w">loved.</em></h3>
+      <div class="info c-fade">
+        <p>A Bible church in north San Antonio: bright on Sunday morning, honest about the hard questions, and glad you're here.</p>
+        <div class="chips"><span class="chip"><b>Sun</b>9:00 &amp; 10:45 am</span><span class="chip"><b>At</b>15759 San Pedro Ave</span></div>
+      </div>
+    </div>
+    <div class="steps">
+      <div><span class="arrow">→</span><b>one</b><h4>Connect</h4><p>We want to meet you.</p></div>
+      <div><span class="arrow">→</span><b>two</b><h4>Consider</h4><p>Learn who we are.</p></div>
+      <div><span class="arrow">→</span><b>three</b><h4>Commit</h4><p>Make Crossway home.</p></div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll('.dir-label').forEach(label => {
+    const btn = document.createElement('button');
+    btn.className = 'replay';
+    btn.textContent = 'Replay';
+    btn.addEventListener('click', e => { e.stopPropagation(); play(label.nextElementSibling.dataset.anim); });
+    label.appendChild(btn);
+  });
+
+  document.querySelectorAll('.dir').forEach(d => d.addEventListener('click', () => {
+    document.querySelectorAll('.dir').forEach(o => { if (o !== d) o.classList.remove('selected'); });
+  }));
+
+  document.querySelectorAll('video').forEach(v => {
+    const skipDarkOpening = () => { if (v.currentTime < 2.5) v.currentTime = 2.5; };
+    v.addEventListener('loadedmetadata', skipDarkOpening);
+    v.addEventListener('timeupdate', skipDarkOpening);
+    if (v.readyState >= 1) skipDarkOpening();
+  });
+
+  function drawMark(svg, dur) {
+    const paths = svg.querySelectorAll('path');
+    paths.forEach(p => { const l = p.getTotalLength(); gsap.set(p, { strokeDasharray: l, strokeDashoffset: l }); });
+    return gsap.to(paths, { strokeDashoffset: 0, duration: dur, ease: 'power2.inOut', stagger: 0.25 });
+  }
+
+  const anims = {
+    a() {
+      const tl = gsap.timeline();
+      tl.from('.a .bg', { opacity: 0, duration: 1.6, ease: 'power2.out' })
+        .from('.a .bg video', { scale: 1.3, duration: 2.6, ease: 'power3.out' }, 0)
+        .from('.a h3 .line > span', { yPercent: 110, duration: 1.2, ease: 'expo.out', stagger: 0.12 }, 0.3)
+        .from('.a .a-fade', { opacity: 0, y: 14, duration: .9, stagger: .15 }, 0.7)
+        .from('.a .bulletin div', { opacity: 0, y: 16, duration: .8, stagger: .1 }, 1);
+      return tl;
+    },
+    b() {
+      const tl = gsap.timeline();
+      tl.from('.b .bg video', { scale: 1.35, duration: 2.4, ease: 'power3.out' }, 0)
+        .add(drawMark(document.querySelector('.b .big-mark'), 1.8), 0.2)
+        .from('.b h3 .row span', { yPercent: 100, duration: 1, ease: 'power4.out', stagger: 0.1 }, 0.5)
+        .from('.b .b-fade', { opacity: 0, x: -20, duration: 1 }, 1)
+        .from('.b .steps div', { opacity: 0, y: 30, duration: .8, stagger: .12 }, 1.1);
+      return tl;
+    },
+    c() {
+      const tl = gsap.timeline();
+      tl.from('.c .film', { clipPath: 'inset(8% 8% 8% 8% round 28px)', duration: 1.6, ease: 'expo.inOut' })
+        .from('.c .film video', { scale: 1.45, duration: 2.4, ease: 'power3.out' }, 0)
+        .from('.c h3 .w', { opacity: 0, y: 40, filter: 'blur(12px)', duration: 1.2, ease: 'power3.out', stagger: .14 }, 0.7)
+        .from('.c .c-fade', { opacity: 0, y: 16, duration: 1 }, 1.1)
+        .from('.c .steps div', { opacity: 0, y: 40, duration: .9, ease: 'power3.out', stagger: .1 }, 1.2);
+      return tl;
+    }
+  };
+  const running = {};
+  function play(key) {
+    if (running[key]) { running[key].progress(1).kill(); }
+    running[key] = anims[key]();
+  }
+
+  gsap.to('.b .ticker .track', { xPercent: -50, duration: 28, ease: 'none', repeat: -1 });
+  gsap.to('.c .ray.r1', { x: -120, y: 60, duration: 9, yoyo: true, repeat: -1, ease: 'sine.inOut' });
+  gsap.to('.c .ray.r2', { x: 90, y: -30, opacity: .5, duration: 7, yoyo: true, repeat: -1, ease: 'sine.inOut' });
+
+  const seen = new Set(/HeadlessChrome/.test(navigator.userAgent) ? ['a', 'b', 'c'] : []);
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      const key = en.target.dataset.anim;
+      if (en.isIntersecting && !seen.has(key)) { seen.add(key); play(key); }
+    });
+  }, { threshold: 0.25 });
+  document.querySelectorAll('[data-anim]').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

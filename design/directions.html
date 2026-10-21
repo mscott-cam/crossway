@@ -1,0 +1,872 @@
+<title>Crossway Site Directions</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600;700&family=Public+Sans:wght@400;500;600&family=Schibsted+Grotesk:wght@500;700;800&family=Young+Serif&display=swap">
+<style>
+:root {
+  --bg: #f3f6f8;
+  --fg: #142331;
+  --muted: #4b5f6e;
+  --line: #d3dde4;
+  --panel: #ffffff;
+  --chip: #e6edf2;
+  --brand: #1a374d;
+  --amber: #f5a707;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1822;
+    --fg: #e8eef2;
+    --muted: #a5b5c1;
+    --line: #26394a;
+    --panel: #14242f;
+    --chip: #1c3141;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1822;
+  --fg: #e8eef2;
+  --muted: #a5b5c1;
+  --line: #26394a;
+  --panel: #14242f;
+  --chip: #1c3141;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Figtree', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 80px;
+}
+.wrap { max-width: 1240px; margin: 0 auto; display: grid; gap: 28px; }
+.wrap > * { min-width: 0; }
+.intro { display: grid; gap: 14px; max-width: 74ch; }
+.intro h1 { margin: 0; font-size: clamp(1.8rem, 3.6vw, 2.7rem); line-height: 1.1; font-weight: 700; text-wrap: balance; letter-spacing: -0.015em; }
+.intro p { margin: 0; color: var(--muted); font-size: 1.05rem; }
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.tab { text-align: left; padding: 14px 18px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); border-radius: 10px; font: inherit; cursor: pointer; display: grid; gap: 2px; }
+.tab strong { font-size: 1.05rem; }
+.tab span { color: var(--muted); font-size: 0.92rem; }
+.tab:hover { border-color: var(--muted); }
+.tab[aria-selected="true"] { border-color: var(--fg); box-shadow: inset 0 0 0 1px var(--fg); }
+.tab:focus-visible, .replay:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.spec { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; gap: 24px; padding: 20px 22px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+.spec > div { min-width: 0; display: grid; gap: 6px; align-content: start; }
+.spec h2 { margin: 0; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.spec p { margin: 0; font-size: 0.97rem; }
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+.sw { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--muted); }
+.sw i { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--line); display: block; }
+.bar { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.bar p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+.replay { font: inherit; font-weight: 600; padding: 9px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; }
+.replay:hover { border-color: var(--fg); }
+.needs { display: grid; gap: 10px; padding: 22px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+.needs h2 { margin: 0; font-size: 1.15rem; }
+.needs ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 4px; columns: 2; column-gap: 40px; }
+.needs p { margin: 0; color: var(--muted); }
+@media (max-width: 900px) {
+  .spec { grid-template-columns: 1fr 1fr; }
+  .needs ul { columns: 1; }
+}
+@media (max-width: 760px) {
+  .tabs { grid-template-columns: 1fr; }
+  .spec { grid-template-columns: 1fr; }
+}
+
+.mock { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; isolation: isolate; }
+.mock a { color: inherit; }
+.mock :focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
+.mock ul, .mock ol, .mock dl { list-style: none; margin: 0; padding: 0; }
+.mock p { margin: 0; }
+.ico { width: 18px; height: 18px; flex: none; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; padding: 0 22px; font: inherit; font-weight: 600; text-decoration: none; border: 2px solid transparent; cursor: pointer; border-radius: var(--btn-r, 999px); }
+.btn--solid { background: var(--btn-bg); color: var(--btn-fg); }
+.btn--line { border-color: var(--btn-line); color: var(--btn-line); background: transparent; }
+.m-menu { display: none; font: inherit; font-weight: 600; background: transparent; border: 2px solid currentColor; border-radius: 8px; padding: 8px 14px; color: inherit; margin-left: auto; }
+.ph { border-bottom: 2px dashed var(--amb, #f5a707); }
+.ph-tag { display: inline-block; margin-left: 6px; padding: 0 8px; border-radius: 999px; background: #fff0c7; color: #4a3500; font-size: 0.78rem; font-weight: 600; white-space: nowrap; vertical-align: 1px; }
+
+.a { --n: #1a374d; --n-deep: #0f2434; --amb: #f5a707; --stone: #dde5ea; --mist: #eef2f5; --ink: #10283a; background: var(--n); color: #eaf0f4; font-family: 'Figtree', system-ui, sans-serif; --btn-bg: var(--n); --btn-fg: #fff; --btn-line: var(--n); }
+.a h1, .a h2, .a h3 { font-family: 'Young Serif', Georgia, serif; font-weight: 400; margin: 0; text-wrap: balance; }
+.a-head { display: flex; align-items: center; gap: 24px; padding: 20px clamp(16px, 4vw, 56px); }
+.a-brand { display: flex; align-items: center; gap: 12px; font-weight: 600; color: #fff; text-decoration: none; }
+.a-mark { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; background: var(--amb); color: var(--n); font-family: 'Young Serif', serif; }
+.a-nav { display: flex; gap: 4px; margin-left: auto; }
+.a-nav a { padding: 10px 12px; border-radius: 8px; color: #d4e0e8; text-decoration: none; font-weight: 500; }
+.a-nav a:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
+.a-give { padding: 10px 20px; border-radius: 999px; background: var(--amb); color: var(--n); font-weight: 600; text-decoration: none; }
+.a-hero { padding-top: 24px; }
+.a-arcade { display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: clamp(10px, 1.8vw, 24px); align-items: end; padding: 0 clamp(16px, 4vw, 56px); }
+.a-arch { container-type: inline-size; background: var(--stone); padding: 9px 9px 0; border-radius: 999px 999px 0 0; min-width: 0; }
+.a-lit { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; padding: max(28px, 30cqw) 9cqw 36px; min-height: 380px; border-radius: 999px 999px 0 0; background: radial-gradient(120% 90% at 50% 100%, #ffc84a 0%, var(--amb) 55%, #eb9c00 100%); color: var(--n); }
+.a-arch--mid .a-lit { min-height: 480px; justify-content: center; padding-bottom: 44px; }
+.a-dim { position: absolute; inset: 0; border-radius: inherit; background: var(--n-deep); opacity: 0; pointer-events: none; z-index: 2; }
+.a-lit h1 { font-size: clamp(2.2rem, 13cqw, 3.9rem); line-height: 1.02; }
+.a-lit h2 { font-size: 1.5rem; line-height: 1.15; }
+.a-lit p { max-width: 30ch; }
+.a-times { display: grid; gap: 0; font-family: 'Young Serif', serif; font-size: clamp(2.1rem, 17cqw, 3.4rem); line-height: 1.05; }
+.a-times small { font-family: 'Figtree', sans-serif; font-size: 1rem; font-weight: 600; margin-top: 4px; }
+.a-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 8px; }
+.a-link { font-weight: 600; text-decoration: underline; text-underline-offset: 4px; display: inline-flex; gap: 6px; align-items: center; }
+.a-ground { height: 14px; background: var(--stone); }
+.a-plan { background: var(--mist); color: var(--ink); padding: clamp(48px, 7vw, 96px) clamp(16px, 4vw, 56px); }
+.a-plan-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: clamp(28px, 5vw, 72px); align-items: start; max-width: 1160px; margin: 0 auto; }
+.a-plan-grid > * { min-width: 0; }
+.a-plan h2 { font-size: clamp(2rem, 4vw, 3rem); line-height: 1.08; }
+.a-lead { font-size: 1.15rem; max-width: 46ch; color: #2e4658; margin: 16px 0 24px !important; }
+.a-row { display: grid; grid-template-columns: 8.5rem 1fr; gap: 16px; padding: 16px 0; border-top: 1px solid #c6d2da; }
+.a-row dt { font-weight: 600; }
+.a-row dd { margin: 0; color: #2e4658; }
+.a-photo { aspect-ratio: 3 / 4; width: 100%; max-width: 420px; margin-inline: auto; border-radius: 999px 999px 0 0; background: repeating-linear-gradient(135deg, #27495f 0 14px, #2b4f66 14px 28px); display: grid; align-items: end; justify-items: center; padding: 24px; }
+.photo-tag { padding: 6px 14px; border-radius: 999px; background: rgba(15, 36, 52, 0.82); color: #e4edf3; font-size: 0.85rem; font-weight: 500; }
+.a-steps { max-width: 1160px; margin: clamp(48px, 6vw, 80px) auto 0; }
+.a-steps h3 { font-size: 1.7rem; margin-bottom: 24px; }
+.a-step-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(12px, 2vw, 28px); }
+.a-step { container-type: inline-size; position: relative; overflow: hidden; border-radius: 999px 999px 0 0; border: 2px solid var(--n); border-bottom: 0; min-width: 0; }
+.a-step-fill { position: absolute; inset: 0; background: var(--amb); transform-origin: 50% 100%; }
+.a-step-body { position: relative; padding: max(24px, 30cqw) 10cqw 28px; text-align: center; display: grid; gap: 8px; justify-items: center; }
+.a-step-body h4 { margin: 0; font-family: 'Young Serif', serif; font-weight: 400; font-size: 1.7rem; }
+.a-step-body p { color: var(--n); }
+.a-news { background: var(--n); padding: clamp(48px, 7vw, 88px) clamp(16px, 4vw, 56px); }
+.a-news-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: clamp(28px, 5vw, 72px); max-width: 1160px; margin: 0 auto; }
+.a-news-grid > * { min-width: 0; }
+.a-news h2 { font-size: 1.5rem; color: var(--amb); margin-bottom: 18px; }
+.a-news h3 { font-size: clamp(1.8rem, 3.4vw, 2.6rem); line-height: 1.1; color: #fff; }
+.a-news .meta { color: #b9cad6; margin: 12px 0 22px; }
+.a-news .actions { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-bottom: 28px; }
+.a-news .btn--solid { --btn-bg: var(--amb); --btn-fg: var(--n); }
+.a-news .a-link { color: #fff; }
+.sm { display: grid; grid-template-columns: 5.5rem 1fr; gap: 4px 16px; padding: 14px 0; border-top: 1px solid rgba(255, 255, 255, 0.18); }
+.sm-date { color: #b9cad6; font-variant-numeric: tabular-nums; }
+.sm-t { font-weight: 600; color: #fff; }
+.sm-by { grid-column: 2; color: #b9cad6; font-size: 0.95rem; }
+.a .ev { display: grid; grid-template-columns: 4.5rem 1fr; gap: 14px; align-items: center; padding: 14px 0; border-top: 1px solid rgba(255, 255, 255, 0.18); }
+.a .ev-date { display: grid; line-height: 1.05; }
+.a .ev-m { color: var(--amb); font-weight: 600; font-size: 0.9rem; }
+.a .ev-d { font-family: 'Young Serif', serif; font-size: 1.9rem; color: #fff; }
+.a .ev-t { color: #fff; font-weight: 500; }
+.a-foot { background: var(--stone); color: var(--ink); padding: 28px clamp(16px, 4vw, 56px); display: flex; flex-wrap: wrap; gap: 12px 40px; justify-content: space-between; align-items: center; }
+.a-foot p { max-width: 60ch; }
+.a-foot nav { display: flex; gap: 20px; font-weight: 600; }
+@media (max-width: 900px) {
+  .a-nav { display: none; }
+  .a .m-menu { display: block; margin-left: auto; }
+  .a-give { display: none; }
+}
+@media (max-width: 760px) {
+  .a-arcade { grid-template-columns: 1fr 1fr; }
+  .a-arch--mid { grid-column: 1 / -1; order: -1; }
+  .a-lit { min-height: 300px; }
+  .a-arch--mid .a-lit { min-height: 420px; }
+  .a-plan-grid, .a-news-grid { grid-template-columns: 1fr; }
+  .a-step-row { grid-template-columns: 1fr; max-width: 340px; margin-inline: auto; }
+  .a-row { grid-template-columns: 1fr; gap: 2px; }
+}
+
+.b { --ink: #1a374d; --ground: #f6f8fa; --rule: #c3d0da; --amb: #f5a707; --soft: #e9eff4; background: var(--ground); color: var(--ink); font-family: 'Atkinson Hyperlegible', system-ui, sans-serif; font-size: 1.0625rem; --btn-bg: var(--ink); --btn-fg: #fff; --btn-line: var(--ink); --btn-r: 6px; }
+.b h1, .b h2, .b h3, .b h4, .b .b-sign, .b-nav a, .b .btn { font-family: 'Schibsted Grotesk', system-ui, sans-serif; }
+.b h1, .b h2, .b h3, .b h4 { font-weight: 800; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+.b-head { display: flex; align-items: center; gap: 24px; padding: 16px clamp(16px, 3vw, 40px); border-bottom: 1px solid var(--rule); }
+.b-brand { display: flex; align-items: center; gap: 12px; font: 800 1.05rem 'Schibsted Grotesk', sans-serif; text-decoration: none; }
+.b-mark { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 6px; background: var(--ink); color: #fff; font: 800 1rem 'Schibsted Grotesk', sans-serif; position: relative; }
+.b-mark::after { content: ""; position: absolute; right: -5px; bottom: -5px; width: 12px; height: 12px; background: var(--amb); border-radius: 2px; }
+.b-nav { display: flex; gap: 4px; margin-left: auto; }
+.b-nav a { padding: 10px 12px; border-radius: 6px; font-weight: 700; text-decoration: none; }
+.b-nav a:hover { background: var(--soft); }
+.b-hero { display: grid; grid-template-columns: 5fr 7fr; border-bottom: 1px solid var(--rule); }
+.b-hero > * { min-width: 0; }
+.b-hero-l { padding: clamp(28px, 5vw, 64px) clamp(16px, 3vw, 40px); display: grid; align-content: center; gap: 22px; }
+.b-hero-l h1 { font-size: clamp(2.8rem, 6.4vw, 5.2rem); line-height: 0.96; }
+.b-hero-l p { max-width: 38ch; font-size: 1.2rem; }
+.b-hero-l .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.b-hero-r { border-left: 1px solid var(--rule); padding: clamp(16px, 3vw, 40px); display: grid; align-content: center; gap: 12px; background: linear-gradient(rgba(26, 55, 77, 0.07) 1px, transparent 1px) 0 0 / 100% 40px, linear-gradient(90deg, rgba(26, 55, 77, 0.07) 1px, transparent 1px) 0 0 / 40px 100%, var(--ground); }
+.b-route-svg { width: 100%; height: auto; display: block; }
+.b-route-path { stroke-dasharray: 1; stroke-dashoffset: 0; }
+.b-route-svg text { font-family: 'Atkinson Hyperlegible', sans-serif; fill: var(--ink); }
+.b-cap { font-size: 0.92rem; color: #3d5565; }
+.b-route-list { display: none; position: relative; gap: 22px; padding-left: 56px; }
+.b-route-list::before { content: ""; position: absolute; left: 21px; top: 20px; bottom: 20px; width: 6px; background: var(--ink); }
+.b-rl-item { position: relative; font: 800 1.2rem 'Schibsted Grotesk', sans-serif; }
+.b-rl-item small { display: block; font: 400 1rem 'Atkinson Hyperlegible', sans-serif; }
+.b-rl-item b { position: absolute; left: -56px; top: -4px; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--amb); border: 4px solid var(--ink); font-size: 0.95rem; }
+.b-signs { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--ink); color: #fff; }
+.b-sign { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px clamp(16px, 2.4vw, 32px); font-weight: 800; font-size: 1.1rem; text-decoration: none; color: #fff; border-left: 1px solid rgba(255, 255, 255, 0.2); }
+.b-sign:first-child { border-left: 0; }
+.b-sign .ico { width: 30px; height: 30px; padding: 6px; background: var(--amb); color: var(--ink); border-radius: 4px; }
+.b-sign:hover .ico { background: #fff; }
+.b-plan { display: grid; grid-template-columns: 1.25fr 0.75fr; border-bottom: 1px solid var(--rule); }
+.b-plan > * { min-width: 0; }
+.b-plan-l { display: grid; align-content: start; }
+.b-plan-h { padding: clamp(28px, 4vw, 56px) clamp(16px, 3vw, 40px) 28px; display: grid; gap: 12px; }
+.b-plan-h h2 { font-size: clamp(2rem, 4vw, 3rem); line-height: 1; }
+.b-plan-h p { max-width: 50ch; font-size: 1.1rem; }
+.b-mods { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--rule); }
+.b-mod { padding: 20px clamp(16px, 3vw, 40px) 24px; display: grid; gap: 4px; align-content: start; }
+.b-mod:nth-child(even) { border-left: 1px solid var(--rule); }
+.b-mod:nth-child(n+3) { border-top: 1px solid var(--rule); }
+.b-mod h3 { font-size: 1.15rem; }
+.b-photo { border-left: 1px solid var(--rule); position: relative; min-height: 360px; background: repeating-linear-gradient(135deg, #dfe8ee 0 14px, #e7eef3 14px 28px); display: grid; align-items: end; padding: 20px; }
+.b-photo i { position: absolute; width: 22px; height: 22px; border: 3px solid var(--ink); }
+.b-photo i:nth-child(1) { top: 16px; left: 16px; border-right: 0; border-bottom: 0; }
+.b-photo i:nth-child(2) { top: 16px; right: 16px; border-left: 0; border-bottom: 0; }
+.b-photo i:nth-child(3) { bottom: 16px; left: 16px; border-right: 0; border-top: 0; }
+.b-photo i:nth-child(4) { bottom: 16px; right: 16px; border-left: 0; border-top: 0; }
+.b-photo .photo-tag { justify-self: start; background: var(--ink); margin: 0 0 14px 14px; }
+.b-steps { padding: clamp(36px, 5vw, 64px) clamp(16px, 3vw, 40px); border-bottom: 1px solid var(--rule); }
+.b-steps h2 { font-size: clamp(1.7rem, 3vw, 2.3rem); margin-bottom: 36px; }
+.b-line { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); }
+.b-track, .b-fill { position: absolute; left: 22px; right: calc(100% / 3 - 22px); top: 19px; height: 6px; background: var(--rule); }
+.b-fill { background: var(--ink); transform-origin: 0 50%; }
+.b-step { position: relative; padding-top: 56px; padding-right: 32px; display: grid; gap: 8px; align-content: start; justify-items: start; }
+.b-step h3 { font-size: 1.5rem; }
+.b-stop { position: absolute; top: 0; left: 0; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: #fff; border: 5px solid var(--ink); font: 800 1.05rem 'Schibsted Grotesk', sans-serif; z-index: 1; }
+.b-step:last-child .b-stop { background: var(--amb); }
+.b-step .a-link { font-weight: 700; text-decoration: underline; text-underline-offset: 4px; display: inline-flex; gap: 6px; align-items: center; margin-top: 6px; }
+.b-news { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--rule); }
+.b-news > * { min-width: 0; }
+.b-sermon { padding: clamp(24px, 4vw, 48px) clamp(16px, 3vw, 40px); display: grid; gap: 14px; align-content: start; }
+.b-sermon h2 { font-size: 1.15rem; }
+.b-sermon h3 { font-size: clamp(1.8rem, 3.2vw, 2.5rem); line-height: 1.04; }
+.b-sermon .meta { color: #3d5565; }
+.b-sermon .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.b .sm { grid-template-columns: 5.5rem 1fr; border-top: 1px solid var(--rule); }
+.b .sm-date { color: #3d5565; }
+.b .sm-t { color: var(--ink); }
+.b .sm-by { color: #3d5565; }
+.b-board { background: var(--ink); color: #fff; padding: clamp(24px, 4vw, 48px) clamp(16px, 3vw, 40px); }
+.b-board h2 { font-size: 1.15rem; margin-bottom: 14px; }
+.b .ev { display: grid; grid-template-columns: 6rem 1fr auto; gap: 14px; align-items: center; padding: 14px 0; border-top: 1px solid rgba(255, 255, 255, 0.22); }
+.b .ev-date { display: flex; gap: 8px; align-items: baseline; font: 800 1.25rem 'Schibsted Grotesk', sans-serif; color: var(--amb); font-variant-numeric: tabular-nums; }
+.b .ev-m { text-transform: uppercase; font-size: 0.95rem; }
+.b .ev-t { font-weight: 700; }
+.b .ev-go { display: inline-flex; gap: 6px; align-items: center; font-weight: 700; text-decoration: none; padding: 6px 10px; border-radius: 4px; border: 1px solid rgba(255, 255, 255, 0.4); }
+.b-foot { padding: 24px clamp(16px, 3vw, 40px); display: flex; flex-wrap: wrap; gap: 12px 40px; justify-content: space-between; align-items: center; }
+.b-foot nav { display: flex; gap: 20px; font-weight: 700; font-family: 'Schibsted Grotesk', sans-serif; }
+@media (max-width: 900px) {
+  .b-nav { display: none; }
+  .b .m-menu { display: block; }
+  .b-signs { grid-template-columns: 1fr 1fr; }
+  .b-sign:nth-child(3) { border-left: 0; }
+  .b-sign:nth-child(n+3) { border-top: 1px solid rgba(255, 255, 255, 0.2); }
+}
+@media (max-width: 760px) {
+  .b-hero, .b-plan, .b-news { grid-template-columns: 1fr; }
+  .b-hero-r { border-left: 0; border-top: 1px solid var(--rule); }
+  .b-route-svg { display: none; }
+  .b-route-list { display: grid; }
+  .b-photo { border-left: 0; border-top: 1px solid var(--rule); min-height: 240px; }
+  .b-mods { grid-template-columns: 1fr; }
+  .b-mod:nth-child(even) { border-left: 0; }
+  .b-mod:nth-child(n+2) { border-top: 1px solid var(--rule); }
+  .b-line { grid-template-columns: 1fr; gap: 28px; }
+  .b-track, .b-fill { left: 19px; right: auto; top: 22px; bottom: 22px; width: 6px; height: auto; }
+  .b-fill { transform-origin: 50% 0; }
+  .b-step { padding-top: 0; padding-left: 64px; min-height: 44px; }
+  .b .ev { grid-template-columns: 5.5rem 1fr; }
+  .b .ev-go { grid-column: 2; justify-self: start; }
+}
+
+.c { --navy: #1a374d; --navy2: #2b5069; --steel: #3f6a85; --steel-l: #9dbbcc; --sky: #cfe0ea; --mist: #eaf1f5; --paper: #fbfcfd; --amb: #f5a707; --sage: #7ea08c; background: var(--mist); color: var(--navy); font-family: 'Public Sans', system-ui, sans-serif; --btn-bg: var(--navy); --btn-fg: #fff; --btn-line: var(--navy); --btn-r: 14px; }
+.c h1, .c h2, .c h3, .c h4 { font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 700; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+.c .btn--solid { box-shadow: 0 3px 6px rgba(15, 36, 52, 0.28); }
+.c-head { display: flex; align-items: center; gap: 24px; padding: 20px clamp(16px, 4vw, 56px); }
+.c-brand { display: flex; align-items: center; gap: 12px; font: 700 1.05rem 'Bricolage Grotesque', sans-serif; text-decoration: none; }
+.c-mark { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; background: var(--navy); color: #fff; font: 700 1rem 'Bricolage Grotesque', sans-serif; box-shadow: 0 0 0 4px var(--amb), 0 3px 6px rgba(15, 36, 52, 0.3); margin-right: 4px; }
+.c-nav { display: flex; gap: 4px; margin-left: auto; }
+.c-nav a { padding: 10px 12px; border-radius: 10px; text-decoration: none; font-weight: 600; }
+.c-nav a:hover { background: var(--paper); }
+.c-give { padding: 10px 20px; border-radius: 14px; background: var(--amb); font-weight: 700; text-decoration: none; box-shadow: 0 3px 6px rgba(15, 36, 52, 0.22); }
+.c-hero { display: grid; grid-template-columns: 1.05fr 1fr; align-items: center; gap: clamp(16px, 3vw, 48px); padding: clamp(12px, 2vw, 28px) clamp(16px, 4vw, 56px) clamp(40px, 6vw, 72px); }
+.c-hero > * { min-width: 0; }
+.c-hero-t { display: grid; gap: 22px; justify-items: start; }
+.c-hero-t h1 { font-size: clamp(3rem, 7.4vw, 5.8rem); line-height: 0.94; }
+.c-hero-t p { max-width: 36ch; font-size: 1.2rem; }
+.c-hero-t .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.c-chip { display: inline-flex; flex-wrap: wrap; gap: 6px 14px; padding: 10px 16px; border-radius: 14px; background: var(--paper); box-shadow: 0 3px 8px -2px rgba(15, 36, 52, 0.25); font-weight: 600; font-size: 0.97rem; }
+.c-roundel { width: 100%; max-width: 540px; height: auto; justify-self: center; display: block; overflow: visible; }
+.c-wave { display: block; width: 100%; height: clamp(28px, 4vw, 56px); background: var(--from); color: var(--to); filter: drop-shadow(0 -3px 3px rgba(15, 36, 52, 0.1)); }
+.c-plan { background: var(--paper); padding: clamp(32px, 5vw, 72px) clamp(16px, 4vw, 56px) clamp(48px, 7vw, 96px); }
+.c-plan-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: clamp(28px, 5vw, 72px); align-items: center; max-width: 1160px; margin: 0 auto; }
+.c-plan-grid > * { min-width: 0; }
+.c-plan h2 { font-size: clamp(2rem, 4vw, 3.1rem); line-height: 1.04; }
+.c-lead { font-size: 1.15rem; max-width: 46ch; margin: 14px 0 28px !important; color: #2c4659; }
+.c-info { display: grid; grid-template-columns: 1fr 1fr; gap: 26px 36px; }
+.c-info > div { display: grid; gap: 4px; padding-left: 26px; position: relative; }
+.c-info > div::before { content: ""; position: absolute; left: 0; top: 7px; width: 14px; height: 14px; border-radius: 50%; background: var(--amb); box-shadow: 0 2px 3px rgba(15, 36, 52, 0.3); }
+.c-info h3 { font-size: 1.2rem; }
+.c-info p { color: #2c4659; }
+.c-photo { aspect-ratio: 1; width: 100%; max-width: 380px; margin-inline: auto; border-radius: 50%; background: repeating-linear-gradient(135deg, #b8cfdc 0 14px, #c4d8e3 14px 28px); box-shadow: 0 0 0 10px var(--paper), 0 0 0 22px var(--navy), 0 14px 28px 16px rgba(15, 36, 52, 0.22); display: grid; align-items: end; justify-items: center; padding-bottom: 14%; }
+.c-photo .photo-tag { background: var(--navy); }
+.c-steps-wrap { max-width: 1160px; margin: clamp(48px, 6vw, 80px) auto 0; }
+.c-steps-wrap h3 { font-size: 1.8rem; margin-bottom: 24px; }
+.c-steps { display: flex; }
+.c-step { flex: 1; min-width: 0; border-radius: 22px; padding: 30px 28px 34px 60px; box-shadow: 0 8px 18px -6px rgba(15, 36, 52, 0.45); position: relative; display: grid; gap: 8px; align-content: start; justify-items: start; }
+.c-step:first-child { padding-left: 30px; }
+.c-step + .c-step { margin-left: -30px; }
+.c-step:nth-child(1) { background: var(--navy); color: #fff; z-index: 1; }
+.c-step:nth-child(2) { background: var(--steel); color: #fff; z-index: 2; }
+.c-step:nth-child(3) { background: var(--amb); color: var(--navy); z-index: 3; }
+.c-step h4 { font-size: 1.6rem; }
+.c-step a { font-weight: 700; text-decoration: underline; text-underline-offset: 4px; display: inline-flex; gap: 6px; align-items: center; margin-top: 6px; }
+.c-news { background: var(--navy); color: #eaf0f4; padding: clamp(40px, 6vw, 80px) clamp(16px, 4vw, 56px); }
+.c-news-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: clamp(28px, 5vw, 64px); max-width: 1160px; margin: 0 auto; align-items: start; }
+.c-news-grid > * { min-width: 0; }
+.c-sermon { background: var(--paper); color: var(--navy); border-radius: 22px; padding: clamp(22px, 3vw, 36px); box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.5); display: grid; gap: 14px; }
+.c-sermon h2 { font-size: 1.1rem; }
+.c-sermon h3 { font-size: clamp(1.7rem, 3vw, 2.4rem); line-height: 1.08; }
+.c-sermon .meta { color: #2c4659; }
+.c-sermon .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.c-sermon .btn--solid { --btn-bg: var(--amb); --btn-fg: var(--navy); }
+.c-sermon .sm { grid-template-columns: 5.5rem 1fr; border-top: 1px solid #d5e0e7; }
+.c-sermon .sm-date, .c-sermon .sm-by { color: #2c4659; }
+.c-sermon .sm-t { color: var(--navy); }
+.c-events h2 { font-size: 1.5rem; margin-bottom: 14px; color: #fff; }
+.c .ev { display: grid; grid-template-columns: 58px 1fr; gap: 16px; align-items: center; padding: 12px 0; }
+.c .ev-date { display: grid; place-items: center; width: 58px; height: 58px; border-radius: 50%; background: var(--amb); color: var(--navy); line-height: 1; box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4); }
+.c .ev-m { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; }
+.c .ev-d { font: 700 1.35rem 'Bricolage Grotesque', sans-serif; }
+.c .ev-t { font-weight: 600; color: #fff; }
+.c-foot { background: var(--mist); padding: 28px clamp(16px, 4vw, 56px); display: flex; flex-wrap: wrap; gap: 12px 40px; justify-content: space-between; align-items: center; }
+.c-foot nav { display: flex; gap: 20px; font-weight: 700; }
+@media (max-width: 900px) {
+  .c-nav { display: none; }
+  .c .m-menu { display: block; }
+  .c-give { display: none; }
+}
+@media (max-width: 760px) {
+  .c-hero, .c-plan-grid, .c-news-grid { grid-template-columns: 1fr; }
+  .c-info { grid-template-columns: 1fr; }
+  .c-steps { flex-direction: column; }
+  .c-step, .c-step:first-child { padding: 30px 28px 34px; }
+  .c-step + .c-step { margin-left: 0; margin-top: -22px; padding-top: 48px; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></symbol>
+</svg>
+
+<div class="wrap">
+  <header class="intro">
+    <h1>Three directions for the new crosswaysa.org</h1>
+    <p>All three keep the CW mark, navy and amber, and the current site's content. Each mockup below uses the live site's service times, address, latest sermon, upcoming events and Three Steps. Items marked "to confirm" are placeholders. Striped areas show where the church's own photos go. Pick one and I'll narrow it into the final design.</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Design directions">
+    <button class="tab" role="tab" id="tab-arcade" aria-controls="mock-arcade" aria-selected="true" data-dir="arcade"><strong>A. The Lit Arcade</strong><span>Arches at dusk, windows lit</span></button>
+    <button class="tab" role="tab" id="tab-grid" aria-controls="mock-grid" aria-selected="false" data-dir="grid"><strong>B. Signal Grid</strong><span>Wayfinding for a first Sunday</span></button>
+    <button class="tab" role="tab" id="tab-paper" aria-controls="mock-paper" aria-selected="false" data-dir="paper"><strong>C. Layered Paper</strong><span>Cut paper, built in layers</span></button>
+  </div>
+
+  <section class="spec" id="spec-arcade" aria-label="Direction A details">
+    <div>
+      <h2>Idea</h2>
+      <p>San Antonio's limestone arches at blue hour. Each arch is a lit doorway holding service times, the headline and the latest message, and they light up one by one. The same arch shape frames photos and the three steps.</p>
+    </div>
+    <div>
+      <h2>Look</h2>
+      <div class="swatches"><span class="sw"><i style="background:#1a374d"></i>Navy</span><span class="sw"><i style="background:#f5a707"></i>Amber</span><span class="sw"><i style="background:#dde5ea"></i>Limestone</span><span class="sw"><i style="background:#eef2f5"></i>Mist</span></div>
+      <p>Young Serif for headings, Figtree for text.</p>
+    </div>
+    <div>
+      <h2>Motion</h2>
+      <p>On load the arches light from the edges to the centre. Further down, each step's doorway fills with light as you reach it. Nothing loops.</p>
+    </div>
+    <div>
+      <h2>Risk</h2>
+      <p>The heaviest first impression, so it needs real photography to balance the dark navy opening. Arches can recall Spanish missions, so only the shape is used, with no religious iconography.</p>
+    </div>
+  </section>
+
+  <section class="spec" id="spec-grid" aria-label="Direction B details" hidden>
+    <div>
+      <h2>Idea</h2>
+      <p>The site works like good airport signage. A ruled grid, one route from the parking lot to the sanctuary, and sign bars that take members to Live, Sermons, Events and Give in one click. The Three Steps become stops on a line.</p>
+    </div>
+    <div>
+      <h2>Look</h2>
+      <div class="swatches"><span class="sw"><i style="background:#1a374d"></i>Navy</span><span class="sw"><i style="background:#f5a707"></i>Amber</span><span class="sw"><i style="background:#f6f8fa"></i>Ground</span><span class="sw"><i style="background:#c3d0da"></i>Rule</span></div>
+      <p>Schibsted Grotesk for headings, Atkinson Hyperlegible for text. Atkinson was designed for low-vision readers.</p>
+    </div>
+    <div>
+      <h2>Motion</h2>
+      <p>The route line draws itself from the first stop to the last on load. The Three Steps line fills as you scroll. Event rows step in once.</p>
+    </div>
+    <div>
+      <h2>Risk</h2>
+      <p>The clearest and most institutional of the three. Warmth has to come from the photos and the writing. The route stops shown are placeholders until the church confirms its Sunday flow.</p>
+    </div>
+  </section>
+
+  <section class="spec" id="spec-paper" aria-label="Direction C details" hidden>
+    <div>
+      <h2>Idea</h2>
+      <p>A cut-paper landscape of Texas hills with a lit church door, built from flat layers with soft shadows. The layers return in the steps and the section edges, so the page feels assembled rather than stacked.</p>
+    </div>
+    <div>
+      <h2>Look</h2>
+      <div class="swatches"><span class="sw"><i style="background:#1a374d"></i>Navy</span><span class="sw"><i style="background:#f5a707"></i>Amber</span><span class="sw"><i style="background:#3f6a85"></i>Steel</span><span class="sw"><i style="background:#eaf1f5"></i>Mist</span><span class="sw"><i style="background:#7ea08c"></i>Sage</span></div>
+      <p>Bricolage Grotesque for headings, Public Sans for text.</p>
+    </div>
+    <div>
+      <h2>Motion</h2>
+      <p>On load the paper layers settle into place from back to front. The hills drift at slightly different speeds as you scroll. The three steps paste in one after another.</p>
+    </div>
+    <div>
+      <h2>Risk</h2>
+      <p>The warmest and most illustrated. It can read as folksy unless the drawing is excellent, so the final build needs a custom illustration set rather than stock shapes.</p>
+    </div>
+  </section>
+
+  <div class="bar">
+    <p>Scroll inside each mockup to see the page motion. Motion is off when your system asks for reduced motion.</p>
+    <button class="replay" id="replay" type="button">Replay motion</button>
+  </div>
+
+  <section class="mock a" id="mock-arcade" role="tabpanel" aria-labelledby="tab-arcade">
+    <header class="a-head">
+      <a class="a-brand" href="#"><span class="a-mark" aria-hidden="true">CW</span><span>Crossway Bible Church</span></a>
+      <nav class="a-nav" aria-label="Main"><a href="#">Visit</a><a href="#">About</a><a href="#">Church Life</a><a href="#">Sermons</a><a href="#">Events</a></nav>
+      <a class="a-give" href="#">Give</a>
+      <button class="m-menu" type="button">Menu</button>
+    </header>
+
+    <div class="a-hero">
+      <div class="a-arcade">
+        <article class="a-arch a-arch--side"><div class="a-lit">
+          <span class="a-dim" aria-hidden="true"></span>
+          <h2>Sundays</h2>
+          <p class="a-times"><span>9:00</span><span>10:45</span><small>every Sunday morning</small></p>
+          <p>15759 San Pedro Ave<br>San Antonio, TX 78232</p>
+          <a class="a-link" href="#">Get directions <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        </div></article>
+        <article class="a-arch a-arch--mid"><div class="a-lit">
+          <span class="a-dim" aria-hidden="true"></span>
+          <h1>You are loved.</h1>
+          <p>Crossway Bible Church exists to glorify God through the fulfillment of the Great Commission.</p>
+          <div class="a-actions">
+            <a class="btn btn--solid" href="#">Plan your visit <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            <a class="btn btn--line" href="#">Watch live</a>
+          </div>
+        </div></article>
+        <article class="a-arch a-arch--side"><div class="a-lit">
+          <span class="a-dim" aria-hidden="true"></span>
+          <h2>Latest message</h2>
+          <p><strong>Entrusted With Resources</strong><br>Josh de Koning<br>1 Timothy</p>
+          <a class="btn btn--solid" href="#"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg> Watch</a>
+        </div></article>
+      </div>
+      <div class="a-ground"></div>
+    </div>
+
+    <div class="a-plan">
+      <div class="a-plan-grid">
+        <div>
+          <h2>Plan your first Sunday</h2>
+          <p class="a-lead">Here is what to expect when you walk in the door, so you can arrive knowing where to go.</p>
+          <dl class="a-rows">
+            <div class="a-row"><dt>When</dt><dd>Sundays at 9:00 and 10:45 am.</dd></div>
+            <div class="a-row"><dt>Where</dt><dd>15759 San Pedro Ave, San Antonio, TX 78232.</dd></div>
+            <div class="a-row"><dt>Parking</dt><dd><span class="ph">Parking and arrival details</span><span class="ph-tag">to confirm</span></dd></div>
+            <div class="a-row"><dt>Kids</dt><dd>Crossway Kids meets at both services, from infants through 5th grade. <span class="ph">Check-in steps</span><span class="ph-tag">to confirm</span></dd></div>
+          </dl>
+        </div>
+        <div class="a-photo" role="img" aria-label="Photo placeholder: Sunday worship"><span class="photo-tag">Photo: Sunday worship</span></div>
+      </div>
+
+      <div class="a-steps">
+        <h3>Three steps to get plugged in</h3>
+        <div class="a-step-row">
+          <div class="a-step"><span class="a-step-fill"></span><div class="a-step-body"><h4>Connect</h4><p>We want to meet you!</p><a class="a-link" href="#">Let's connect <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a></div></div>
+          <div class="a-step"><span class="a-step-fill"></span><div class="a-step-body"><h4>Consider</h4><p>Learn more about us.</p><a class="a-link" href="#">Tell me more <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a></div></div>
+          <div class="a-step"><span class="a-step-fill"></span><div class="a-step-body"><h4>Commit</h4><p>Join our church!</p><a class="a-link" href="#">I'm ready <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="a-news">
+      <div class="a-news-grid">
+        <div>
+          <h2>Latest message</h2>
+          <h3>Entrusted With Resources: Putting Money in Its Place</h3>
+          <p class="meta">10.18.26 &middot; Josh de Koning &middot; 1 Timothy &middot; Stand Alone Messages</p>
+          <div class="actions">
+            <a class="btn btn--solid" href="#"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg> Watch</a>
+            <a class="a-link" href="#">All sermons <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          </div>
+          <ul class="sm-list" data-sermons></ul>
+        </div>
+        <div>
+          <h2>Coming up</h2>
+          <ul class="ev-list" data-events></ul>
+        </div>
+      </div>
+    </div>
+
+    <footer class="a-foot">
+      <p>Crossway Bible Church &middot; Sundays 9:00 and 10:45 am &middot; 15759 San Pedro Ave, San Antonio, TX 78232</p>
+      <nav aria-label="Footer"><a href="#">Give</a><a href="#">Events</a><a href="#">Church Center</a></nav>
+    </footer>
+  </section>
+
+  <section class="mock b" id="mock-grid" role="tabpanel" aria-labelledby="tab-grid" hidden>
+    <header class="b-head">
+      <a class="b-brand" href="#"><span class="b-mark" aria-hidden="true">CW</span><span>Crossway Bible Church</span></a>
+      <nav class="b-nav" aria-label="Main"><a href="#">Visit</a><a href="#">About</a><a href="#">Church Life</a><a href="#">Sermons</a><a href="#">Events</a><a href="#">Give</a></nav>
+      <button class="m-menu" type="button">Menu</button>
+    </header>
+
+    <div class="b-hero">
+      <div class="b-hero-l">
+        <h1>You are loved.</h1>
+        <p>Join us Sundays at 9:00 and 10:45 am at 15759 San Pedro Ave, San Antonio.</p>
+        <div class="actions">
+          <a class="btn btn--solid" href="#">Plan your visit <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <a class="btn btn--line" href="#">Watch live</a>
+        </div>
+      </div>
+      <div class="b-hero-r">
+        <svg class="b-route-svg" viewBox="0 0 700 380" role="img" aria-label="Your first Sunday as a route with four stops: arrive and park, drop off kids, worship, say hello">
+          <path class="b-route-path" pathLength="1" d="M44 320 H210 V210 H420 V100 H650" fill="none" stroke="#1a374d" stroke-width="8" stroke-linejoin="round"/>
+          <g class="b-stopg"><circle cx="44" cy="320" r="19" fill="#f5a707" stroke="#1a374d" stroke-width="5"/><text x="44" y="326" text-anchor="middle" font-size="17" font-weight="700">1</text><text x="44" y="282" font-size="21" font-weight="700">Arrive and park</text></g>
+          <g class="b-stopg"><circle cx="210" cy="210" r="19" fill="#fff" stroke="#1a374d" stroke-width="5"/><text x="210" y="216" text-anchor="middle" font-size="17" font-weight="700">2</text><text x="210" y="168" font-size="21" font-weight="700">Drop off kids</text></g>
+          <g class="b-stopg"><circle cx="420" cy="100" r="19" fill="#fff" stroke="#1a374d" stroke-width="5"/><text x="420" y="106" text-anchor="middle" font-size="17" font-weight="700">3</text><text x="420" y="58" font-size="21" font-weight="700">Worship</text><text x="420" y="80" font-size="16">9:00 or 10:45</text></g>
+          <g class="b-stopg"><circle cx="650" cy="100" r="19" fill="#f5a707" stroke="#1a374d" stroke-width="5"/><text x="650" y="106" text-anchor="middle" font-size="17" font-weight="700">4</text><text x="680" y="154" text-anchor="end" font-size="21" font-weight="700">Say hello</text></g>
+        </svg>
+        <ol class="b-route-list">
+          <li class="b-rl-item"><b>1</b>Arrive and park</li>
+          <li class="b-rl-item"><b>2</b>Drop off kids</li>
+          <li class="b-rl-item"><b>3</b>Worship<small>9:00 or 10:45</small></li>
+          <li class="b-rl-item"><b>4</b>Say hello</li>
+        </ol>
+        <p class="b-cap">A typical Sunday. Arrival and check-in details to be confirmed with the church.</p>
+      </div>
+    </div>
+
+    <nav class="b-signs" aria-label="Quick links">
+      <a class="b-sign" href="#">Watch live <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <a class="b-sign" href="#">Sermons <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <a class="b-sign" href="#">Events <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <a class="b-sign" href="#">Give <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    </nav>
+
+    <div class="b-plan">
+      <div class="b-plan-l">
+        <div class="b-plan-h">
+          <h2>Plan your first Sunday</h2>
+          <p>Here is what to expect when you walk in the door, so you can arrive knowing where to go.</p>
+        </div>
+        <div class="b-mods">
+          <div class="b-mod"><h3>When</h3><p>Sundays at 9:00 and 10:45 am.</p></div>
+          <div class="b-mod"><h3>Where</h3><p>15759 San Pedro Ave, San Antonio, TX 78232.</p></div>
+          <div class="b-mod"><h3>Parking</h3><p><span class="ph">Parking and arrival details</span><span class="ph-tag">to confirm</span></p></div>
+          <div class="b-mod"><h3>Kids</h3><p>Crossway Kids meets at both services, from infants through 5th grade. <span class="ph">Check-in steps</span><span class="ph-tag">to confirm</span></p></div>
+        </div>
+      </div>
+      <div class="b-photo" role="img" aria-label="Photo placeholder: Sunday worship"><i></i><i></i><i></i><i></i><span class="photo-tag">Photo: Sunday worship</span></div>
+    </div>
+
+    <div class="b-steps">
+      <h2>Three steps to get plugged in</h2>
+      <div class="b-line">
+        <span class="b-track"></span><span class="b-fill"></span>
+        <div class="b-step"><span class="b-stop">1</span><h3>Connect</h3><p>We want to meet you!</p><a class="a-link" href="#">Let's connect <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+        <div class="b-step"><span class="b-stop">2</span><h3>Consider</h3><p>Learn more about us.</p><a class="a-link" href="#">Tell me more <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+        <div class="b-step"><span class="b-stop">3</span><h3>Commit</h3><p>Join our church!</p><a class="a-link" href="#">I'm ready <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+      </div>
+    </div>
+
+    <div class="b-news">
+      <div class="b-sermon">
+        <h2>Latest message</h2>
+        <h3>Entrusted With Resources: Putting Money in Its Place</h3>
+        <p class="meta">10.18.26 &middot; Josh de Koning &middot; 1 Timothy &middot; Stand Alone Messages</p>
+        <div class="actions">
+          <a class="btn btn--solid" href="#"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg> Watch</a>
+          <a class="btn btn--line" href="#">All sermons</a>
+        </div>
+        <ul class="sm-list" data-sermons></ul>
+      </div>
+      <div class="b-board">
+        <h2>Coming up</h2>
+        <ul class="ev-list" data-events data-go></ul>
+      </div>
+    </div>
+
+    <footer class="b-foot">
+      <p>Crossway Bible Church &middot; Sundays 9:00 and 10:45 am &middot; 15759 San Pedro Ave, San Antonio, TX 78232</p>
+      <nav aria-label="Footer"><a href="#">Give</a><a href="#">Events</a><a href="#">Church Center</a></nav>
+    </footer>
+  </section>
+
+  <section class="mock c" id="mock-paper" role="tabpanel" aria-labelledby="tab-paper" hidden>
+    <header class="c-head">
+      <a class="c-brand" href="#"><span class="c-mark" aria-hidden="true">CW</span><span>Crossway Bible Church</span></a>
+      <nav class="c-nav" aria-label="Main"><a href="#">Visit</a><a href="#">About</a><a href="#">Church Life</a><a href="#">Sermons</a><a href="#">Events</a></nav>
+      <a class="c-give" href="#">Give</a>
+      <button class="m-menu" type="button">Menu</button>
+    </header>
+
+    <div class="c-hero">
+      <div class="c-hero-t">
+        <h1>You are loved.</h1>
+        <p>Crossway Bible Church exists to glorify God through the fulfillment of the Great Commission.</p>
+        <div class="actions">
+          <a class="btn btn--solid" href="#">Plan your visit <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <a class="btn btn--line" href="#">Watch live</a>
+        </div>
+        <p class="c-chip"><span>Sundays 9:00 and 10:45 am</span><span>15759 San Pedro Ave</span></p>
+      </div>
+      <svg class="c-roundel" viewBox="-10 -10 540 540" role="img" aria-label="Layered paper landscape with hills, a winding path and a church with a lit door">
+        <defs>
+          <clipPath id="c-clip"><circle cx="260" cy="260" r="206"/></clipPath>
+          <filter id="paper" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0f2434" flood-opacity="0.32"/></filter>
+        </defs>
+        <g class="c-layer c-ringg" filter="url(#paper)"><circle cx="260" cy="260" r="236" fill="#1a374d"/><g class="c-scallops" fill="#1a374d"></g></g>
+        <g class="c-layer" filter="url(#paper)"><circle cx="260" cy="260" r="222" fill="#fbfcfd"/></g>
+        <g clip-path="url(#c-clip)">
+          <g class="c-layer"><rect x="40" y="40" width="440" height="440" fill="#cfe0ea"/></g>
+          <g class="c-layer c-sun" filter="url(#paper)"><circle cx="372" cy="168" r="50" fill="#f5a707"/></g>
+          <g class="c-layer c-hill c-h1" filter="url(#paper)"><path d="M30 318 C120 258 200 280 300 290 S440 258 490 280 V490 H30Z" fill="#9dbbcc"/></g>
+          <g class="c-layer c-hill c-h2" filter="url(#paper)"><path d="M30 372 C120 322 200 330 280 352 S420 330 490 348 V490 H30Z" fill="#3f6a85"/></g>
+          <g class="c-layer c-church" filter="url(#paper)">
+            <rect x="168" y="314" width="44" height="34" fill="#fbfcfd"/>
+            <polygon points="163,314 190,294 217,314" fill="#1a374d"/>
+            <rect x="186" y="268" width="8" height="26" fill="#1a374d"/>
+            <polygon points="183,268 190,254 197,268" fill="#1a374d"/>
+            <path d="M184 348 V336 a6 6 0 0 1 12 0 V348Z" fill="#f5a707"/>
+          </g>
+          <g class="c-layer c-hill c-h3" filter="url(#paper)"><path d="M30 424 C140 384 260 404 340 414 S450 396 490 402 V490 H30Z" fill="#2b5069"/></g>
+          <g class="c-layer" filter="url(#paper)"><path d="M236 490 C250 440 196 430 206 398 C214 374 178 366 184 348 L196 348 C192 366 232 372 226 398 C220 428 284 440 280 490Z" fill="#fbfcfd"/></g>
+          <g class="c-layer" filter="url(#paper)"><rect x="344" y="372" width="6" height="26" fill="#1a374d"/><circle cx="347" cy="362" r="22" fill="#7ea08c"/><rect x="398" y="384" width="6" height="22" fill="#1a374d"/><circle cx="401" cy="376" r="17" fill="#7ea08c"/></g>
+          <g class="c-layer c-hill c-h4" filter="url(#paper)"><path d="M30 462 C160 432 300 452 490 440 V490 H30Z" fill="#1a374d"/></g>
+        </g>
+      </svg>
+    </div>
+
+    <svg class="c-wave" style="--from:#eaf1f5;--to:#fbfcfd" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30 C240 0 480 60 720 30 S1200 0 1440 30 V60 H0Z" fill="currentColor"/></svg>
+
+    <div class="c-plan">
+      <div class="c-plan-grid">
+        <div>
+          <h2>Plan your first Sunday</h2>
+          <p class="c-lead">Here is what to expect when you walk in the door, so you can arrive knowing where to go.</p>
+          <div class="c-info">
+            <div><h3>When</h3><p>Sundays at 9:00 and 10:45 am.</p></div>
+            <div><h3>Where</h3><p>15759 San Pedro Ave, San Antonio, TX 78232.</p></div>
+            <div><h3>Parking</h3><p><span class="ph">Parking and arrival details</span><span class="ph-tag">to confirm</span></p></div>
+            <div><h3>Kids</h3><p>Crossway Kids meets at both services, from infants through 5th grade. <span class="ph">Check-in steps</span><span class="ph-tag">to confirm</span></p></div>
+          </div>
+        </div>
+        <div class="c-photo" role="img" aria-label="Photo placeholder: Sunday worship"><span class="photo-tag">Photo: Sunday worship</span></div>
+      </div>
+
+      <div class="c-steps-wrap">
+        <h3>Three steps to get plugged in</h3>
+        <div class="c-steps">
+          <div class="c-step"><h4>Connect</h4><p>We want to meet you!</p><a href="#">Let's connect <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+          <div class="c-step"><h4>Consider</h4><p>Learn more about us.</p><a href="#">Tell me more <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+          <div class="c-step"><h4>Commit</h4><p>Join our church!</p><a href="#">I'm ready <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+        </div>
+      </div>
+    </div>
+
+    <svg class="c-wave" style="--from:#fbfcfd;--to:#1a374d" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30 C240 0 480 60 720 30 S1200 0 1440 30 V60 H0Z" fill="currentColor"/></svg>
+
+    <div class="c-news">
+      <div class="c-news-grid">
+        <div class="c-sermon">
+          <h2>Latest message</h2>
+          <h3>Entrusted With Resources: Putting Money in Its Place</h3>
+          <p class="meta">10.18.26 &middot; Josh de Koning &middot; 1 Timothy &middot; Stand Alone Messages</p>
+          <div class="actions">
+            <a class="btn btn--solid" href="#"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg> Watch</a>
+            <a class="btn btn--line" href="#">All sermons</a>
+          </div>
+          <ul class="sm-list" data-sermons></ul>
+        </div>
+        <div class="c-events">
+          <h2>Coming up</h2>
+          <ul class="ev-list" data-events></ul>
+        </div>
+      </div>
+    </div>
+
+    <svg class="c-wave" style="--from:#1a374d;--to:#eaf1f5" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30 C240 0 480 60 720 30 S1200 0 1440 30 V60 H0Z" fill="currentColor"/></svg>
+
+    <footer class="c-foot">
+      <p>Crossway Bible Church &middot; Sundays 9:00 and 10:45 am &middot; 15759 San Pedro Ave, San Antonio, TX 78232</p>
+      <nav aria-label="Footer"><a href="#">Give</a><a href="#">Events</a><a href="#">Church Center</a></nav>
+    </footer>
+  </section>
+
+  <section class="needs">
+    <h2>Still needed from the church</h2>
+    <ul>
+      <li>CW logo files (the mark in the mockups is a stand-in)</li>
+      <li>The photo library, so photos can be cropped to the chosen direction</li>
+      <li>Parking and arrival details</li>
+      <li>How kids check-in works</li>
+      <li>Child safety policy text</li>
+      <li>Belief statements and leader bios</li>
+    </ul>
+    <p>Prefer a conventional church-site layout played straight? Say so and I'll add it as a fourth direction.</p>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+const events = [
+  { m: 'Oct', d: '25', t: 'Advanced Commitment Night' },
+  { m: 'Nov', d: '4', t: '1st Wednesday: Prayer & Praise' },
+  { m: 'Dec', d: '2', t: '1st Wednesday: Prayer & Praise' },
+  { m: 'Dec', d: '13', t: 'Student Ministry Christmas Party' }
+];
+const sermons = [
+  { date: '9.27.26', t: 'Treasuring Scripture Like Jesus', by: 'Josh de Koning', ref: 'Matthew' },
+  { date: '9.20.26', t: 'Main Character Energy', by: 'Josh Collins', ref: 'Joshua' },
+  { date: '9.13.26', t: 'How To Not Be a Pile of Rocks', by: 'Josh de Koning', ref: '1 Peter' }
+];
+const arrowSvg = '<svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg>';
+
+document.querySelectorAll('[data-events]').forEach(ul => {
+  const go = ul.hasAttribute('data-go');
+  ul.innerHTML = events.map(e =>
+    '<li class="ev"><span class="ev-date"><span class="ev-m">' + e.m + '</span><span class="ev-d">' + e.d + '</span></span><span class="ev-t">' + e.t.replace('&', '&amp;') + '</span>' +
+    (go ? '<a class="ev-go" href="#">Details ' + arrowSvg + '</a>' : '') + '</li>'
+  ).join('');
+});
+document.querySelectorAll('[data-sermons]').forEach(ul => {
+  ul.innerHTML = sermons.map(s =>
+    '<li class="sm"><span class="sm-date">' + s.date + '</span><span class="sm-t">' + s.t + '</span><span class="sm-by">' + s.by + ' &middot; ' + s.ref + '</span></li>'
+  ).join('');
+});
+
+const scallops = document.querySelector('.c-scallops');
+if (scallops) {
+  let html = '';
+  for (let i = 0; i < 30; i++) {
+    const a = (i / 30) * Math.PI * 2;
+    html += '<circle cx="' + (260 + 236 * Math.cos(a)).toFixed(1) + '" cy="' + (260 + 236 * Math.sin(a)).toFixed(1) + '" r="24"/>';
+  }
+  scallops.innerHTML = html;
+}
+
+document.addEventListener('click', e => {
+  if (e.target.closest('.mock a')) e.preventDefault();
+});
+
+const dirs = ['arcade', 'grid', 'paper'];
+const hasGsap = typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined';
+if (hasGsap) gsap.registerPlugin(ScrollTrigger);
+let mm = null;
+let current = null;
+
+function scrollReveal(targets, trigger, vars) {
+  gsap.from(targets, Object.assign({
+    opacity: 0, y: 16, duration: 0.6, stagger: 0.08, ease: 'power2.out',
+    scrollTrigger: { trigger: trigger, start: 'top 85%', once: true }
+  }, vars || {}));
+}
+
+function initArcade(q) {
+  const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
+  tl.from(q('.a-head'), { opacity: 0, y: -8, duration: 0.5 })
+    .fromTo(q('.a-hero .a-dim'), { opacity: 0.92 }, { opacity: 0, duration: 1.2, stagger: { each: 0.3, from: 'edges' } }, 0.1)
+    .from(q('.a-hero .a-lit > :not(.a-dim)'), { opacity: 0, y: 12, duration: 0.7, stagger: 0.05, ease: 'power3.out' }, 0.45);
+  scrollReveal(q('.a-row'), q('.a-rows')[0] || q('.a-plan-grid')[0]);
+  gsap.from(q('.a-photo'), { opacity: 0, y: 20, duration: 0.8, ease: 'power2.out', scrollTrigger: { trigger: q('.a-photo')[0], start: 'top 85%', once: true } });
+  gsap.from(q('.a-step-fill'), { scaleY: 0, duration: 1, stagger: 0.2, ease: 'power2.out', scrollTrigger: { trigger: q('.a-step-row')[0], start: 'top 80%', once: true } });
+  gsap.from(q('.a-step-body > *'), { opacity: 0, y: 10, duration: 0.6, stagger: 0.04, delay: 0.25, ease: 'power2.out', scrollTrigger: { trigger: q('.a-step-row')[0], start: 'top 80%', once: true } });
+  scrollReveal(q('.a-news .sm, .a-news .ev'), q('.a-news-grid')[0], { stagger: 0.07 });
+}
+
+function initGrid(q, c) {
+  const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
+  tl.from(q('.b-head'), { opacity: 0, y: -8, duration: 0.5 })
+    .from(q('.b-hero-l > *'), { opacity: 0, y: 18, duration: 0.7, stagger: 0.09 }, 0.1);
+  if (c.wide) {
+    tl.from(q('.b-route-path'), { strokeDashoffset: 1, duration: 2.2, ease: 'none' }, 0.3);
+    [0, 0.7, 1.5, 2.2].forEach((t, i) => {
+      tl.from(q('.b-stopg')[i], { opacity: 0, y: 6, duration: 0.4 }, 0.3 + t);
+    });
+  } else {
+    tl.from(q('.b-rl-item'), { opacity: 0, x: -10, duration: 0.5, stagger: 0.15 }, 0.35);
+  }
+  tl.from(q('.b-sign'), { opacity: 0, x: -10, duration: 0.5, stagger: 0.08 }, 0.6);
+  scrollReveal(q('.b-mod'), q('.b-mods')[0]);
+  gsap.fromTo(q('.b-fill'), c.wide ? { scaleX: 0 } : { scaleY: 0 }, Object.assign(
+    c.wide ? { scaleX: 1 } : { scaleY: 1 },
+    { ease: 'none', scrollTrigger: { trigger: q('.b-line')[0], start: 'top 75%', end: 'bottom 60%', scrub: 0.5 } }
+  ));
+  scrollReveal(q('.b-step > :not(.b-stop)'), q('.b-line')[0], { stagger: 0.06 });
+  scrollReveal(q('.b-news .sm, .b-news .ev'), q('.b-news')[0], { stagger: 0.07 });
+}
+
+function initPaper(q) {
+  const tl = gsap.timeline();
+  tl.from(q('.c-head'), { opacity: 0, y: -8, duration: 0.5, ease: 'power2.out' })
+    .from(q('.c-hero-t > *'), { opacity: 0, y: 16, duration: 0.7, stagger: 0.09, ease: 'power2.out' }, 0.1)
+    .from(q('.c-layer'), { opacity: 0, y: -18, duration: 0.7, stagger: 0.07, ease: 'power3.out' }, 0.2);
+  const depth = { '.c-h1': 6, '.c-h2': 12, '.c-h3': 18, '.c-h4': 24 };
+  Object.keys(depth).forEach(sel => {
+    gsap.to(q(sel), { yPercent: depth[sel] / 4, ease: 'none', scrollTrigger: { trigger: q('.c-hero')[0], start: 'top top', end: 'bottom top', scrub: 0.6 } });
+  });
+  scrollReveal(q('.c-info > div'), q('.c-info')[0]);
+  gsap.from(q('.c-photo'), { opacity: 0, scale: 0.96, duration: 0.8, ease: 'power2.out', scrollTrigger: { trigger: q('.c-photo')[0], start: 'top 85%', once: true } });
+  gsap.from(q('.c-step'), { opacity: 0, y: 28, duration: 0.7, stagger: 0.16, ease: 'power3.out', scrollTrigger: { trigger: q('.c-steps')[0], start: 'top 85%', once: true } });
+  scrollReveal(q('.c-news .sm, .c-news .ev'), q('.c-news-grid')[0], { stagger: 0.07 });
+}
+
+const inits = { arcade: initArcade, grid: initGrid, paper: initPaper };
+
+function show(id) {
+  if (mm) { mm.revert(); mm = null; }
+  current = id;
+  dirs.forEach(d => {
+    const on = d === id;
+    document.getElementById('mock-' + d).hidden = !on;
+    document.getElementById('spec-' + d).hidden = !on;
+    const tab = document.getElementById('tab-' + d);
+    tab.setAttribute('aria-selected', on ? 'true' : 'false');
+    tab.tabIndex = on ? 0 : -1;
+  });
+  try { history.replaceState(null, '', '#' + id); } catch (err) {}
+  if (!hasGsap) return;
+  const root = document.getElementById('mock-' + id);
+  mm = gsap.matchMedia();
+  mm.add({ rm: '(prefers-reduced-motion: no-preference)', wide: '(min-width: 761px)' }, ctx => {
+    if (!ctx.conditions.rm) return;
+    inits[id](gsap.utils.selector(root), ctx.conditions);
+  });
+  ScrollTrigger.refresh();
+}
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => show(tab.dataset.dir));
+  tab.addEventListener('keydown', e => {
+    const i = dirs.indexOf(tab.dataset.dir);
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      const next = dirs[(i + (e.key === 'ArrowRight' ? 1 : dirs.length - 1)) % dirs.length];
+      show(next);
+      document.getElementById('tab-' + next).focus();
+    }
+  });
+});
+document.getElementById('replay').addEventListener('click', () => show(current));
+
+const fromHash = location.hash.replace('#', '');
+show(dirs.indexOf(fromHash) > -1 ? fromHash : 'arcade');
+</script>

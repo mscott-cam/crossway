@@ -1,0 +1,13 @@
+.superpowers/
+node_modules/
+dist/
+.vercel/
+.env
+.env.*
+!.env.example
+.DS_Store
+scripts/data/
+test-results/
+playwright-report/
+.astro/
+.lighthouseci/

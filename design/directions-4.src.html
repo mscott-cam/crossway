@@ -1,0 +1,970 @@
+<title>Crossway Directions Round Four</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Figtree:wght@400;500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+:root {
+  --bg: #f3f6f8;
+  --fg: #142331;
+  --muted: #4b5f6e;
+  --line: #d3dde4;
+  --panel: #ffffff;
+  --amber: #f5a707;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1822;
+    --fg: #e8eef2;
+    --muted: #a5b5c1;
+    --line: #26394a;
+    --panel: #14242f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1822;
+  --fg: #e8eef2;
+  --muted: #a5b5c1;
+  --line: #26394a;
+  --panel: #14242f;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Figtree', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 80px;
+}
+.wrap { max-width: 1280px; margin: 0 auto; display: grid; gap: 28px; }
+.wrap > * { min-width: 0; }
+.intro { display: grid; gap: 14px; max-width: 76ch; }
+.intro h1 { margin: 0; font-size: clamp(1.8rem, 3.6vw, 2.7rem); line-height: 1.1; font-weight: 700; text-wrap: balance; letter-spacing: -0.015em; }
+.intro p { margin: 0; color: var(--muted); font-size: 1.05rem; }
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.tab { text-align: left; padding: 14px 18px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); border-radius: 10px; font: inherit; cursor: pointer; display: grid; gap: 2px; }
+.tab strong { font-size: 1.05rem; }
+.tab span { color: var(--muted); font-size: 0.92rem; }
+.tab:hover { border-color: var(--muted); }
+.tab[aria-selected="true"] { border-color: var(--fg); box-shadow: inset 0 0 0 1px var(--fg); }
+.tab:focus-visible, .replay:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.spec { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; gap: 24px; padding: 20px 22px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+.spec > div { min-width: 0; display: grid; gap: 6px; align-content: start; }
+.spec h2 { margin: 0; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.spec p { margin: 0; font-size: 0.97rem; }
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+.sw { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--muted); }
+.sw i { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--line); display: block; }
+.bar { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.bar p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+.replay { font: inherit; font-weight: 600; padding: 9px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; }
+.replay:hover { border-color: var(--fg); }
+.needs { display: grid; gap: 10px; padding: 22px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+.needs h2 { margin: 0; font-size: 1.15rem; }
+.needs ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 4px; columns: 2; column-gap: 40px; }
+.needs p { margin: 0; color: var(--muted); }
+@media (max-width: 900px) {
+  .spec { grid-template-columns: 1fr 1fr; }
+  .needs ul { columns: 1; }
+}
+@media (max-width: 760px) {
+  .tabs { grid-template-columns: 1fr; }
+  .spec { grid-template-columns: 1fr; }
+}
+
+.mock { border: 1px solid var(--line); border-radius: 14px; overflow: clip; position: relative; isolation: isolate; font-family: 'Hanken Grotesk', system-ui, sans-serif; font-size: 1.125rem; line-height: 1.5; }
+.mock a { color: inherit; }
+.mock :focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
+.mock ul, .mock ol, .mock dl { list-style: none; margin: 0; padding: 0; }
+:where(.mock) :is(p, h1, h2, h3, dd) { margin: 0; }
+.mock button { font-family: inherit; }
+.wide { font-family: 'Archivo', system-ui, sans-serif; font-stretch: 125%; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; }
+.serif-i { font-family: 'Instrument Serif', Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: 0; }
+.ico { width: 18px; height: 18px; flex: none; }
+.grain::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 40; opacity: 0.55; mix-blend-mode: multiply; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .1 0 0 0 0 .16 0 0 0 0 .22 0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.lock { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; }
+.lock-box { display: grid; place-items: center; width: 48px; height: 36px; background: var(--amb); }
+.lock-mark { height: 24px; aspect-ratio: 154 / 182; }
+.lock-name { height: 15px; aspect-ratio: 692 / 98; }
+.cw-mark { aspect-ratio: 154 / 182; display: block; }
+.cw-full { aspect-ratio: 1590 / 98; display: block; width: 100%; }
+.menu-btn { display: inline-flex; align-items: center; gap: 10px; border: 0; padding: 11px 18px; font: 800 0.78rem 'Archivo', sans-serif; font-stretch: 112%; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; background: var(--amb); color: var(--navy); }
+.blk { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 50px; padding: 0 22px; font: 800 0.78rem 'Archivo', sans-serif; font-stretch: 112%; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; border: 2px solid var(--blk-bg); background: var(--blk-bg); color: var(--blk-fg); cursor: pointer; transition: background-color 0.2s, color 0.2s; }
+.blk:hover { background: transparent; color: var(--blk-bg); }
+.mock a.blk { color: var(--blk-fg); }
+.mock a.blk:hover { color: var(--blk-bg); }
+.blk--line { background: transparent; color: var(--blk-bg); }
+.mock a.blk--line { color: var(--blk-bg); }
+.blk--line:hover { background: var(--blk-bg); }
+.mock a.blk--line:hover { color: var(--blk-fg); }
+.photo { position: relative; overflow: hidden; display: grid; align-items: end; background: var(--ph, #a9b9c9); }
+.photo-in { position: absolute; inset: 0; background: var(--ph-in, none); }
+.photo .photo-tag { position: relative; justify-self: start; margin: 14px; padding: 5px 12px; background: rgba(12, 28, 40, 0.84); color: #e8eff4; font: 500 0.8rem 'Hanken Grotesk', sans-serif; letter-spacing: 0; text-transform: none; font-style: normal; }
+.ph { border-bottom: 2px dashed #c98a00; }
+.ph-tag { display: inline-block; margin-left: 6px; padding: 0 8px; border-radius: 999px; background: #fff0c7; color: #4a3500; font: 600 0.74rem 'Hanken Grotesk', sans-serif; white-space: nowrap; vertical-align: 1px; letter-spacing: 0; text-transform: none; font-style: normal; }
+.menu { position: absolute; left: 0; right: 0; top: 0; height: min(100%, 700px); z-index: 60; display: grid; grid-template-rows: auto 1fr; padding: 0 clamp(16px, 3.4vw, 48px) 32px; background: var(--menu-bg); color: var(--menu-fg); }
+.menu-top { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; }
+.menu-links { display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; align-content: center; }
+.menu-links a { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--menu-rule); text-decoration: none; font: 800 clamp(1rem, 2.6vw, 2rem) 'Archivo', sans-serif; font-stretch: 125%; text-transform: uppercase; letter-spacing: 0.02em; }
+.menu-links a:hover { color: var(--menu-hover); }
+.lit span { display: inline-block; }
+
+.m1 { --cream: #f4f2ea; --ink: #14293a; --navy: #1a374d; --amb: #f5a707; --blue: #a9b9c9; --rule: rgba(20, 41, 58, 0.28); --blk-bg: var(--navy); --blk-fg: #f4f2ea; --menu-bg: var(--navy); --menu-fg: #f4f2ea; --menu-rule: rgba(244, 242, 234, 0.24); --menu-hover: var(--amb); background-color: var(--cream); color: var(--ink); }
+.m1 .lock-mark, .m1 .lock-name { color: var(--navy); }
+.m1-bar { background: var(--amb); color: var(--ink); text-align: center; padding: 7px 16px; font: 700 0.7rem 'Archivo', sans-serif; font-stretch: 112%; letter-spacing: 0.08em; text-transform: uppercase; }
+.m1-bar a { text-decoration: none; display: inline-flex; gap: 8px; align-items: center; }
+.m1-bar a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.m1-head { display: flex; align-items: center; justify-content: space-between; padding: 18px clamp(16px, 3.4vw, 48px); }
+.m1-hero { display: grid; grid-template-rows: 1fr auto; min-height: 640px; padding: 24px clamp(16px, 3.4vw, 48px) 0; }
+.m1-hero-c { display: grid; gap: 14px; justify-items: center; align-content: center; text-align: center; }
+.m1-pre { font-size: clamp(1.6rem, 2.8vw, 2.4rem); line-height: 1; }
+.m1-hmark { width: clamp(64px, 8vw, 104px); color: var(--amb); }
+.cycle { display: grid; justify-items: center; overflow: hidden; padding: 0.08em 0; }
+.cycle span { grid-area: 1 / 1; font: 800 clamp(2.4rem, 8vw, 7rem) / 1.05 'Archivo', sans-serif; font-stretch: 125%; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; }
+.cycle span:not(:first-child) { visibility: hidden; }
+.m1-quote { border-left: 2px solid var(--ink); padding: 4px 0 4px 24px; max-width: 46ch; margin: 0 0 clamp(32px, 5vw, 64px); justify-self: start; font-size: 1.2rem; line-height: 1.45; }
+.m1-quote strong { font-weight: 600; }
+.m1-media-wrap { padding: 0 clamp(16px, 3.4vw, 48px); display: grid; justify-items: center; }
+.m1-media { width: 100%; aspect-ratio: 16 / 8; min-height: 260px; }
+.m1-scrip { text-align: center; padding: clamp(64px, 9vw, 130px) clamp(16px, 7vw, 120px); display: grid; gap: 28px; justify-items: center; }
+.quote-badge { width: 58px; height: 58px; border: 1px solid var(--ink); border-radius: 50%; display: grid; place-items: center; font: 400 2.2rem/1 'Instrument Serif', serif; padding-top: 12px; }
+.m1-scrip blockquote { margin: 0; font: italic 400 clamp(2rem, 4.8vw, 4.1rem) / 1.08 'Instrument Serif', Georgia, serif; max-width: 24ch; text-wrap: balance; }
+.cite { font-size: 0.8rem; letter-spacing: 0.14em; font-stretch: 112%; font-weight: 700; }
+.m1-visit { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: clamp(28px, 5vw, 80px); padding: 0 clamp(16px, 3.4vw, 48px) clamp(64px, 9vw, 130px); align-items: start; }
+.m1-visit > * { min-width: 0; }
+.m1-visit h2 { font-size: clamp(2rem, 4.6vw, 4rem); line-height: 1; font-stretch: 125%; }
+.m1-times { display: flex; flex-wrap: wrap; gap: 4px 28px; margin: 28px 0 10px; font: 800 clamp(1.8rem, 3.8vw, 3rem) 'Archivo', sans-serif; font-stretch: 125%; letter-spacing: 0.02em; }
+.m1-times small { font-size: 0.45em; letter-spacing: 0.08em; margin-left: 4px; }
+.m1-lead { max-width: 40ch; margin-bottom: 20px; }
+.m1-rows > div { display: grid; grid-template-columns: 8rem 1fr; gap: 16px; padding: 14px 0; border-top: 1px solid var(--rule); }
+.m1-rows dt { font: 700 0.76rem 'Archivo', sans-serif; font-stretch: 112%; letter-spacing: 0.1em; text-transform: uppercase; padding-top: 4px; }
+.m1-btns { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.m1-vphoto { aspect-ratio: 4 / 5; }
+.m1-commit { padding: 0 0 clamp(64px, 9vw, 130px) clamp(16px, 3.4vw, 48px); }
+.sec-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; padding-right: clamp(16px, 3.4vw, 48px); margin-bottom: 28px; }
+.sec-head h2 { font-size: clamp(1.6rem, 3.6vw, 3rem); line-height: 1; font-stretch: 125%; }
+.car-btns { display: flex; gap: 8px; }
+.car-btn { width: 50px; height: 50px; display: grid; place-items: center; border: 2px solid currentColor; background: transparent; color: inherit; cursor: pointer; }
+.car-btn:hover { background: var(--amb); color: var(--navy); border-color: var(--amb); }
+.car-btn.prev .ico { transform: rotate(180deg); }
+.m1-track { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; padding-right: clamp(16px, 3.4vw, 48px); scrollbar-width: none; }
+.m1-track::-webkit-scrollbar { display: none; }
+.m1-ccard { flex: 0 0 min(80%, 380px); scroll-snap-align: start; min-height: 320px; padding: 26px; display: grid; align-content: space-between; gap: 40px; }
+.m1-ccard:nth-child(4n+1) { background: var(--navy); color: #f4f2ea; }
+.m1-ccard:nth-child(4n+2) { background: var(--amb); color: var(--ink); }
+.m1-ccard:nth-child(4n+3) { background: var(--blue); color: var(--ink); }
+.m1-ccard:nth-child(4n+4) { background: #fbfaf5; color: var(--ink); box-shadow: inset 0 0 0 1px var(--rule); }
+.m1-ccard .cite { font-size: 0.74rem; }
+.m1-ccard h3 { font: italic 400 clamp(2rem, 3.2vw, 2.8rem) / 1 'Instrument Serif', serif; }
+.m1-steps { padding: 0 clamp(16px, 3.4vw, 48px) clamp(64px, 9vw, 130px); }
+.m1-step { display: grid; grid-template-columns: 1.2fr 1fr auto; gap: 16px 32px; align-items: center; padding: 26px 0; border-top: 1px solid var(--ink); text-decoration: none; position: relative; }
+.m1-step:last-child { border-bottom: 1px solid var(--ink); }
+.m1-step h3 { font: 800 clamp(1.8rem, 5vw, 4.2rem) / 1 'Archivo', sans-serif; font-stretch: 125%; text-transform: uppercase; letter-spacing: 0.02em; }
+.m1-step p { font-size: 1.15rem; }
+.m1-step .go { display: inline-flex; align-items: center; gap: 12px; font: 800 0.78rem 'Archivo', sans-serif; font-stretch: 112%; letter-spacing: 0.08em; text-transform: uppercase; }
+.m1-step .go i { width: 46px; height: 46px; display: grid; place-items: center; background: var(--navy); color: var(--amb); transition: transform 0.25s; }
+.m1-step:hover .go i { transform: translateX(6px); background: var(--amb); color: var(--navy); }
+.m1-news { padding: 0 clamp(16px, 3.4vw, 48px) clamp(64px, 9vw, 130px); }
+.m1-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(14px, 2vw, 28px); }
+.m1-card { display: grid; gap: 10px; align-content: start; }
+.m1-cimg { aspect-ratio: 16 / 10; margin-bottom: 6px; }
+.m1-cmeta { font: 700 0.72rem 'Archivo', sans-serif; font-stretch: 112%; letter-spacing: 0.1em; text-transform: uppercase; }
+.m1-card h3 { font: italic 400 clamp(1.7rem, 2.6vw, 2.3rem) / 1.05 'Instrument Serif', serif; }
+.m1-cby { color: #3d5565; font-size: 0.97rem; }
+.m1-card .blk { justify-self: start; margin-top: 8px; }
+.m1-events { padding: 0 clamp(16px, 3.4vw, 48px) clamp(64px, 9vw, 130px); }
+.m1 .ev { display: grid; grid-template-columns: 9rem 1fr auto; gap: 16px 28px; align-items: center; padding: 20px 8px; border-top: 1px solid var(--ink); transition: background-color 0.2s; }
+.m1 .ev:last-child { border-bottom: 1px solid var(--ink); }
+.m1 .ev:hover { background: var(--amb); }
+.m1 .ev-date { display: flex; gap: 0.6em; font: 800 1.1rem 'Archivo', sans-serif; font-stretch: 125%; text-transform: uppercase; letter-spacing: 0.04em; }
+.m1 .ev-t { font: italic 400 clamp(1.5rem, 2.8vw, 2.4rem) / 1.1 'Instrument Serif', serif; }
+.m1-ent { background: var(--navy); color: #f4f2ea; padding: clamp(48px, 7vw, 96px) clamp(16px, 3.4vw, 48px); display: grid; grid-template-columns: 1fr auto; gap: 28px 48px; align-items: center; position: relative; overflow: clip; }
+.m1-ent h2 { font-size: clamp(2.2rem, 6vw, 5rem); line-height: 1; font-stretch: 125%; color: var(--amb); }
+.m1-ent p { max-width: 52ch; margin-top: 16px; color: #d6e0e8; }
+.m1-ent .blk { --blk-bg: var(--amb); --blk-fg: var(--navy); }
+.m1-foot { background: var(--navy); color: #f4f2ea; padding: 0 clamp(16px, 3.4vw, 48px) 28px; border-top: 1px solid rgba(244, 242, 234, 0.2); }
+.m1-foot-top { display: grid; grid-template-columns: 1fr auto; gap: 24px; padding: 36px 0; align-items: end; }
+.m1-foot-top p { max-width: 40ch; color: #cbd8e1; }
+.m1-foot nav { display: flex; flex-wrap: wrap; gap: 8px 22px; font: 800 0.76rem 'Archivo', sans-serif; font-stretch: 112%; letter-spacing: 0.08em; text-transform: uppercase; }
+.m1-foot .cw-full { color: #f4f2ea; margin-top: 12px; }
+@media (max-width: 900px) {
+  .m1-visit, .m1-ent, .m1-foot-top { grid-template-columns: 1fr; }
+  .m1-step { grid-template-columns: 1fr auto; }
+  .m1-step p { grid-column: 1; grid-row: 2; }
+  .m1-step .go { grid-column: 2; grid-row: 1 / 3; }
+  .m1-cards { grid-template-columns: 1fr; }
+  .m1 .ev { grid-template-columns: 6rem 1fr; }
+  .m1 .ev .go-i { display: none; }
+  .m1-media { aspect-ratio: 4 / 3; }
+}
+@media (max-width: 760px) {
+  .sec-head { flex-wrap: wrap; }
+  .sec-head h2 { font-size: 1.5rem; }
+  .m1-step { grid-template-columns: 1fr; }
+  .m1-step p, .m1-step .go { grid-column: 1; grid-row: auto; }
+}
+
+.m2 { --night: #12293a; --amb: #f5a707; --navy: #12293a; --cream: #f1efe6; --slate: #2c4b62; --rule: rgba(241, 239, 230, 0.24); --blk-bg: var(--amb); --blk-fg: #12293a; --ph: #2c4b62; --ph-in: linear-gradient(160deg, rgba(255, 255, 255, 0.12), rgba(0, 0, 0, 0.18)); --menu-bg: #f5a707; --menu-fg: #12293a; --menu-rule: rgba(18, 41, 58, 0.35); --menu-hover: #f1efe6; background-color: var(--night); color: var(--cream); }
+.m2 .lock-mark { color: var(--amb); height: 34px; }
+.m2 .lock-name { color: var(--cream); }
+.m2 .lock { gap: 14px; }
+.m2-bar { background: var(--cream); color: #12293a; text-align: center; padding: 7px 16px; font: 700 0.7rem 'Archivo', sans-serif; font-stretch: 112%; letter-spacing: 0.08em; text-transform: uppercase; }
+.m2-bar a { text-decoration: none; display: inline-flex; gap: 8px; align-items: center; }
+.m2-head { display: flex; align-items: center; justify-content: space-between; padding: 18px clamp(16px, 3.4vw, 48px); position: relative; z-index: 3; }
+.m2-hero { position: relative; min-height: 640px; display: grid; align-content: end; padding: 24px clamp(16px, 3.4vw, 48px) clamp(40px, 6vw, 72px); overflow: clip; }
+.m2-hero-t { position: relative; z-index: 2; display: grid; gap: 28px; justify-items: start; }
+.m2-hero h1 { font-size: clamp(2.6rem, 7.2vw, 6.6rem); line-height: 0.94; letter-spacing: 0.01em; }
+.m2-hero h1 .ln { display: block; overflow: hidden; padding-bottom: 0.04em; }
+.m2-hero h1 .ln > span { display: block; }
+.m2-hero h1 i { color: var(--amb); font-style: normal; }
+.m2-bigmark { position: absolute; z-index: 1; right: -3%; top: 4%; height: 118%; width: auto; color: var(--amb); opacity: 0.95; }
+.m2-quote { border-left: 2px solid var(--amb); padding: 4px 0 4px 22px; max-width: 44ch; font-size: 1.2rem; line-height: 1.45; color: #e3e8e6; }
+.m2-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.m2 .blk--line { --blk-bg: var(--cream); --blk-fg: #12293a; }
+.m2-strip { overflow: hidden; padding: 16px 0 clamp(48px, 7vw, 96px); }
+.m2-mq { display: flex; width: max-content; }
+.m2-mq .photo { width: clamp(220px, 24vw, 340px); aspect-ratio: 4 / 3; margin-right: 14px; flex: none; }
+.m2-mission { padding: clamp(32px, 6vw, 96px) clamp(16px, 7vw, 120px) clamp(64px, 9vw, 130px); display: grid; gap: 24px; justify-items: start; max-width: 1200px; }
+.m2-mission p { font: italic 400 clamp(2.4rem, 6.4vw, 5.6rem) / 1 'Instrument Serif', serif; text-wrap: balance; }
+.m2-mission .cite { color: var(--amb); }
+.m2-visit { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 5vw, 80px); padding: clamp(48px, 7vw, 96px) clamp(16px, 3.4vw, 48px); border-top: 1px solid var(--rule); align-items: start; }
+.m2-visit > * { min-width: 0; }
+.m2-times { display: grid; line-height: 0.92; font: 800 clamp(4rem, 13vw, 10.5rem) 'Archivo', sans-serif; font-stretch: 125%; color: var(--amb); letter-spacing: 0; }
+.m2-times em { font: 700 0.8rem 'Archivo', sans-serif; font-stretch: 112%; font-style: normal; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cream); margin-top: 18px; }
+.m2-visit-r { display: grid; gap: 20px; }
+.m2-visit-r h2 { font-size: clamp(1.8rem, 3.6vw, 3rem); line-height: 1; font-stretch: 125%; }
+.m2-rows > div { display: grid; grid-template-columns: 7.5rem 1fr; gap: 16px; padding: 14px 0; border-top: 1px solid var(--rule); }
+.m2-rows dt { font: 700 0.76rem 'Archivo', sans-serif; font-stretch: 112%; letter-spacing: 0.1em; text-transform: uppercase; color: var(--amb); padding-top: 4px; }
+.m2-rows dd { color: #e3e8e6; }
+.m2-btns { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+.m2-commit { padding: clamp(48px, 7vw, 96px) clamp(16px, 3.4vw, 48px); border-top: 1px solid var(--rule); }
+.m2-commit h2 { font-size: clamp(1.6rem, 3.6vw, 3rem); line-height: 1; font-stretch: 125%; margin-bottom: 28px; }
+.m2-crow { display: grid; grid-template-columns: 1fr auto auto; gap: 8px 28px; align-items: center; padding: 20px 10px; border-top: 1px solid var(--rule); transition: background-color 0.2s, color 0.2s; }
+.m2-crow:last-child { border-bottom: 1px solid var(--rule); }
+.m2-crow:hover { background: var(--amb); color: #12293a; }
+.m2-crow .wide { font-size: clamp(1.3rem, 3.4vw, 3rem); line-height: 1.05; }
+.m2-crow em { font: italic 400 clamp(1.2rem, 2vw, 1.7rem) 'Instrument Serif', serif; }
+.m2-stack { padding: clamp(32px, 5vw, 64px) clamp(16px, 3.4vw, 48px) clamp(64px, 9vw, 120px); }
+.m2-stack > h2 { font-size: clamp(1.6rem, 3.6vw, 3rem); line-height: 1; font-stretch: 125%; margin-bottom: 28px; }
+.m2-scard { position: sticky; top: calc(14px + var(--i) * 16px); height: clamp(300px, 34vw, 400px); margin-bottom: 18px; padding: clamp(20px, 3vw, 40px); display: grid; grid-template-columns: 1fr auto; align-content: space-between; gap: 16px 32px; transform-origin: 50% 0; }
+.m2-scard:nth-child(1) { background: var(--slate); color: var(--cream); }
+.m2-scard:nth-child(2) { background: var(--amb); color: #12293a; }
+.m2-scard:nth-child(3) { background: var(--cream); color: #12293a; }
+.m2-scard .num { font: 800 clamp(3rem, 9vw, 8rem) / 0.9 'Archivo', sans-serif; font-stretch: 125%; justify-self: end; -webkit-text-stroke: 2px currentColor; color: transparent; }
+.m2-scard h3 { font: 800 clamp(2.2rem, 7vw, 6rem) / 0.95 'Archivo', sans-serif; font-stretch: 125%; text-transform: uppercase; align-self: end; }
+.m2-scard .row { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: center; justify-content: space-between; }
+.m2-scard p { font-size: 1.25rem; }
+.m2-scard .blk { --blk-bg: #12293a; --blk-fg: var(--cream); }
+.m2-scard:nth-child(1) .blk { --blk-bg: var(--amb); --blk-fg: #12293a; }
+.m2-news { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 5vw, 80px); padding: clamp(48px, 7vw, 96px) clamp(16px, 3.4vw, 48px); border-top: 1px solid var(--rule); align-items: start; }
+.m2-news > * { min-width: 0; }
+.m2-feat { display: grid; gap: 14px; }
+.m2-feat .photo { aspect-ratio: 4 / 3; }
+.m2-play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 92px; height: 92px; border-radius: 50%; background: var(--amb); color: #12293a; display: grid; place-items: center; text-decoration: none; }
+.m2-play .ico { width: 34px; height: 34px; margin-left: 4px; }
+.m2-feat h3 { font: italic 400 clamp(2.2rem, 4vw, 3.6rem) / 1 'Instrument Serif', serif; }
+.m2-feat .meta { color: #c9d4d8; }
+.m2-slist h2 { font-size: 1.2rem; font-stretch: 125%; margin-bottom: 8px; }
+.m2 .sm { display: grid; grid-template-columns: 5.5rem 1fr auto; gap: 4px 20px; align-items: center; padding: 20px 0; border-top: 1px solid var(--rule); }
+.m2 .sm-date { font-variant-numeric: tabular-nums; color: #c9d4d8; }
+.m2 .sm-t { font: italic 400 1.7rem / 1.1 'Instrument Serif', serif; }
+.m2 .sm-by { grid-column: 2; color: #c9d4d8; font-size: 0.95rem; }
+.m2 .sm .blk { grid-row: 1 / 3; grid-column: 3; min-height: 44px; }
+.m2-events { padding: 0 clamp(16px, 3.4vw, 48px) clamp(48px, 7vw, 96px); }
+.m2-events h2 { font-size: clamp(1.6rem, 3.6vw, 3rem); line-height: 1; font-stretch: 125%; margin-bottom: 28px; }
+.m2-events ul { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--rule); }
+.m2 .ev { display: grid; gap: 12px; align-content: start; padding: 24px 22px 28px 0; border-left: 1px solid var(--rule); padding-left: 22px; }
+.m2 .ev:first-child { border-left: 0; padding-left: 0; }
+.m2 .ev-date { display: flex; align-items: baseline; gap: 10px; color: var(--amb); font: 800 clamp(2.6rem, 5vw, 4.4rem) / 1 'Archivo', sans-serif; font-stretch: 125%; }
+.m2 .ev-m { font-size: 0.34em; letter-spacing: 0.08em; text-transform: uppercase; order: 2; }
+.m2 .ev-t { font: italic 400 1.7rem / 1.1 'Instrument Serif', serif; }
+.m2-ent { background: var(--amb); color: #12293a; padding: clamp(40px, 6vw, 80px) clamp(16px, 3.4vw, 48px); display: grid; gap: 22px; justify-items: start; position: relative; overflow: clip; }
+.m2-ent h2 { font-size: clamp(2.4rem, 9vw, 8.4rem); line-height: 0.9; font-stretch: 125%; letter-spacing: 0; }
+.m2-ent p { max-width: 54ch; font-size: 1.2rem; }
+.m2-ent .blk { --blk-bg: #12293a; --blk-fg: var(--amb); }
+.m2-foot { padding: clamp(40px, 6vw, 72px) clamp(16px, 3.4vw, 48px) 0; overflow: clip; }
+.m2-foot-top { display: grid; grid-template-columns: auto 1fr auto; gap: 24px 48px; align-items: start; }
+.m2-foot-top .cw-mark { height: 72px; width: auto; color: var(--amb); }
+.m2-foot-top p { color: #cbd5d8; max-width: 38ch; }
+.m2-foot nav { display: grid; gap: 6px; font: 800 0.76rem 'Archivo', sans-serif; font-stretch: 112%; letter-spacing: 0.08em; text-transform: uppercase; }
+.m2-foot .cw-full { color: var(--cream); margin-top: clamp(32px, 6vw, 72px); transform-origin: 50% 100%; }
+@media (max-width: 900px) {
+  .m2-visit, .m2-news { grid-template-columns: 1fr; }
+  .m2-foot-top { grid-template-columns: 1fr; }
+  .m2-events ul { grid-template-columns: 1fr 1fr; }
+  .m2 .ev:nth-child(3) { border-left: 0; padding-left: 0; }
+  .m2-bigmark { opacity: 0.2; right: -34%; top: 0; height: 80%; }
+  .m2-crow { grid-template-columns: 1fr; }
+  .m2-crow .go-i { display: none; }
+  .m2 .sm { grid-template-columns: 5rem 1fr; }
+  .m2 .sm .blk { grid-column: 2; grid-row: auto; justify-self: start; }
+}
+
+.m3 { --amb: #f5a707; --navy: #1a374d; --paper: #f4f2ea; --blue: #a9b9c9; --ink: #14293a; --blk-bg: var(--navy); --blk-fg: var(--amb); --ph: #1a374d; --ph-in: linear-gradient(160deg, rgba(255, 255, 255, 0.16), rgba(0, 0, 0, 0.2)); --menu-bg: #1a374d; --menu-fg: #f4f2ea; --menu-rule: rgba(244, 242, 234, 0.24); --menu-hover: #f5a707; background-color: var(--paper); color: var(--ink); }
+.m3 .lock-mark { color: var(--navy); height: 38px; }
+.m3 .lock-name { color: var(--navy); }
+.m3 .lock { gap: 14px; }
+.m3 .menu-btn { background: var(--navy); color: var(--amb); }
+.m3-top { background-color: var(--amb); color: var(--navy); }
+.m3-head { display: flex; align-items: center; justify-content: space-between; padding: 18px clamp(16px, 3.4vw, 48px); }
+.m3-hero { display: grid; grid-template-columns: 1.35fr 0.65fr; gap: clamp(24px, 4vw, 64px); padding: clamp(8px, 2vw, 24px) clamp(16px, 3.4vw, 48px) clamp(40px, 6vw, 72px); align-items: start; }
+.m3-hero > * { min-width: 0; }
+.m3-hero h1 { font: italic 400 clamp(3.4rem, 8.6vw, 7.6rem) / 0.9 'Instrument Serif', serif; letter-spacing: -0.01em; }
+.m3-hero-l > p { margin: 18px 0 clamp(20px, 3vw, 40px); max-width: 44ch; font-size: 1.2rem; }
+.m3-dir li a { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 6px; border-top: 2px solid var(--navy); text-decoration: none; font: 800 clamp(1.3rem, 3.1vw, 2.7rem) / 1 'Archivo', sans-serif; font-stretch: 125%; text-transform: uppercase; letter-spacing: 0.02em; transition: background-color 0.2s, color 0.2s, padding 0.25s; }
+.m3-dir li:last-child a { border-bottom: 2px solid var(--navy); }
+.m3-dir li a:hover { background: var(--navy); color: var(--amb); padding-left: 20px; }
+.m3-dir .ico { width: 0.8em; height: 0.8em; }
+.m3-hero-r { display: grid; gap: 0; position: sticky; top: 16px; }
+.m3-hphoto { aspect-ratio: 3 / 4; min-height: 340px; }
+.m3-hmark { position: absolute; top: 18px; right: 18px; width: 64px; color: var(--amb); }
+.m3-sun { background: var(--navy); color: var(--paper); padding: 22px 22px 24px; display: grid; gap: 6px; }
+.m3-sun strong { font: 800 clamp(1.4rem, 2.4vw, 2rem) / 1 'Archivo', sans-serif; font-stretch: 125%; color: var(--amb); text-transform: uppercase; }
+.m3-sun span { color: #d6e0e8; }
+.m3-scrip { background: var(--navy); color: var(--paper); text-align: center; padding: clamp(64px, 9vw, 130px) clamp(16px, 7vw, 120px); display: grid; gap: 28px; justify-items: center; }
+.m3-scrip .quote-badge { border-color: var(--amb); color: var(--amb); }
+.m3-scrip blockquote { margin: 0; font: italic 400 clamp(2rem, 4.8vw, 4.1rem) / 1.08 'Instrument Serif', serif; max-width: 24ch; text-wrap: balance; }
+.m3-scrip .cite { color: var(--amb); }
+.m3-visit { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: clamp(28px, 5vw, 80px); padding: clamp(56px, 8vw, 112px) clamp(16px, 3.4vw, 48px); align-items: start; }
+.m3-visit > * { min-width: 0; }
+.m3-visit h2 { font-size: clamp(2rem, 4.6vw, 4rem); line-height: 1; font-stretch: 125%; }
+.m3-visit-l { display: grid; gap: 20px; justify-items: start; }
+.m3-visit-l p { max-width: 38ch; }
+.m3-4 { display: grid; grid-template-columns: 1fr 1fr; }
+.m3-4 > div { padding: 20px 20px 28px 0; border-top: 4px solid var(--navy); display: grid; gap: 6px; align-content: start; }
+.m3-4 > div:nth-child(even) { padding-left: 20px; }
+.m3-4 h3 { font: 800 1.15rem 'Archivo', sans-serif; font-stretch: 125%; text-transform: uppercase; letter-spacing: 0.04em; }
+.m3-4 big { display: block; font: 800 clamp(1.6rem, 3.2vw, 2.6rem) / 1 'Archivo', sans-serif; font-stretch: 125%; }
+.m3-commit h2 { font-size: clamp(1.6rem, 3.6vw, 3rem); line-height: 1; font-stretch: 125%; padding: 0 clamp(16px, 3.4vw, 48px) 24px; }
+.m3-mos { display: grid; grid-template-columns: repeat(3, 1fr); }
+.m3-blk { aspect-ratio: 1.15; padding: clamp(18px, 2.4vw, 32px); display: grid; align-content: space-between; gap: 20px; }
+.m3-blk:nth-child(1), .m3-blk:nth-child(6) { background: var(--navy); color: var(--paper); }
+.m3-blk:nth-child(2), .m3-blk:nth-child(4) { background: var(--amb); }
+.m3-blk:nth-child(3), .m3-blk:nth-child(5) { background: var(--blue); }
+.m3-blk h3 { font: 800 clamp(1.3rem, 2.6vw, 2.3rem) / 1.02 'Archivo', sans-serif; font-stretch: 125%; text-transform: uppercase; }
+.m3-blk .cite { font-size: 0.72rem; }
+.m3-steps { padding: clamp(56px, 8vw, 112px) clamp(16px, 3.4vw, 48px); }
+.m3-steps h2 { font-size: clamp(1.6rem, 3.6vw, 3rem); line-height: 1; font-stretch: 125%; margin-bottom: 36px; }
+.m3-three { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px, 3vw, 48px); }
+.m3-st { display: grid; gap: 10px; align-content: start; justify-items: start; }
+.m3-st .n { font: 800 clamp(5rem, 12vw, 10rem) / 0.85 'Archivo', sans-serif; font-stretch: 125%; color: transparent; -webkit-text-stroke: 3px var(--navy); }
+.m3-st h3 { font: italic 400 clamp(2.2rem, 3.8vw, 3.2rem) / 1 'Instrument Serif', serif; }
+.m3-st p { font-size: 1.15rem; max-width: 26ch; }
+.m3-st .blk { margin-top: 10px; }
+.m3-news { background: var(--navy); color: var(--paper); padding: clamp(56px, 8vw, 112px) clamp(16px, 3.4vw, 48px); }
+.m3-news h2 { font-size: clamp(1.6rem, 3.6vw, 3rem); line-height: 1; font-stretch: 125%; color: var(--amb); margin-bottom: 28px; }
+.m3-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(14px, 2vw, 28px); }
+.m3-card { display: grid; gap: 10px; align-content: start; }
+.m3-cimg { aspect-ratio: 16 / 11; --ph: #2c4b62; margin-bottom: 6px; }
+.m3-cmeta { font: 700 0.72rem 'Archivo', sans-serif; font-stretch: 112%; letter-spacing: 0.1em; text-transform: uppercase; color: var(--amb); }
+.m3-card h3 { font: italic 400 clamp(1.7rem, 2.6vw, 2.3rem) / 1.05 'Instrument Serif', serif; }
+.m3-cby { color: #cbd8e1; font-size: 0.97rem; }
+.m3-news .blk { --blk-bg: var(--amb); --blk-fg: var(--navy); justify-self: start; margin-top: 8px; }
+.m3-events { padding: clamp(56px, 8vw, 112px) clamp(16px, 3.4vw, 48px); }
+.m3-events h2 { font-size: clamp(1.6rem, 3.6vw, 3rem); line-height: 1; font-stretch: 125%; margin-bottom: 28px; }
+.m3 .ev { display: grid; grid-template-columns: 5.5rem 1fr auto; gap: 16px 24px; align-items: center; padding: 18px 0; border-top: 2px solid var(--navy); }
+.m3 .ev:last-child { border-bottom: 2px solid var(--navy); }
+.m3 .ev-date { display: grid; justify-items: start; line-height: 1; }
+.m3 .ev-m { font: 800 0.8rem 'Archivo', sans-serif; font-stretch: 125%; text-transform: uppercase; letter-spacing: 0.08em; }
+.m3 .ev-d { font: 800 2.4rem 'Archivo', sans-serif; font-stretch: 125%; }
+.m3 .ev-t { font: italic 400 clamp(1.5rem, 2.8vw, 2.4rem) / 1.1 'Instrument Serif', serif; }
+.m3-foot { background-color: var(--amb); color: var(--navy); padding: clamp(40px, 6vw, 72px) clamp(16px, 3.4vw, 48px) clamp(20px, 3vw, 32px); overflow: clip; }
+.m3-foot-top { display: grid; grid-template-columns: auto 1fr auto; gap: 24px 48px; align-items: start; }
+.m3-foot-top .cw-mark { height: 72px; width: auto; color: var(--navy); }
+.m3-foot-top p { max-width: 38ch; }
+.m3-foot nav { display: grid; gap: 6px; font: 800 0.76rem 'Archivo', sans-serif; font-stretch: 112%; letter-spacing: 0.08em; text-transform: uppercase; }
+.m3-foot .cw-full { color: var(--navy); margin-top: clamp(32px, 6vw, 72px); }
+@media (max-width: 900px) {
+  .m3-hero, .m3-visit { grid-template-columns: 1fr; }
+  .m3-hero-r { position: static; grid-template-columns: 1fr; }
+  .m3-hphoto { aspect-ratio: 4 / 3; min-height: 0; }
+  .m3-three, .m3-cards { grid-template-columns: 1fr; }
+  .m3-mos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .m3-blk:nth-child(n) { background: var(--navy); color: var(--paper); }
+  .m3-blk:nth-child(2), .m3-blk:nth-child(3) { background: var(--amb); color: var(--ink); }
+  .m3-blk:nth-child(5), .m3-blk:nth-child(6) { background: var(--blue); color: var(--ink); }
+  .m3-blk { aspect-ratio: auto; min-height: 170px; }
+  .m3-foot-top { grid-template-columns: 1fr; }
+  .m3-blk h3 { font-size: 1.05rem; overflow-wrap: anywhere; }
+  .m3 .ev { grid-template-columns: 4.5rem 1fr; }
+  .m3-4 { grid-template-columns: 1fr; }
+  .m3-4 > div:nth-child(even) { padding-left: 0; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs><path id="cw-text-p" d="{{TEXT}}"/></defs>
+  <symbol id="cw-mark" viewBox="0 0 154 182"><path fill="currentColor" fill-rule="evenodd" d="{{MARK}}"/></symbol>
+  <symbol id="cw-name" viewBox="208 48 692 98"><use href="#cw-text-p" fill="currentColor" fill-rule="evenodd"/></symbol>
+  <symbol id="cw-full" viewBox="208 48 1590 98"><use href="#cw-text-p" fill="currentColor" fill-rule="evenodd"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M3 12h17M14 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z" fill="currentColor"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"/></symbol>
+</svg>
+
+<div class="wrap">
+  <header class="intro">
+    <h1>Three concepts in the spirit of Table Fellowship, with the Crossway logo</h1>
+    <p>These follow the reference more closely: a warm, confident layout with big type, a block menu button, photo blocks that grow as you scroll, and scripture set large in italic. The logo is used directly throughout. I traced it into a vector so the cross mark and the lettering can be used together or apart, in any colour. Items marked "to confirm" are placeholders, and flat blue panels show where the church's own photos go.</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Design concepts">
+    <button class="tab" role="tab" id="tab-door" aria-controls="mock-door" aria-selected="true" data-dir="door"><strong>1. Open Door</strong><span>Warm paper, navy and amber, closest to the reference</span></button>
+    <button class="tab" role="tab" id="tab-night" aria-controls="mock-night" aria-selected="false" data-dir="night"><strong>2. Night Service</strong><span>Deep navy, giant type, the logo cropped large</span></button>
+    <button class="tab" role="tab" id="tab-directory" aria-controls="mock-directory" aria-selected="false" data-dir="directory"><strong>3. Directory</strong><span>Amber front door with the whole site in big type</span></button>
+  </div>
+
+  <section class="spec" id="spec-door" aria-label="Concept 1 details">
+    <div>
+      <h2>Idea</h2>
+      <p>The closest to the reference. A warm paper ground, an amber announcement bar and block menu button, and the cross mark above a single wide word that changes between Connect, Consider and Commit. A photo block grows to full width as you scroll, and scripture is set large in italic.</p>
+    </div>
+    <div>
+      <h2>Look</h2>
+      <div class="swatches"><span class="sw"><i style="background:#f4f2ea"></i>Paper</span><span class="sw"><i style="background:#1a374d"></i>Navy</span><span class="sw"><i style="background:#f5a707"></i>Amber</span><span class="sw"><i style="background:#a9b9c9"></i>Mist</span></div>
+      <p>Archivo Expanded capitals, Instrument Serif Italic, Hanken Grotesk for reading.</p>
+    </div>
+    <div>
+      <h2>Motion</h2>
+      <p>The word swaps every few seconds. The photo block widens as you scroll and the scripture lights up word by word. The menu opens as a panel.</p>
+    </div>
+    <div>
+      <h2>Risk</h2>
+      <p>Paper with a serif italic is a familiar pairing, so the cross mark and amber have to carry the identity. It only feels alive with real photographs.</p>
+    </div>
+  </section>
+
+  <section class="spec" id="spec-night" aria-label="Concept 2 details" hidden>
+    <div>
+      <h2>Idea</h2>
+      <p>The same ideas after dark. Deep navy with the logo in its original amber and white, a giant headline, the cross mark cropped large at the edge, a slow strip of photos, and the three steps as cards that stack as you scroll.</p>
+    </div>
+    <div>
+      <h2>Look</h2>
+      <div class="swatches"><span class="sw"><i style="background:#12293a"></i>Night</span><span class="sw"><i style="background:#f5a707"></i>Amber</span><span class="sw"><i style="background:#f1efe6"></i>Cream</span><span class="sw"><i style="background:#2c4b62"></i>Slate</span></div>
+      <p>Archivo Expanded capitals, Instrument Serif Italic, Hanken Grotesk for reading.</p>
+    </div>
+    <div>
+      <h2>Motion</h2>
+      <p>The headline lifts in line by line, the photo strip drifts slowly, step cards stack and settle as you scroll, and the wordmark rises into the footer.</p>
+    </div>
+    <div>
+      <h2>Risk</h2>
+      <p>Dark pages are harder for some older readers, so body text stays large and high contrast. The photos have to be bright enough to carry the page.</p>
+    </div>
+  </section>
+
+  <section class="spec" id="spec-directory" aria-label="Concept 3 details" hidden>
+    <div>
+      <h2>Idea</h2>
+      <p>Amber up front. The hero is the site's table of contents in big type: plan a visit, watch, groups, kids, events, give. It serves a newcomer and a member in one glance. Below, the page moves in solid colour blocks.</p>
+    </div>
+    <div>
+      <h2>Look</h2>
+      <div class="swatches"><span class="sw"><i style="background:#f5a707"></i>Amber</span><span class="sw"><i style="background:#1a374d"></i>Navy</span><span class="sw"><i style="background:#f4f2ea"></i>Paper</span><span class="sw"><i style="background:#a9b9c9"></i>Mist</span></div>
+      <p>Archivo Expanded capitals, Instrument Serif Italic, Hanken Grotesk for reading.</p>
+    </div>
+    <div>
+      <h2>Motion</h2>
+      <p>The headline and directory rows slide in, rows invert on hover, and the colour blocks reveal as you scroll.</p>
+    </div>
+    <div>
+      <h2>Risk</h2>
+      <p>The loudest of the three. Large amber areas need restraint to stay serious, and the directory needs the church to agree on its top six destinations.</p>
+    </div>
+  </section>
+
+  <div class="bar">
+    <p>Scroll inside each mockup to see the page motion, and try the Menu button. Motion is off when your system asks for reduced motion.</p>
+    <button class="replay" id="replay" type="button">Replay motion</button>
+  </div>
+
+  <section class="mock m1 grain" id="mock-door" role="tabpanel" aria-labelledby="tab-door">
+    <div class="m1-bar"><a href="#">Advanced Commitment Night is Oct 25. Learn about ENTRUSTED <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+    <header class="m1-head">
+      <a class="lock" href="#" aria-label="Crossway Bible Church"><span class="lock-box"><svg class="lock-mark" aria-hidden="true"><use href="#cw-mark"/></svg></span><svg class="lock-name" aria-hidden="true"><use href="#cw-name"/></svg></a>
+      <button class="menu-btn" type="button" data-menu-open><svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg> Menu</button>
+    </header>
+    <div class="menu" data-menu hidden>
+      <div class="menu-top"><a class="lock" href="#" aria-label="Crossway Bible Church"><svg class="cw-mark" style="height:34px;color:#f5a707" aria-hidden="true"><use href="#cw-mark"/></svg><svg class="lock-name" style="color:#f4f2ea" aria-hidden="true"><use href="#cw-name"/></svg></a><button class="menu-btn" type="button" data-menu-close><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg> Close</button></div>
+      <nav class="menu-links" data-mount="menu" aria-label="Main"></nav>
+    </div>
+
+    <div class="m1-hero">
+      <div class="m1-hero-c">
+        <p class="m1-pre serif-i">Here, you can</p>
+        <svg class="m1-hmark cw-mark" aria-hidden="true"><use href="#cw-mark"/></svg>
+        <div class="cycle" aria-label="Connect, consider, commit"><span>Connect</span><span>Consider</span><span>Commit</span></div>
+      </div>
+      <p class="m1-quote"><strong>You are loved.</strong> Crossway Bible Church exists to glorify God through the fulfillment of the Great Commission.</p>
+    </div>
+
+    <div class="m1-media-wrap"><div class="photo m1-media" role="img" aria-label="Photo or video placeholder: Sunday worship"><span class="photo-in"></span><span class="photo-tag">Photo or video: Sunday worship</span></div></div>
+
+    <div class="m1-scrip">
+      <span class="quote-badge" aria-hidden="true">&ldquo;</span>
+      <blockquote class="lit" data-lit>Go ye therefore, and teach all nations &hellip; and, lo, I am with you alway, even unto the end of the world.</blockquote>
+      <p class="cite wide">Matthew 28:19&ndash;20 <span class="ph-tag">verse to confirm</span></p>
+    </div>
+
+    <div class="m1-visit">
+      <div>
+        <h2 class="wide">Visit on a Sunday</h2>
+        <p class="m1-times"><span>9:00<small>AM</small></span><span>10:45<small>AM</small></span></p>
+        <p class="m1-lead">Here is what to expect when you walk in the door, so you can arrive knowing where to go.</p>
+        <dl class="m1-rows">
+          <div><dt>Where</dt><dd>15759 San Pedro Ave, San Antonio, TX 78232</dd></div>
+          <div><dt>Parking</dt><dd><span class="ph">Parking and arrival details</span><span class="ph-tag">to confirm</span></dd></div>
+          <div><dt>Kids</dt><dd>Crossway Kids meets at both services, from infants through 5th grade. <span class="ph">Check-in steps</span><span class="ph-tag">to confirm</span></dd></div>
+        </dl>
+        <div class="m1-btns"><a class="blk" href="#">Plan your visit <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a><a class="blk blk--line" href="#">Get directions</a></div>
+      </div>
+      <div class="photo m1-vphoto" role="img" aria-label="Photo placeholder: families arriving"><span class="photo-in"></span><span class="photo-tag">Photo: families arriving</span></div>
+    </div>
+
+    <div class="m1-commit">
+      <div class="sec-head"><h2 class="wide">Six commitments</h2><div class="car-btns"><button class="car-btn prev" type="button" aria-label="Previous" data-car-prev><svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></button><button class="car-btn next" type="button" aria-label="Next" data-car-next><svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></button></div></div>
+      <div class="m1-track" data-mount="m1-commit" data-track></div>
+    </div>
+
+    <div class="m1-steps">
+      <div class="sec-head" style="padding-right:0"><h2 class="wide">Three steps</h2></div>
+      <div data-mount="m1-steps"></div>
+    </div>
+
+    <div class="m1-news">
+      <div class="sec-head" style="padding-right:0"><h2 class="wide">Recent messages</h2><a class="blk blk--line" href="#">All sermons</a></div>
+      <ul class="m1-cards" data-mount="m1-sermons"></ul>
+    </div>
+
+    <div class="m1-events">
+      <div class="sec-head" style="padding-right:0"><h2 class="wide">Coming up</h2><a class="blk blk--line" href="#">All events</a></div>
+      <ul data-mount="events"></ul>
+    </div>
+
+    <div class="m1-ent">
+      <div><h2 class="wide">Entrusted</h2><p>A two-year, church-wide initiative focused on discipleship, generosity and stewardship for God's glory. The commitment period begins Sunday, December 13.</p></div>
+      <a class="blk" href="#">Learn about ENTRUSTED <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    </div>
+
+    <footer class="m1-foot">
+      <div class="m1-foot-top">
+        <p>Crossway Bible Church<br>Sundays at 9:00 and 10:45 am<br>15759 San Pedro Ave, San Antonio, TX 78232</p>
+        <nav aria-label="Footer"><a href="#">Give</a><a href="#">Events</a><a href="#">Church Center</a><a href="#">Sermons</a></nav>
+      </div>
+      <svg class="cw-full" aria-hidden="true"><use href="#cw-full"/></svg>
+    </footer>
+  </section>
+
+  <section class="mock m2 grain" id="mock-night" role="tabpanel" aria-labelledby="tab-night" hidden>
+    <div class="m2-bar"><a href="#">Advanced Commitment Night is Oct 25. Learn about ENTRUSTED <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+    <header class="m2-head">
+      <a class="lock" href="#" aria-label="Crossway Bible Church"><svg class="lock-mark" aria-hidden="true"><use href="#cw-mark"/></svg><svg class="lock-name" aria-hidden="true"><use href="#cw-name"/></svg></a>
+      <button class="menu-btn" type="button" data-menu-open><svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg> Menu</button>
+    </header>
+    <div class="menu" data-menu hidden>
+      <div class="menu-top"><a class="lock" href="#" aria-label="Crossway Bible Church"><svg class="cw-mark" style="height:34px;color:#12293a" aria-hidden="true"><use href="#cw-mark"/></svg><svg class="lock-name" style="color:#12293a" aria-hidden="true"><use href="#cw-name"/></svg></a><button class="menu-btn" type="button" data-menu-close style="background:#12293a;color:#f5a707"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg> Close</button></div>
+      <nav class="menu-links" data-mount="menu" aria-label="Main"></nav>
+    </div>
+
+    <div class="m2-hero">
+      <svg class="m2-bigmark cw-mark" aria-hidden="true"><use href="#cw-mark"/></svg>
+      <div class="m2-hero-t">
+        <h1 class="wide"><span class="ln"><span>You are</span></span><span class="ln"><span>loved<i>.</i></span></span></h1>
+        <p class="m2-quote">Crossway Bible Church exists to glorify God through the fulfillment of the Great Commission.</p>
+        <div class="m2-actions"><a class="blk" href="#">Plan your visit <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a><a class="blk blk--line" href="#">Watch live</a></div>
+      </div>
+    </div>
+
+    <div class="m2-strip" aria-hidden="true"><div class="m2-mq" data-mount="marquee"></div></div>
+
+    <div class="m2-mission">
+      <p class="lit" data-lit>Lost people saved. Saved people matured. Matured people multiplied.</p>
+      <p class="cite wide" style="font:700 0.8rem 'Archivo',sans-serif;font-stretch:112%;letter-spacing:.14em">Our aim, in three lines</p>
+    </div>
+
+    <div class="m2-visit">
+      <p class="m2-times"><span>9:00</span><span>10:45</span><em>AM &middot; every Sunday</em></p>
+      <div class="m2-visit-r">
+        <h2 class="wide">Visit on a Sunday</h2>
+        <p style="max-width:40ch">Here is what to expect when you walk in the door, so you can arrive knowing where to go.</p>
+        <dl class="m2-rows">
+          <div><dt>Where</dt><dd>15759 San Pedro Ave, San Antonio, TX 78232</dd></div>
+          <div><dt>Parking</dt><dd><span class="ph">Parking and arrival details</span><span class="ph-tag">to confirm</span></dd></div>
+          <div><dt>Kids</dt><dd>Crossway Kids meets at both services, from infants through 5th grade. <span class="ph">Check-in steps</span><span class="ph-tag">to confirm</span></dd></div>
+        </dl>
+        <div class="m2-btns"><a class="blk" href="#">Plan your visit <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a><a class="blk blk--line" href="#">Get directions</a></div>
+      </div>
+    </div>
+
+    <div class="m2-commit">
+      <h2 class="wide">Six commitments</h2>
+      <ul data-mount="m2-commit"></ul>
+    </div>
+
+    <div class="m2-stack">
+      <h2 class="wide">Three steps</h2>
+      <div data-mount="m2-steps"></div>
+    </div>
+
+    <div class="m2-news">
+      <div class="m2-feat">
+        <div class="photo" role="img" aria-label="Photo placeholder: the pulpit"><span class="photo-in"></span><span class="photo-tag">Photo: sermon artwork</span><a class="m2-play" href="#" aria-label="Watch the latest message"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg></a></div>
+        <h3>Entrusted With Resources: Putting Money in Its Place</h3>
+        <p class="meta">10.18.26 &middot; Josh de Koning &middot; 1 Timothy &middot; Stand Alone Messages</p>
+      </div>
+      <div class="m2-slist"><h2 class="wide">Recent messages</h2><ul data-mount="m2-sermons"></ul></div>
+    </div>
+
+    <div class="m2-events">
+      <h2 class="wide">Coming up</h2>
+      <ul data-mount="events"></ul>
+    </div>
+
+    <div class="m2-ent">
+      <h2 class="wide">Entrusted</h2>
+      <p>A two-year, church-wide initiative focused on discipleship, generosity and stewardship for God's glory. The commitment period begins Sunday, December 13.</p>
+      <a class="blk" href="#">Learn about ENTRUSTED <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    </div>
+
+    <footer class="m2-foot">
+      <div class="m2-foot-top">
+        <svg class="cw-mark" aria-hidden="true"><use href="#cw-mark"/></svg>
+        <p>Crossway Bible Church<br>Sundays at 9:00 and 10:45 am<br>15759 San Pedro Ave, San Antonio, TX 78232</p>
+        <nav aria-label="Footer"><a href="#">Give</a><a href="#">Events</a><a href="#">Church Center</a><a href="#">Sermons</a></nav>
+      </div>
+      <svg class="cw-full" aria-hidden="true"><use href="#cw-full"/></svg>
+    </footer>
+  </section>
+
+  <section class="mock m3 grain" id="mock-directory" role="tabpanel" aria-labelledby="tab-directory" hidden>
+    <div class="m3-top">
+      <header class="m3-head">
+        <a class="lock" href="#" aria-label="Crossway Bible Church"><svg class="lock-mark" aria-hidden="true"><use href="#cw-mark"/></svg><svg class="lock-name" aria-hidden="true"><use href="#cw-name"/></svg></a>
+        <button class="menu-btn" type="button" data-menu-open><svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg> Menu</button>
+      </header>
+      <div class="menu" data-menu hidden>
+        <div class="menu-top"><a class="lock" href="#" aria-label="Crossway Bible Church"><svg class="cw-mark" style="height:34px;color:#f5a707" aria-hidden="true"><use href="#cw-mark"/></svg><svg class="lock-name" style="color:#f4f2ea" aria-hidden="true"><use href="#cw-name"/></svg></a><button class="menu-btn" type="button" data-menu-close style="background:#f5a707;color:#1a374d"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg> Close</button></div>
+        <nav class="menu-links" data-mount="menu" aria-label="Main"></nav>
+      </div>
+      <div class="m3-hero">
+        <div class="m3-hero-l">
+          <h1>You are loved.</h1>
+          <p>Crossway Bible Church exists to glorify God through the fulfillment of the Great Commission.</p>
+          <ul class="m3-dir" data-mount="m3-dir"></ul>
+        </div>
+        <div class="m3-hero-r">
+          <div class="photo m3-hphoto" role="img" aria-label="Photo placeholder: the congregation on Sunday"><span class="photo-in"></span><svg class="m3-hmark cw-mark" aria-hidden="true"><use href="#cw-mark"/></svg><span class="photo-tag">Photo: the congregation</span></div>
+          <div class="m3-sun"><strong>Sundays 9:00 &amp; 10:45 am</strong><span>15759 San Pedro Ave, San Antonio, TX 78232</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="m3-scrip">
+      <span class="quote-badge" aria-hidden="true">&ldquo;</span>
+      <blockquote class="lit" data-lit>Go ye therefore, and teach all nations &hellip; and, lo, I am with you alway, even unto the end of the world.</blockquote>
+      <p class="cite wide">Matthew 28:19&ndash;20 <span class="ph-tag">verse to confirm</span></p>
+    </div>
+
+    <div class="m3-visit">
+      <div class="m3-visit-l">
+        <h2 class="wide">Visit on a Sunday</h2>
+        <p>Here is what to expect when you walk in the door, so you can arrive knowing where to go.</p>
+        <a class="blk" href="#">Plan your visit <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      </div>
+      <div class="m3-4">
+        <div><h3>When</h3><big>9:00 &amp; 10:45 AM</big></div>
+        <div><h3>Where</h3><p>15759 San Pedro Ave, San Antonio, TX 78232</p></div>
+        <div><h3>Parking</h3><p><span class="ph">Parking and arrival details</span><span class="ph-tag">to confirm</span></p></div>
+        <div><h3>Kids</h3><p>Crossway Kids meets at both services, infants through 5th grade. <span class="ph">Check-in steps</span><span class="ph-tag">to confirm</span></p></div>
+      </div>
+    </div>
+
+    <div class="m3-commit">
+      <h2 class="wide">Six commitments</h2>
+      <div class="m3-mos" data-mount="m3-commit"></div>
+    </div>
+
+    <div class="m3-steps">
+      <h2 class="wide">Three steps</h2>
+      <div class="m3-three" data-mount="m3-steps"></div>
+    </div>
+
+    <div class="m3-news">
+      <h2 class="wide">Recent messages</h2>
+      <ul class="m3-cards" data-mount="m3-sermons"></ul>
+    </div>
+
+    <div class="m3-events">
+      <h2 class="wide">Coming up</h2>
+      <ul data-mount="events"></ul>
+    </div>
+
+    <footer class="m3-foot">
+      <div class="m3-foot-top">
+        <svg class="cw-mark" aria-hidden="true"><use href="#cw-mark"/></svg>
+        <p>Crossway Bible Church<br>Sundays at 9:00 and 10:45 am<br>15759 San Pedro Ave, San Antonio, TX 78232</p>
+        <nav aria-label="Footer"><a href="#">Give</a><a href="#">Events</a><a href="#">Church Center</a><a href="#">Sermons</a></nav>
+      </div>
+      <svg class="cw-full" aria-hidden="true"><use href="#cw-full"/></svg>
+    </footer>
+  </section>
+
+  <section class="needs">
+    <h2>Still needed from the church</h2>
+    <ul>
+      <li>Photos and short videos, ideally horizontal and vertical crops</li>
+      <li>A choice of three or four words for the hero (Connect, Consider and Commit are used here)</li>
+      <li>Parking and arrival details</li>
+      <li>How kids check-in works</li>
+      <li>The scripture the church wants quoted (Matthew 28 is a placeholder)</li>
+      <li>Child safety policy text, belief statements and leader bios</li>
+    </ul>
+    <p>The logo files are in <code>crossway/design/assets</code>: the cross mark in amber and navy, the lettering in navy and white, and ready-made lockups. Mix freely, for example the Night Service hero with the Directory list.</p>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+const esc = s => s.replace(/&/g, '&amp;');
+const arrow = '<svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg>';
+const events = [
+  { m: 'Oct', d: '25', t: 'Advanced Commitment Night' },
+  { m: 'Nov', d: '4', t: '1st Wednesday: Prayer & Praise' },
+  { m: 'Dec', d: '2', t: '1st Wednesday: Prayer & Praise' },
+  { m: 'Dec', d: '13', t: 'Student Ministry Christmas Party' }
+];
+const sermons = [
+  { date: '10.18.26', t: 'Entrusted With Resources: Putting Money in Its Place', by: 'Josh de Koning', ref: '1 Timothy' },
+  { date: '9.27.26', t: 'Treasuring Scripture Like Jesus', by: 'Josh de Koning', ref: 'Matthew' },
+  { date: '9.20.26', t: 'Main Character Energy', by: 'Josh Collins', ref: 'Joshua' },
+  { date: '9.13.26', t: 'How To Not Be a Pile of Rocks', by: 'Josh de Koning', ref: '1 Peter' }
+];
+const commitments = [
+  { t: 'Bold Preaching', v: '2 Timothy 4:2' },
+  { t: 'Passionate Worship', v: 'Psalm 95:6' },
+  { t: 'Purposeful Discipleship', v: '1 Thessalonians 2:8' },
+  { t: 'Fervent Prayer', v: 'Romans 12:12' },
+  { t: 'Courageous Evangelism', v: 'John 20:21' },
+  { t: 'Church Planting', v: 'Acts 14:23' }
+];
+const steps = [
+  { t: 'Connect', p: 'We want to meet you!', a: "Let's connect" },
+  { t: 'Consider', p: 'Learn more about us.', a: 'Tell me more' },
+  { t: 'Commit', p: 'Join our church!', a: "I'm ready" }
+];
+const menuItems = ['Visit', 'About', 'Small Groups', 'Students', 'Kids', 'Biblical Counseling', 'Sermons', 'Watch Live', 'Events', 'Give'];
+const directory = ['Plan your visit', 'Watch a sermon', 'Small groups', 'Kids and students', 'Events', 'Give'];
+
+const render = {
+  menu: () => menuItems.map(i => '<a href="#">' + i + arrow + '</a>').join(''),
+  events: () => events.map(e => '<li class="ev"><span class="ev-date"><span class="ev-m">' + e.m + '</span><span class="ev-d">' + e.d + '</span></span><span class="ev-t">' + esc(e.t) + '</span></li>').join(''),
+  'm1-commit': () => commitments.map(c => '<article class="m1-ccard"><p class="cite wide">' + c.v + '</p><h3>' + c.t + '</h3></article>').join(''),
+  'm1-steps': () => steps.map(s => '<a class="m1-step" href="#"><h3>' + s.t + '</h3><p>' + s.p + '</p><span class="go">' + s.a + '<i>' + arrow + '</i></span></a>').join(''),
+  'm1-sermons': () => sermons.slice(0, 3).map(s => '<li class="m1-card"><div class="photo m1-cimg" role="img" aria-label="Photo placeholder: sermon artwork"><span class="photo-in"></span></div><p class="m1-cmeta">' + s.date + ' &middot; Stand Alone Messages</p><h3>' + s.t + '</h3><p class="m1-cby">' + s.by + ' &middot; ' + s.ref + '</p><a class="blk" href="#">Watch ' + arrow + '</a></li>').join(''),
+  marquee: () => {
+    const set = '<div style="display:flex">' + Array.from({ length: 8 }, (_, i) => '<div class="photo" role="img" aria-label="Photo placeholder"><span class="photo-in"></span><span class="photo-tag">Photo ' + (i + 1) + '</span></div>').join('') + '</div>';
+    return set + set;
+  },
+  'm2-commit': () => commitments.map(c => '<li class="m2-crow"><span class="wide">' + c.t + '</span><em>' + c.v + '</em><span class="go-i">' + arrow + '</span></li>').join(''),
+  'm2-steps': () => steps.map((s, i) => '<article class="m2-scard" style="--i:' + i + '"><h3>' + s.t + '</h3><span class="num" aria-hidden="true">' + (i + 1) + '</span><div class="row"><p>' + s.p + '</p><a class="blk" href="#">' + s.a + ' ' + arrow + '</a></div></article>').join(''),
+  'm2-sermons': () => sermons.slice(1).map(s => '<li class="sm"><span class="sm-date">' + s.date + '</span><span class="sm-t">' + s.t + '</span><span class="sm-by">' + s.by + ' &middot; ' + s.ref + '</span><a class="blk" href="#">Watch</a></li>').join(''),
+  'm3-dir': () => directory.map(d => '<li><a href="#">' + d + arrow + '</a></li>').join(''),
+  'm3-commit': () => commitments.map(c => '<article class="m3-blk"><p class="cite wide">' + c.v + '</p><h3>' + c.t + '</h3></article>').join(''),
+  'm3-steps': () => steps.map((s, i) => '<article class="m3-st"><span class="n" aria-hidden="true">' + (i + 1) + '</span><h3>' + s.t + '</h3><p>' + s.p + '</p><a class="blk" href="#">' + s.a + ' ' + arrow + '</a></article>').join(''),
+  'm3-sermons': () => sermons.slice(0, 3).map(s => '<li class="m3-card"><div class="photo m3-cimg" role="img" aria-label="Photo placeholder: sermon artwork"><span class="photo-in"></span></div><p class="m3-cmeta">' + s.date + ' &middot; Stand Alone Messages</p><h3>' + s.t + '</h3><p class="m3-cby">' + s.by + ' &middot; ' + s.ref + '</p><a class="blk" href="#">Watch ' + arrow + '</a></li>').join('')
+};
+document.querySelectorAll('[data-mount]').forEach(el => { const f = render[el.dataset.mount]; if (f) el.innerHTML = f(); });
+document.querySelectorAll('[data-lit]').forEach(el => {
+  el.innerHTML = el.textContent.split(' ').map(w => '<span>' + w + '</span>').join(' ');
+});
+
+document.addEventListener('click', e => {
+  if (e.target.closest('.mock a')) e.preventDefault();
+});
+
+const dirs = ['door', 'night', 'directory'];
+const hasGsap = typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined';
+if (hasGsap) gsap.registerPlugin(ScrollTrigger);
+const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let mm = null;
+let current = null;
+
+function once(trigger, vars, start) {
+  return Object.assign({}, vars, { scrollTrigger: { trigger: trigger, start: start || 'top 88%', once: true } });
+}
+function reveal(targets, trigger, vars) {
+  if (!trigger) return;
+  gsap.from(targets, once(trigger, Object.assign({ opacity: 0, y: 22, duration: 0.8, stagger: 0.09, ease: 'power2.out' }, vars || {})));
+}
+function lightWords(q, sel) {
+  q(sel).forEach(el => {
+    gsap.fromTo(el.querySelectorAll('span'), { opacity: 0.18 }, { opacity: 1, stagger: 0.12, ease: 'none', scrollTrigger: { trigger: el, start: 'top 82%', end: 'bottom 48%', scrub: true } });
+  });
+}
+function menuSetup(root) {
+  const menu = root.querySelector('[data-menu]');
+  if (!menu) return;
+  const open = () => {
+    menu.hidden = false;
+    if (hasGsap && !reduce()) {
+      gsap.fromTo(menu, { clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)', duration: 0.6, ease: 'power3.out' });
+      gsap.from(menu.querySelectorAll('.menu-links a'), { opacity: 0, y: 24, duration: 0.6, stagger: 0.04, delay: 0.25, ease: 'power2.out' });
+    }
+  };
+  const close = () => {
+    if (hasGsap && !reduce()) {
+      gsap.to(menu, { clipPath: 'inset(0 0 100% 0)', duration: 0.45, ease: 'power3.in', onComplete: () => { menu.hidden = true; gsap.set(menu, { clearProps: 'clipPath' }); } });
+    } else menu.hidden = true;
+  };
+  root.querySelectorAll('[data-menu-open]').forEach(b => b.addEventListener('click', open));
+  root.querySelectorAll('[data-menu-close]').forEach(b => b.addEventListener('click', close));
+}
+document.querySelectorAll('.mock').forEach(menuSetup);
+document.querySelectorAll('.m1-commit').forEach(sec => {
+  const track = sec.querySelector('[data-track]');
+  const step = () => { const c = track.querySelector('.m1-ccard'); return c ? c.getBoundingClientRect().width + 14 : 300; };
+  sec.querySelector('[data-car-prev]').addEventListener('click', () => track.scrollBy({ left: -step(), behavior: 'smooth' }));
+  sec.querySelector('[data-car-next]').addEventListener('click', () => track.scrollBy({ left: step(), behavior: 'smooth' }));
+});
+
+function initDoor(q) {
+  const words = q('.cycle span');
+  gsap.set(words, { visibility: 'visible' });
+  gsap.set(words.slice(1), { yPercent: 115 });
+  const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
+  tl.from(q('.m1-bar, .m1-head'), { opacity: 0, y: -8, duration: 0.6, stagger: 0.1 })
+    .from(q('.m1-pre'), { opacity: 0, y: 12, duration: 0.7 }, 0.2)
+    .from(q('.m1-hmark'), { opacity: 0, scale: 0.85, duration: 0.9 }, 0.3)
+    .from(words[0], { yPercent: 115, duration: 0.9, ease: 'power3.out' }, 0.5)
+    .from(q('.m1-quote'), { opacity: 0, y: 16, duration: 0.8 }, 0.9);
+  const loop = gsap.timeline({ repeat: -1, delay: 2.6 });
+  words.forEach((el, i) => {
+    const nx = words[(i + 1) % words.length];
+    loop.to(el, { yPercent: -115, duration: 0.7, ease: 'power3.in' }, '+=1.9')
+      .fromTo(nx, { yPercent: 115 }, { yPercent: 0, duration: 0.7, ease: 'power3.out' }, '<0.35');
+  });
+  gsap.fromTo(q('.m1-media'), { width: '52%' }, { width: '100%', ease: 'none', scrollTrigger: { trigger: q('.m1-media-wrap')[0], start: 'top 92%', end: 'top 22%', scrub: 0.6 } });
+  gsap.fromTo(q('.m1-media .photo-tag'), { opacity: 0 }, { opacity: 1, ease: 'none', scrollTrigger: { trigger: q('.m1-media-wrap')[0], start: 'top 50%', end: 'top 22%', scrub: true } });
+  gsap.from(q('.quote-badge'), once(q('.m1-scrip')[0], { scale: 0.6, opacity: 0, duration: 0.7, ease: 'back.out(2)' }));
+  lightWords(q, '.m1-scrip blockquote');
+  gsap.from(q('.m1-scrip .cite'), once(q('.m1-scrip .cite')[0], { opacity: 0, y: 10, duration: 0.7 }));
+  reveal(q('.m1-visit h2, .m1-times, .m1-lead'), q('.m1-visit')[0], { stagger: 0.1 });
+  reveal(q('.m1-rows > div'), q('.m1-rows')[0]);
+  reveal(q('.m1-btns > *'), q('.m1-btns')[0], { y: 12 });
+  gsap.from(q('.m1-vphoto'), once(q('.m1-vphoto')[0], { clipPath: 'inset(12% 12% 12% 12%)', duration: 1.2, ease: 'power3.out' }));
+  reveal(q('.m1-commit .sec-head'), q('.m1-commit .sec-head')[0]);
+  reveal(q('.m1-ccard'), q('.m1-track')[0], { x: 40, y: 0, stagger: 0.1 });
+  reveal(q('.m1-steps .sec-head'), q('.m1-steps .sec-head')[0]);
+  q('.m1-step').forEach(el => {
+    gsap.from(el.children, once(el, { opacity: 0, y: 18, duration: 0.8, stagger: 0.08, ease: 'power2.out' }, 'top 90%'));
+  });
+  reveal(q('.m1-news .sec-head'), q('.m1-news .sec-head')[0]);
+  reveal(q('.m1-card'), q('.m1-cards')[0], { stagger: 0.12 });
+  reveal(q('.m1-events .sec-head'), q('.m1-events .sec-head')[0]);
+  reveal(q('.m1 .ev'), q('.m1-events ul')[0], { y: 14, stagger: 0.08 });
+  reveal(q('.m1-ent > *'), q('.m1-ent')[0], { stagger: 0.12 });
+  gsap.from(q('.m1-foot .cw-full'), { yPercent: 30, ease: 'none', scrollTrigger: { trigger: q('.m1-foot')[0], start: 'top 95%', end: 'bottom bottom', scrub: true } });
+}
+
+function initNight(q) {
+  const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+  tl.from(q('.m2-bar, .m2-head'), { opacity: 0, y: -8, duration: 0.6, stagger: 0.1 })
+    .from(q('.m2-hero h1 .ln > span'), { yPercent: 105, duration: 1.1, stagger: 0.14 }, 0.2)
+    .from(q('.m2-bigmark'), { xPercent: 18, opacity: 0, duration: 1.4, ease: 'power3.out' }, 0.2)
+    .from(q('.m2-quote, .m2-actions'), { opacity: 0, y: 16, duration: 0.8, stagger: 0.12, ease: 'power2.out' }, 0.9);
+  gsap.to(q('.m2-mq'), { xPercent: -50, duration: 70, ease: 'none', repeat: -1 });
+  lightWords(q, '.m2-mission p.lit');
+  reveal(q('.m2-times > *'), q('.m2-visit')[0], { stagger: 0.14, y: 40 });
+  reveal(q('.m2-visit-r > *'), q('.m2-visit')[0], { stagger: 0.1 });
+  reveal(q('.m2-commit h2'), q('.m2-commit')[0]);
+  reveal(q('.m2-crow'), q('.m2-commit ul')[0], { y: 14, stagger: 0.07 });
+  reveal(q('.m2-stack > h2'), q('.m2-stack')[0]);
+  const cards = q('.m2-scard');
+  cards.forEach((card, i) => {
+    const next = cards[i + 1];
+    if (!next) return;
+    gsap.to(card, { scale: 0.94, opacity: 0.55, ease: 'none', scrollTrigger: { trigger: next, start: 'top 75%', end: 'top 25%', scrub: true } });
+  });
+  reveal(q('.m2-feat > *'), q('.m2-news')[0]);
+  reveal(q('.m2 .sm, .m2-slist h2'), q('.m2-slist')[0], { y: 14, stagger: 0.08 });
+  reveal(q('.m2-events h2'), q('.m2-events')[0]);
+  reveal(q('.m2 .ev'), q('.m2-events ul')[0], { stagger: 0.1 });
+  reveal(q('.m2-ent > *'), q('.m2-ent')[0], { stagger: 0.12 });
+  gsap.from(q('.m2-foot .cw-full'), { yPercent: 40, ease: 'none', scrollTrigger: { trigger: q('.m2-foot')[0], start: 'top 95%', end: 'bottom bottom', scrub: true } });
+}
+
+function initDirectory(q) {
+  const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+  tl.from(q('.m3-head'), { opacity: 0, y: -8, duration: 0.6 })
+    .from(q('.m3-hero h1'), { opacity: 0, y: 40, duration: 1 }, 0.1)
+    .from(q('.m3-hero-l > p'), { opacity: 0, y: 16, duration: 0.8 }, 0.5)
+    .from(q('.m3-dir li'), { opacity: 0, x: -36, duration: 0.8, stagger: 0.09 }, 0.6)
+    .fromTo(q('.m3-hphoto'), { clipPath: 'inset(100% 0 0 0)' }, { clipPath: 'inset(0% 0 0 0)', duration: 1.2, ease: 'power3.inOut' }, 0.3)
+    .from(q('.m3-sun'), { opacity: 0, y: 16, duration: 0.8, ease: 'power2.out' }, 1.2);
+  gsap.from(q('.quote-badge'), once(q('.m3-scrip')[0], { scale: 0.6, opacity: 0, duration: 0.7, ease: 'back.out(2)' }));
+  lightWords(q, '.m3-scrip blockquote');
+  gsap.from(q('.m3-scrip .cite'), once(q('.m3-scrip .cite')[0], { opacity: 0, y: 10, duration: 0.7 }));
+  reveal(q('.m3-visit-l > *'), q('.m3-visit')[0]);
+  reveal(q('.m3-4 > div'), q('.m3-4')[0], { stagger: 0.1 });
+  reveal(q('.m3-commit h2'), q('.m3-commit h2')[0]);
+  reveal(q('.m3-blk'), q('.m3-mos')[0], { y: 30, stagger: 0.08 });
+  reveal(q('.m3-steps h2'), q('.m3-steps h2')[0]);
+  reveal(q('.m3-st'), q('.m3-three')[0], { stagger: 0.14 });
+  reveal(q('.m3-news h2'), q('.m3-news h2')[0]);
+  reveal(q('.m3-card'), q('.m3-cards')[0], { stagger: 0.12 });
+  reveal(q('.m3-events h2'), q('.m3-events h2')[0]);
+  reveal(q('.m3 .ev'), q('.m3-events ul')[0], { y: 14, stagger: 0.08 });
+  gsap.from(q('.m3-foot .cw-full'), { yPercent: 35, ease: 'none', scrollTrigger: { trigger: q('.m3-foot')[0], start: 'top 95%', end: 'bottom bottom', scrub: true } });
+}
+
+const inits = { door: initDoor, night: initNight, directory: initDirectory };
+
+function show(id) {
+  if (mm) { mm.revert(); mm = null; }
+  current = id;
+  dirs.forEach(d => {
+    const on = d === id;
+    document.getElementById('mock-' + d).hidden = !on;
+    document.getElementById('spec-' + d).hidden = !on;
+    const tab = document.getElementById('tab-' + d);
+    tab.setAttribute('aria-selected', on ? 'true' : 'false');
+    tab.tabIndex = on ? 0 : -1;
+  });
+  document.querySelectorAll('[data-menu]').forEach(m => { m.hidden = true; });
+  try { history.replaceState(null, '', '#' + id); } catch (err) {}
+  if (!hasGsap) return;
+  const root = document.getElementById('mock-' + id);
+  mm = gsap.matchMedia();
+  mm.add({ rm: '(prefers-reduced-motion: no-preference)' }, ctx => {
+    if (!ctx.conditions.rm) return;
+    inits[id](gsap.utils.selector(root));
+  });
+  ScrollTrigger.refresh();
+}
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => show(tab.dataset.dir));
+  tab.addEventListener('keydown', e => {
+    const i = dirs.indexOf(tab.dataset.dir);
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      const next = dirs[(i + (e.key === 'ArrowRight' ? 1 : dirs.length - 1)) % dirs.length];
+      show(next);
+      document.getElementById('tab-' + next).focus();
+    }
+  });
+});
+document.getElementById('replay').addEventListener('click', () => show(current));
+
+const fromHash = location.hash.replace('#', '');
+show(dirs.indexOf(fromHash) > -1 ? fromHash : 'door');
+</script>

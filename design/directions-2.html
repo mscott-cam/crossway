@@ -1,0 +1,779 @@
+<title>Crossway Directions Round Two</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:wght@400;500;600;700;800&family=Marcellus&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:wght@400;600&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+:root {
+  --bg: #f3f6f8;
+  --fg: #142331;
+  --muted: #4b5f6e;
+  --line: #d3dde4;
+  --panel: #ffffff;
+  --amber: #f5a707;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1822;
+    --fg: #e8eef2;
+    --muted: #a5b5c1;
+    --line: #26394a;
+    --panel: #14242f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1822;
+  --fg: #e8eef2;
+  --muted: #a5b5c1;
+  --line: #26394a;
+  --panel: #14242f;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: 'Figtree', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 80px;
+}
+.wrap { max-width: 1240px; margin: 0 auto; display: grid; gap: 28px; }
+.wrap > * { min-width: 0; }
+.intro { display: grid; gap: 14px; max-width: 74ch; }
+.intro h1 { margin: 0; font-size: clamp(1.8rem, 3.6vw, 2.7rem); line-height: 1.1; font-weight: 700; text-wrap: balance; letter-spacing: -0.015em; }
+.intro p { margin: 0; color: var(--muted); font-size: 1.05rem; }
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.tab { text-align: left; padding: 14px 18px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); border-radius: 10px; font: inherit; cursor: pointer; display: grid; gap: 2px; }
+.tab strong { font-size: 1.05rem; }
+.tab span { color: var(--muted); font-size: 0.92rem; }
+.tab:hover { border-color: var(--muted); }
+.tab[aria-selected="true"] { border-color: var(--fg); box-shadow: inset 0 0 0 1px var(--fg); }
+.tab:focus-visible, .replay:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.spec { display: grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; gap: 24px; padding: 20px 22px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+.spec > div { min-width: 0; display: grid; gap: 6px; align-content: start; }
+.spec h2 { margin: 0; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.spec p { margin: 0; font-size: 0.97rem; }
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+.sw { display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--muted); }
+.sw i { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--line); display: block; }
+.bar { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.bar p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+.replay { font: inherit; font-weight: 600; padding: 9px 16px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; }
+.replay:hover { border-color: var(--fg); }
+.needs { display: grid; gap: 10px; padding: 22px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+.needs h2 { margin: 0; font-size: 1.15rem; }
+.needs ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 4px; columns: 2; column-gap: 40px; }
+.needs p { margin: 0; color: var(--muted); }
+@media (max-width: 900px) {
+  .spec { grid-template-columns: 1fr 1fr; }
+  .needs ul { columns: 1; }
+}
+@media (max-width: 760px) {
+  .tabs { grid-template-columns: 1fr; }
+  .spec { grid-template-columns: 1fr; }
+}
+
+.mock { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; isolation: isolate; }
+.mock a { color: inherit; }
+.mock :focus-visible { outline: 3px solid currentColor; outline-offset: 3px; }
+.mock ul, .mock ol, .mock dl { list-style: none; margin: 0; padding: 0; }
+.mock p { margin: 0; }
+.ico { width: 18px; height: 18px; flex: none; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 24px; font: inherit; font-weight: 600; text-decoration: none; border: 2px solid transparent; cursor: pointer; border-radius: var(--btn-r, 4px); }
+.btn--solid { background: var(--btn-bg); color: var(--btn-fg); }
+.btn--line { border-color: var(--btn-line); color: var(--btn-line); background: transparent; }
+.mock a.btn--solid { color: var(--btn-fg); }
+.mock a.btn--line { color: var(--btn-line); }
+.m-menu { display: none; font: inherit; font-weight: 600; background: transparent; border: 2px solid currentColor; border-radius: 4px; padding: 8px 14px; color: inherit; }
+.ph { border-bottom: 2px dashed #c98a00; }
+.ph-tag { display: inline-block; margin-left: 6px; padding: 0 8px; border-radius: 999px; background: #fff0c7; color: #4a3500; font-family: 'Figtree', sans-serif; font-size: 0.78rem; font-weight: 600; white-space: nowrap; vertical-align: 1px; letter-spacing: 0; text-transform: none; }
+.photo { position: relative; overflow: hidden; display: grid; align-items: end; background: #1d3b50; }
+.photo-in { position: absolute; inset: 0; background: radial-gradient(90% 70% at 50% 25%, rgba(255, 255, 255, 0.16), transparent 70%), linear-gradient(165deg, #4b6f87 0%, #2e4d63 55%, #1c394d 100%); }
+.photo .photo-tag { position: relative; justify-self: start; margin: 16px; padding: 6px 14px; border-radius: 2px; background: rgba(12, 28, 40, 0.82); color: #e4edf3; font-family: 'Figtree', sans-serif; font-size: 0.85rem; font-weight: 500; letter-spacing: 0; text-transform: none; }
+
+.d { --navy: #1a374d; --amb: #f5a707; --stone: #e8ebed; --stone-l: #f4f6f7; --stone2: #d0d7dc; --muted: #3e5668; background: var(--stone); color: var(--navy); font-family: 'Libre Caslon Text', Georgia, serif; font-size: 1.0625rem; --btn-bg: var(--navy); --btn-fg: #fff; --btn-line: var(--navy); --btn-r: 2px; }
+.d h1, .d h2, .d h3, .d h4, .d .btn, .d-nav a, .d-name { font-family: 'Marcellus', Georgia, serif; font-weight: 400; }
+.d h1, .d h2, .d h3, .d h4 { margin: 0; text-wrap: balance; }
+.d .btn { letter-spacing: 0.14em; text-transform: uppercase; font-size: 0.84rem; }
+.d-head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 24px; padding: 20px clamp(16px, 4vw, 56px); border-bottom: 1px solid var(--stone2); }
+.d-nav { display: flex; gap: 6px; align-items: center; }
+.d-nav--r { justify-self: end; }
+.d-nav a { padding: 10px 12px; text-decoration: none; letter-spacing: 0.14em; text-transform: uppercase; font-size: 0.8rem; }
+.d-nav a:hover { text-decoration: underline; text-underline-offset: 6px; text-decoration-color: var(--amb); text-decoration-thickness: 2px; }
+.d-nav .d-give { border: 1px solid var(--navy); margin-left: 6px; }
+.d-brand { display: grid; justify-items: center; gap: 6px; text-decoration: none; }
+.d-seal { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 50%; background: var(--navy); color: #fff; font-family: 'Marcellus', serif; font-size: 1.1rem; box-shadow: 0 0 0 3px var(--stone), 0 0 0 4px var(--amb); }
+.d-name { font-size: 0.78rem; letter-spacing: 0.2em; text-transform: uppercase; }
+.d-hero { padding: clamp(24px, 4vw, 48px) clamp(16px, 4vw, 56px) 0; }
+.d-photo { aspect-ratio: 21 / 9; min-height: 280px; }
+.d-plate { position: relative; margin: clamp(-96px, -8vw, -48px) auto 0; max-width: 780px; background: var(--stone); padding: clamp(28px, 4vw, 52px); text-align: center; display: grid; gap: 16px; justify-items: center; box-shadow: 0 18px 36px -18px rgba(15, 36, 52, 0.55), 0 0 0 1px var(--stone2); outline: 1px solid var(--stone2); outline-offset: -10px; }
+.d-plate h1 { font-size: clamp(2.6rem, 6vw, 4.6rem); line-height: 1.04; letter-spacing: 0.01em; text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9), 0 -1px 0 rgba(15, 36, 52, 0.18); }
+.d-inlay { width: min(300px, 60%); height: 3px; background: var(--amb); transform-origin: 0 50%; }
+.d-when { font-family: 'Marcellus', serif; letter-spacing: 0.16em; text-transform: uppercase; font-size: 0.95rem; }
+.d-plate .actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 6px; }
+.d-mission { text-align: center; padding: clamp(40px, 6vw, 72px) clamp(16px, 4vw, 56px) clamp(48px, 7vw, 88px); display: grid; gap: 14px; justify-items: center; }
+.d-mission h2 { font-size: clamp(1rem, 1.6vw, 1.2rem); letter-spacing: 0.18em; text-transform: uppercase; max-width: 46ch; line-height: 1.7; }
+.d-mission p { font-style: italic; color: var(--muted); }
+.d-sec { padding: clamp(48px, 7vw, 96px) clamp(16px, 4vw, 56px); }
+.d-sec--l { background: var(--stone-l); }
+.d-sec > h2 { text-align: center; font-size: clamp(1.3rem, 2.4vw, 1.8rem); letter-spacing: 0.18em; text-transform: uppercase; }
+.d-sec > h2::after { content: ""; display: block; width: 56px; height: 3px; background: var(--amb); margin: 18px auto 0; transform-origin: 50% 50%; }
+.d-lead { text-align: center; max-width: 52ch; margin: 22px auto 0 !important; color: var(--muted); }
+.d-cols { display: grid; grid-template-columns: repeat(4, 1fr); max-width: 1100px; margin: 44px auto 0; }
+.d-col { padding: 8px 26px; text-align: center; border-left: 1px solid var(--stone2); display: grid; gap: 8px; align-content: start; }
+.d-col:first-child { border-left: 0; }
+.d-col h3 { font-size: 1.05rem; letter-spacing: 0.14em; text-transform: uppercase; }
+.d-col p { color: var(--muted); }
+.d-three { display: grid; grid-template-columns: repeat(3, 1fr); max-width: 1000px; margin: 44px auto 0; }
+.d-step { padding: 8px 32px; text-align: center; border-left: 1px solid var(--stone2); display: grid; gap: 8px; justify-items: center; align-content: start; }
+.d-step:first-child { border-left: 0; }
+.d-num { font-family: 'Marcellus', serif; font-size: 2.6rem; line-height: 1; }
+.d-step h3 { font-size: 1.3rem; letter-spacing: 0.12em; text-transform: uppercase; }
+.d-step p { color: var(--muted); }
+.d-step a { font-family: 'Marcellus', serif; letter-spacing: 0.12em; text-transform: uppercase; font-size: 0.82rem; text-decoration: underline; text-decoration-color: var(--amb); text-decoration-thickness: 2px; text-underline-offset: 6px; margin-top: 6px; display: inline-flex; gap: 6px; align-items: center; }
+.d-sermon { max-width: 820px; margin: 44px auto 0; padding: clamp(28px, 4vw, 52px); text-align: center; display: grid; gap: 16px; justify-items: center; background: var(--stone); outline: 1px solid var(--stone2); outline-offset: -10px; box-shadow: 0 0 0 1px var(--stone2); }
+.d-sermon h3 { font-size: clamp(1.8rem, 3.6vw, 2.7rem); line-height: 1.12; }
+.d-sermon .meta { color: var(--muted); }
+.d .sm-list { max-width: 820px; margin: 28px auto 0; }
+.d .sm { display: grid; grid-template-columns: 6rem 1fr; gap: 2px 18px; padding: 14px 4px; border-top: 1px solid var(--stone2); }
+.d .sm-date { color: var(--muted); font-variant-numeric: tabular-nums; }
+.d .sm-t { font-weight: 700; }
+.d .sm-by { grid-column: 2; color: var(--muted); font-size: 0.95rem; }
+.d .ev-list { max-width: 720px; margin: 36px auto 0; }
+.d .ev { display: grid; grid-template-columns: 7rem 1fr; gap: 16px; align-items: baseline; padding: 16px 4px; border-bottom: 1px solid var(--stone2); }
+.d .ev-date { font-family: 'Marcellus', serif; letter-spacing: 0.14em; text-transform: uppercase; display: flex; gap: 8px; }
+.d .ev-t { font-weight: 700; }
+.d-foot { background: var(--navy); color: #dbe5ec; padding: clamp(36px, 5vw, 56px) clamp(16px, 4vw, 56px); display: grid; gap: 14px; justify-items: center; text-align: center; }
+.d-foot .d-seal { box-shadow: 0 0 0 3px var(--navy), 0 0 0 4px var(--amb); background: #fff; color: var(--navy); }
+.d-foot nav { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: center; font-family: 'Marcellus', serif; letter-spacing: 0.14em; text-transform: uppercase; font-size: 0.8rem; }
+@media (max-width: 900px) {
+  .d-head { grid-template-columns: 1fr auto; }
+  .d-nav { display: none; }
+  .d-brand { justify-items: start; grid-template-columns: auto 1fr; align-items: center; gap: 12px; }
+  .d-seal { width: 42px; height: 42px; font-size: 0.95rem; }
+  .d .m-menu { display: block; }
+  .d-cols { grid-template-columns: 1fr 1fr; row-gap: 28px; }
+  .d-col:nth-child(3) { border-left: 0; }
+}
+@media (max-width: 760px) {
+  .d-photo { aspect-ratio: auto; min-height: 0; height: 260px; }
+  .d-three { grid-template-columns: 1fr; row-gap: 28px; }
+  .d-step { border-left: 0; border-top: 1px solid var(--stone2); padding-top: 28px; }
+  .d-step:first-child { border-top: 0; padding-top: 8px; }
+  .d-cols { grid-template-columns: 1fr; }
+  .d-col { border-left: 0; border-top: 1px solid var(--stone2); padding-top: 20px; }
+  .d-col:first-child { border-top: 0; padding-top: 8px; }
+  .d .ev { grid-template-columns: 5.5rem 1fr; }
+}
+
+.e { --navy: #1a374d; --amb: #f5a707; --mist: #f2f5f7; --rule: #d5dde3; --ink: #16293a; --soft: #3d5565; background: #fff; color: var(--ink); font-family: 'Source Serif 4', Georgia, serif; font-size: 1.125rem; --btn-bg: var(--amb); --btn-fg: var(--navy); --btn-line: var(--navy); --btn-r: 4px; }
+.e h1, .e h2, .e h3, .e h4, .e .btn, .e-nav a, .e-brand, .e-bar { font-family: 'Libre Franklin', system-ui, sans-serif; }
+.e h1, .e h2, .e h3, .e h4 { margin: 0; text-wrap: balance; letter-spacing: -0.015em; font-weight: 800; }
+.e-head { display: flex; align-items: center; gap: 24px; padding: 16px clamp(16px, 4vw, 56px); border-bottom: 1px solid var(--rule); }
+.e-brand { display: flex; align-items: center; gap: 12px; font-weight: 700; text-decoration: none; line-height: 1.15; }
+.e-brand small { display: block; font-weight: 500; font-size: 0.82rem; color: var(--soft); }
+.e-mark { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 4px; background: var(--navy); color: #fff; font-weight: 800; font-size: 1.05rem; }
+.e-nav { display: flex; gap: 2px; margin-left: auto; }
+.e-nav a { padding: 10px 14px; text-decoration: none; font-weight: 600; font-size: 0.97rem; border-bottom: 3px solid transparent; }
+.e-nav a:hover { border-bottom-color: var(--amb); }
+.e-hero { display: grid; grid-template-columns: 5fr 7fr; min-height: 560px; }
+.e-hero > * { min-width: 0; }
+.e-panel { background: var(--navy); color: #fff; padding: clamp(28px, 5vw, 72px); display: grid; align-content: center; gap: 22px; }
+.e-panel h1 { font-size: clamp(2.7rem, 5.2vw, 4.4rem); line-height: 1.02; }
+.e-panel p { font-size: 1.2rem; color: #d3e0e9; max-width: 34ch; }
+.e-panel .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.e-panel .btn--line { --btn-line: #fff; }
+.e-photo { min-height: 320px; }
+.e-photo .photo-in { inset: -6% 0; }
+.e-bar { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: 1px solid var(--rule); background: #fff; }
+.e-bar > * { padding: 22px clamp(16px, 2.4vw, 32px); font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-decoration: none; border-left: 1px solid var(--rule); }
+.e-bar > *:first-child { border-left: 0; }
+.e-bar a:hover { background: var(--mist); }
+.e-bar .ico { color: var(--navy); }
+.e-plan { display: grid; grid-template-columns: 1fr 1.15fr; gap: clamp(28px, 5vw, 72px); max-width: 1180px; margin: 0 auto; padding: clamp(48px, 7vw, 96px) clamp(16px, 4vw, 56px); align-items: start; }
+.e-plan > * { min-width: 0; }
+.e-plan h2 { font-size: clamp(2rem, 3.6vw, 2.9rem); line-height: 1.04; }
+.e-lead { margin: 16px 0 28px !important; color: var(--soft); max-width: 40ch; }
+.e-plan .photo { aspect-ratio: 3 / 2; }
+.e-rows > div { padding: 22px 0; border-top: 1px solid var(--rule); display: grid; gap: 4px; }
+.e-rows > div:first-child { border-top: 0; padding-top: 0; }
+.e-rows h3 { font-size: 1.15rem; }
+.e-rows p { color: var(--soft); }
+.e-steps { background: var(--mist); padding: clamp(48px, 7vw, 88px) clamp(16px, 4vw, 56px); }
+.e-steps-in { max-width: 1180px; margin: 0 auto; }
+.e-steps h2 { font-size: clamp(1.7rem, 3vw, 2.4rem); margin-bottom: 36px; }
+.e-three { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(20px, 3vw, 40px); }
+.e-step { position: relative; padding-top: 22px; display: grid; gap: 8px; align-content: start; justify-items: start; }
+.e-step::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--navy); transform-origin: 0 50%; }
+.e-num { font: 800 2.6rem 'Libre Franklin', sans-serif; line-height: 1; color: var(--navy); }
+.e-step h3 { font-size: 1.5rem; }
+.e-step p { color: var(--soft); }
+.e-step a { font: 700 1rem 'Libre Franklin', sans-serif; text-decoration: underline; text-underline-offset: 5px; text-decoration-color: var(--amb); text-decoration-thickness: 3px; display: inline-flex; gap: 6px; align-items: center; margin-top: 6px; }
+.e-news { display: grid; grid-template-columns: 1.25fr 1fr; gap: clamp(28px, 5vw, 72px); max-width: 1180px; margin: 0 auto; padding: clamp(48px, 7vw, 96px) clamp(16px, 4vw, 56px); }
+.e-news > * { min-width: 0; }
+.e-sermon { display: grid; gap: 14px; align-content: start; }
+.e-sermon h2 { font-size: 1.1rem; }
+.e-sermon h3 { font-size: clamp(1.9rem, 3.4vw, 2.8rem); line-height: 1.05; }
+.e-sermon .meta { color: var(--soft); }
+.e-sermon .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.e .sm-list { margin-top: 12px; }
+.e .sm { display: grid; grid-template-columns: 5.5rem 1fr; gap: 2px 16px; padding: 14px 0; border-top: 1px solid var(--rule); }
+.e .sm-date { color: var(--soft); font-variant-numeric: tabular-nums; }
+.e .sm-t { font: 700 1rem 'Libre Franklin', sans-serif; }
+.e .sm-by { grid-column: 2; color: var(--soft); font-size: 0.95rem; }
+.e-events h2 { font-size: 1.1rem; margin-bottom: 14px; }
+.e .ev { display: grid; grid-template-columns: 4.5rem 1fr; gap: 16px; align-items: center; padding: 16px 0; border-top: 1px solid var(--rule); }
+.e .ev-date { display: grid; line-height: 1; justify-items: start; }
+.e .ev-m { font: 700 0.85rem 'Libre Franklin', sans-serif; text-transform: uppercase; letter-spacing: 0.06em; color: var(--soft); }
+.e .ev-d { font: 800 1.9rem 'Libre Franklin', sans-serif; color: var(--navy); }
+.e .ev-t { font: 700 1.05rem 'Libre Franklin', sans-serif; }
+.e-foot { background: var(--navy); color: #d3e0e9; padding: 32px clamp(16px, 4vw, 56px); display: flex; flex-wrap: wrap; gap: 12px 40px; justify-content: space-between; align-items: center; }
+.e-foot nav { display: flex; gap: 22px; font: 600 0.97rem 'Libre Franklin', sans-serif; color: #fff; }
+@media (max-width: 900px) {
+  .e-nav { display: none; }
+  .e .m-menu { display: block; margin-left: auto; }
+  .e-bar { grid-template-columns: 1fr 1fr; }
+  .e-bar > *:nth-child(3) { border-left: 0; }
+  .e-bar > *:nth-child(n+3) { border-top: 1px solid var(--rule); }
+}
+@media (max-width: 760px) {
+  .e-hero, .e-plan, .e-news { grid-template-columns: 1fr; }
+  .e-photo { min-height: 260px; order: -1; }
+  .e-three { grid-template-columns: 1fr; }
+}
+
+.f { --navy: #1a374d; --navy-d: #102536; --foil: #f5a707; --paper: #f1f4f6; --ink: #17293a; --rule: #c9d4dc; --soft: #3a5163; background: var(--paper); color: var(--ink); font-family: 'Spectral', Georgia, serif; font-size: 1.1875rem; --btn-bg: var(--foil); --btn-fg: var(--navy-d); --btn-line: #e8eef2; --btn-r: 2px; }
+.f h1, .f h2, .f h3, .f h4 { font-family: 'Old Standard TT', Georgia, serif; font-weight: 400; margin: 0; text-wrap: balance; }
+.f-cloth { position: relative; background-color: var(--navy); background-image: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 3px), repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.07) 0 1px, transparent 1px 3px); color: #eaf0f4; padding: 0 clamp(16px, 4vw, 56px) clamp(32px, 5vw, 56px); }
+.f-head { display: flex; align-items: center; gap: 24px; padding: 22px 0; }
+.f-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; font-family: 'Old Standard TT', serif; font-size: 1.1rem; color: #fff; }
+.f-seal { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--foil); color: var(--foil); font-family: 'Old Standard TT', serif; font-weight: 700; font-size: 0.95rem; }
+.f-nav { display: flex; gap: 4px; margin-left: auto; margin-right: clamp(40px, 7vw, 88px); }
+.f-nav a { padding: 10px 12px; text-decoration: none; font-size: 1rem; color: #dbe5ec; }
+.f-nav a:hover { color: var(--foil); }
+.f-ribbon { position: absolute; top: 0; right: clamp(24px, 5vw, 64px); width: 26px; height: 118px; background: linear-gradient(90deg, #d98f00, #ffc84a 50%, #e89d00); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 86%, 0 100%); }
+.f-frame { position: relative; padding: clamp(40px, 6vw, 80px) clamp(20px, 5vw, 72px); text-align: center; display: grid; gap: 18px; justify-items: center; }
+.f-line { position: absolute; pointer-events: none; }
+.f-line--1 { inset: 0; border: 2px solid var(--foil); }
+.f-line--2 { inset: 8px; border: 1px solid var(--foil); }
+.f-title { font-family: 'Old Standard TT', serif; letter-spacing: 0.24em; text-transform: uppercase; font-size: 0.85rem; color: var(--foil); }
+.f-frame h1 { font-size: clamp(3rem, 7.4vw, 5.8rem); line-height: 1; color: #f4f7f9; }
+.f-orn { width: min(320px, 70%); height: 14px; display: block; overflow: visible; }
+.f-when { font-style: italic; font-size: 1.35rem; color: #e8eef2; }
+.f-addr { color: #b9cad6; }
+.f-frame .actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 8px; position: relative; }
+.f-frame .btn { font-family: 'Old Standard TT', serif; font-weight: 700; letter-spacing: 0.06em; }
+.f-sec { padding: clamp(48px, 7vw, 96px) clamp(16px, 4vw, 56px); }
+.f-sec--w { background: #fff; }
+.f-sec > h2 { text-align: center; font-size: clamp(1.9rem, 3.4vw, 2.7rem); }
+.f-sec > .f-orn { margin: 16px auto 0; }
+.f-lead { text-align: center; max-width: 50ch; margin: 22px auto 0 !important; color: var(--soft); }
+.f-plan { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: clamp(28px, 5vw, 72px); max-width: 1100px; margin: 48px auto 0; align-items: center; }
+.f-plan > * { min-width: 0; }
+.f-rows > div { padding: 18px 0; border-top: 1px solid var(--rule); display: grid; grid-template-columns: 7.5rem 1fr; gap: 16px; }
+.f-rows > div:first-child { border-top: 0; padding-top: 0; }
+.f-rows h3 { font-style: italic; font-size: 1.25rem; }
+.f-rows p { color: var(--soft); }
+.f-plate { padding: 12px; background: #fff; box-shadow: 0 10px 22px -10px rgba(15, 36, 52, 0.4); outline: 1px solid var(--rule); max-width: 380px; width: 100%; margin-inline: auto; }
+.f-plate .photo { aspect-ratio: 4 / 5; }
+.f-three { display: grid; grid-template-columns: repeat(3, 1fr); max-width: 1000px; margin: 48px auto 0; }
+.f-step { padding: 8px 32px; text-align: center; border-left: 1px solid var(--rule); display: grid; gap: 8px; justify-items: center; align-content: start; }
+.f-step:first-child { border-left: 0; }
+.f-num { font-family: 'Old Standard TT', serif; font-style: italic; font-size: 2.8rem; line-height: 1; }
+.f-step h3 { font-size: 1.6rem; }
+.f-step p { color: var(--soft); }
+.f-step a { font-weight: 600; text-decoration: underline; text-decoration-color: var(--foil); text-decoration-thickness: 2px; text-underline-offset: 5px; display: inline-flex; gap: 6px; align-items: center; margin-top: 6px; }
+.f-title-page { max-width: 760px; margin: 44px auto 0; text-align: center; display: grid; gap: 14px; justify-items: center; }
+.f-title-page h3 { font-style: italic; font-size: clamp(2rem, 4.2vw, 3.2rem); line-height: 1.1; }
+.f-title-page .meta { color: var(--soft); }
+.f-title-page .btn { --btn-bg: var(--navy); --btn-fg: #fff; }
+.f-toc { max-width: 760px; margin: 36px auto 0; }
+.f-toc h3 { font-size: 1.4rem; text-align: center; margin-bottom: 8px; }
+.toc-row { display: grid; grid-template-columns: auto 1fr auto; gap: 0 10px; align-items: baseline; padding: 11px 0; }
+.toc-t { font-weight: 500; }
+.dots { border-bottom: 2px dotted #8fa3b2; transform-origin: 0 50%; height: 1px; align-self: end; margin-bottom: 7px; }
+.toc-d { font-style: italic; color: var(--soft); font-variant-numeric: tabular-nums; }
+.toc-m { grid-column: 1 / -1; color: var(--soft); font-size: 0.95rem; }
+.f-foot { background-color: var(--navy); background-image: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 3px), repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.07) 0 1px, transparent 1px 3px); color: #c9d8e2; padding: clamp(32px, 5vw, 48px) clamp(16px, 4vw, 56px); display: grid; gap: 12px; justify-items: center; text-align: center; }
+.f-foot nav { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: center; color: var(--foil); font-weight: 600; }
+@media (max-width: 900px) {
+  .f-nav { display: none; }
+  .f .m-menu { display: block; margin-left: auto; margin-right: 56px; }
+}
+@media (max-width: 760px) {
+  .f-plan { grid-template-columns: 1fr; }
+  .f-three { grid-template-columns: 1fr; row-gap: 28px; }
+  .f-step { border-left: 0; border-top: 1px solid var(--rule); padding-top: 28px; }
+  .f-step:first-child { border-top: 0; padding-top: 8px; }
+  .f-rows > div { grid-template-columns: 1fr; gap: 2px; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></symbol>
+  <symbol id="i-orn" viewBox="0 0 320 14"><path d="M0 7H138M182 7H320" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M160 0l7 7-7 7-7-7z" fill="#f5a707"/></symbol>
+</svg>
+
+<div class="wrap">
+  <header class="intro">
+    <h1>Three more directions, more serious and established</h1>
+    <p>These replace the first round. They drop the playful shapes and the technical grid, and aim for a church that feels established and trustworthy while staying warm. Navy, amber, the CW mark and the live site's content carry over. Items marked "to confirm" are placeholders, and the muted blue panels show where the church's own photos go.</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Design directions">
+    <button class="tab" role="tab" id="tab-cornerstone" aria-controls="mock-cornerstone" aria-selected="true" data-dir="cornerstone"><strong>1. Cornerstone</strong><span>Carved stone, calm and centred</span></button>
+    <button class="tab" role="tab" id="tab-steps" aria-controls="mock-steps" aria-selected="false" data-dir="steps"><strong>2. Front Steps</strong><span>A trusted institution, photo-led</span></button>
+    <button class="tab" role="tab" id="tab-volume" aria-controls="mock-volume" aria-selected="false" data-dir="volume"><strong>3. Bound Volume</strong><span>Navy cloth, gold foil, chapters</span></button>
+  </div>
+
+  <section class="spec" id="spec-cornerstone" aria-label="Direction 1 details">
+    <div>
+      <h2>Idea</h2>
+      <p>A building's dedication stone, made into a website. Calm, centred and symmetrical, with lettering that looks cut into limestone and a thin amber line inlaid like brass. One wide photograph carries the warmth and the text stays quiet.</p>
+    </div>
+    <div>
+      <h2>Look</h2>
+      <div class="swatches"><span class="sw"><i style="background:#1a374d"></i>Navy</span><span class="sw"><i style="background:#f5a707"></i>Amber</span><span class="sw"><i style="background:#e8ebed"></i>Limestone</span><span class="sw"><i style="background:#d0d7dc"></i>Shadow</span></div>
+      <p>Marcellus for headings, Libre Caslon Text for reading.</p>
+    </div>
+    <div>
+      <h2>Motion</h2>
+      <p>The photograph settles in slowly. The amber lines draw across once and each section rises a few pixels into place. Nothing else moves.</p>
+    </div>
+    <div>
+      <h2>Risk</h2>
+      <p>The most formal. It leans on strong photography, and the soft stone tones need careful contrast so older readers are comfortable. The centred layout limits how dense inner pages can get.</p>
+    </div>
+  </section>
+
+  <section class="spec" id="spec-steps" aria-label="Direction 2 details" hidden>
+    <div>
+      <h2>Idea</h2>
+      <p>The trust of a good hospital or university. A large photograph of the congregation, a navy panel with a plain headline, and an information bar that answers when, where and how to watch before anyone scrolls. Strong hierarchy, no ornament.</p>
+    </div>
+    <div>
+      <h2>Look</h2>
+      <div class="swatches"><span class="sw"><i style="background:#1a374d"></i>Navy</span><span class="sw"><i style="background:#f5a707"></i>Amber</span><span class="sw"><i style="background:#ffffff"></i>White</span><span class="sw"><i style="background:#f2f5f7"></i>Mist</span></div>
+      <p>Libre Franklin for headings, Source Serif 4 for reading.</p>
+    </div>
+    <div>
+      <h2>Motion</h2>
+      <p>The photograph is revealed upward like a curtain, then the headline and information bar come in. The photo drifts a few pixels as you scroll.</p>
+    </div>
+    <div>
+      <h2>Risk</h2>
+      <p>The safest and closest to what other churches ship, so it stands out only through execution and real photography. Without good photos it can look like a template.</p>
+    </div>
+  </section>
+
+  <section class="spec" id="spec-volume" aria-label="Direction 3 details" hidden>
+    <div>
+      <h2>Idea</h2>
+      <p>A navy cloth-bound book stamped in gold. The opening is a foil-framed title page, the sections read like chapters, and events and sermons are set like a table of contents with dotted leaders.</p>
+    </div>
+    <div>
+      <h2>Look</h2>
+      <div class="swatches"><span class="sw"><i style="background:#1a374d"></i>Navy cloth</span><span class="sw"><i style="background:#f5a707"></i>Amber foil</span><span class="sw"><i style="background:#f1f4f6"></i>Paper</span><span class="sw"><i style="background:#ffffff"></i>White</span></div>
+      <p>Old Standard TT for headings, Spectral for reading.</p>
+    </div>
+    <div>
+      <h2>Motion</h2>
+      <p>The foil frame is stamped across the opening page, a bookmark ribbon drops in, and the title fades up. Contents lines extend as you reach them.</p>
+    </div>
+    <div>
+      <h2>Risk</h2>
+      <p>The most traditional and ornamental. It signals heritage strongly, which may feel old-fashioned to younger visitors, and it has to avoid costume details such as page curls or fake leather.</p>
+    </div>
+  </section>
+
+  <div class="bar">
+    <p>Scroll inside each mockup to see the page motion. Motion is off when your system asks for reduced motion.</p>
+    <button class="replay" id="replay" type="button">Replay motion</button>
+  </div>
+
+  <section class="mock d" id="mock-cornerstone" role="tabpanel" aria-labelledby="tab-cornerstone">
+    <header class="d-head">
+      <nav class="d-nav d-nav--l" aria-label="Main"><a href="#">Visit</a><a href="#">About</a><a href="#">Church Life</a></nav>
+      <a class="d-brand" href="#"><span class="d-seal" aria-hidden="true">CW</span><span class="d-name">Crossway Bible Church</span></a>
+      <nav class="d-nav d-nav--r" aria-label="Secondary"><a href="#">Sermons</a><a href="#">Events</a><a class="d-give" href="#">Give</a></nav>
+      <button class="m-menu" type="button">Menu</button>
+    </header>
+
+    <div class="d-hero">
+      <div class="photo d-photo" role="img" aria-label="Photo placeholder: the congregation on Sunday"><span class="photo-in"></span><span class="photo-tag">Photo: the congregation on Sunday</span></div>
+      <div class="d-plate">
+        <h1>You are loved.</h1>
+        <span class="d-inlay"></span>
+        <p class="d-when">Sundays at 9:00 and 10:45 am</p>
+        <p>15759 San Pedro Ave, San Antonio, Texas 78232</p>
+        <div class="actions">
+          <a class="btn btn--solid" href="#">Plan your visit</a>
+          <a class="btn btn--line" href="#">Watch live</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-mission">
+      <h2>We exist to glorify God through the fulfillment of the Great Commission.</h2>
+      <p>Lost people saved. Saved people matured. Matured people multiplied.</p>
+    </div>
+
+    <div class="d-sec d-sec--l">
+      <h2>Plan your first Sunday</h2>
+      <p class="d-lead">Here is what to expect when you walk in the door, so you can arrive knowing where to go.</p>
+      <div class="d-cols">
+        <div class="d-col"><h3>When</h3><p>Sundays at 9:00 and 10:45 am.</p></div>
+        <div class="d-col"><h3>Where</h3><p>15759 San Pedro Ave, San Antonio, TX 78232.</p></div>
+        <div class="d-col"><h3>Parking</h3><p><span class="ph">Parking and arrival details</span><span class="ph-tag">to confirm</span></p></div>
+        <div class="d-col"><h3>Kids</h3><p>Crossway Kids meets at both services, infants through 5th grade. <span class="ph">Check-in steps</span><span class="ph-tag">to confirm</span></p></div>
+      </div>
+    </div>
+
+    <div class="d-sec">
+      <h2>Three steps to get plugged in</h2>
+      <div class="d-three">
+        <div class="d-step"><span class="d-num">I</span><h3>Connect</h3><p>We want to meet you!</p><a href="#">Let's connect <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+        <div class="d-step"><span class="d-num">II</span><h3>Consider</h3><p>Learn more about us.</p><a href="#">Tell me more <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+        <div class="d-step"><span class="d-num">III</span><h3>Commit</h3><p>Join our church!</p><a href="#">I'm ready <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+      </div>
+    </div>
+
+    <div class="d-sec d-sec--l">
+      <h2>The latest message</h2>
+      <div class="d-sermon">
+        <h3>Entrusted With Resources: Putting Money in Its Place</h3>
+        <p class="meta">10.18.26 &middot; Josh de Koning &middot; 1 Timothy</p>
+        <a class="btn btn--solid" href="#"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg> Watch</a>
+      </div>
+      <ul class="sm-list" data-sermons></ul>
+    </div>
+
+    <div class="d-sec">
+      <h2>Coming up</h2>
+      <ul class="ev-list" data-events></ul>
+    </div>
+
+    <footer class="d-foot">
+      <span class="d-seal" aria-hidden="true">CW</span>
+      <p>Crossway Bible Church<br>Sundays at 9:00 and 10:45 am<br>15759 San Pedro Ave, San Antonio, TX 78232</p>
+      <nav aria-label="Footer"><a href="#">Give</a><a href="#">Events</a><a href="#">Church Center</a><a href="#">Sermons</a></nav>
+    </footer>
+  </section>
+
+  <section class="mock e" id="mock-steps" role="tabpanel" aria-labelledby="tab-steps" hidden>
+    <header class="e-head">
+      <a class="e-brand" href="#"><span class="e-mark" aria-hidden="true">CW</span><span>Crossway Bible Church<small>San Antonio, Texas</small></span></a>
+      <nav class="e-nav" aria-label="Main"><a href="#">Visit</a><a href="#">About</a><a href="#">Church Life</a><a href="#">Sermons</a><a href="#">Events</a></nav>
+      <a class="btn btn--solid" href="#">Give</a>
+      <button class="m-menu" type="button">Menu</button>
+    </header>
+
+    <div class="e-hero">
+      <div class="e-panel">
+        <h1>You are loved.</h1>
+        <p>Crossway Bible Church exists to glorify God through the fulfillment of the Great Commission.</p>
+        <div class="actions">
+          <a class="btn btn--solid" href="#">Plan your visit <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <a class="btn btn--line" href="#">Watch live</a>
+        </div>
+      </div>
+      <div class="photo e-photo" role="img" aria-label="Photo placeholder: the congregation on Sunday"><span class="photo-in"></span><span class="photo-tag">Photo: the congregation on Sunday</span></div>
+    </div>
+
+    <nav class="e-bar" aria-label="Quick facts">
+      <span>Sundays 9:00 and 10:45 am</span>
+      <span>15759 San Pedro Ave</span>
+      <a href="#">Watch live <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <a href="#">Give <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    </nav>
+
+    <div class="e-plan">
+      <div>
+        <h2>Plan your first Sunday</h2>
+        <p class="e-lead">Here is what to expect when you walk in the door, so you can arrive knowing where to go.</p>
+        <div class="photo" role="img" aria-label="Photo placeholder: families arriving"><span class="photo-in"></span><span class="photo-tag">Photo: families arriving</span></div>
+      </div>
+      <div class="e-rows">
+        <div><h3>When</h3><p>Sundays at 9:00 and 10:45 am.</p></div>
+        <div><h3>Where</h3><p>15759 San Pedro Ave, San Antonio, TX 78232.</p></div>
+        <div><h3>Parking</h3><p><span class="ph">Parking and arrival details</span><span class="ph-tag">to confirm</span></p></div>
+        <div><h3>Kids</h3><p>Crossway Kids meets at both services, from infants through 5th grade. <span class="ph">Check-in steps</span><span class="ph-tag">to confirm</span></p></div>
+      </div>
+    </div>
+
+    <div class="e-steps">
+      <div class="e-steps-in">
+        <h2>Three steps to get plugged in</h2>
+        <div class="e-three">
+          <div class="e-step"><span class="e-num">1</span><h3>Connect</h3><p>We want to meet you!</p><a href="#">Let's connect <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+          <div class="e-step"><span class="e-num">2</span><h3>Consider</h3><p>Learn more about us.</p><a href="#">Tell me more <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+          <div class="e-step"><span class="e-num">3</span><h3>Commit</h3><p>Join our church!</p><a href="#">I'm ready <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="e-news">
+      <div class="e-sermon">
+        <h2>Latest message</h2>
+        <h3>Entrusted With Resources: Putting Money in Its Place</h3>
+        <p class="meta">10.18.26 &middot; Josh de Koning &middot; 1 Timothy &middot; Stand Alone Messages</p>
+        <div class="actions">
+          <a class="btn btn--solid" href="#"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg> Watch</a>
+          <a class="btn btn--line" href="#">All sermons</a>
+        </div>
+        <ul class="sm-list" data-sermons></ul>
+      </div>
+      <div class="e-events">
+        <h2>Coming up</h2>
+        <ul class="ev-list" data-events></ul>
+      </div>
+    </div>
+
+    <footer class="e-foot">
+      <p>Crossway Bible Church &middot; Sundays 9:00 and 10:45 am &middot; 15759 San Pedro Ave, San Antonio, TX 78232</p>
+      <nav aria-label="Footer"><a href="#">Give</a><a href="#">Events</a><a href="#">Church Center</a></nav>
+    </footer>
+  </section>
+
+  <section class="mock f" id="mock-volume" role="tabpanel" aria-labelledby="tab-volume" hidden>
+    <div class="f-cloth">
+      <span class="f-ribbon" aria-hidden="true"></span>
+      <header class="f-head">
+        <a class="f-brand" href="#"><span class="f-seal" aria-hidden="true">CW</span><span>Crossway Bible Church</span></a>
+        <nav class="f-nav" aria-label="Main"><a href="#">Visit</a><a href="#">About</a><a href="#">Church Life</a><a href="#">Sermons</a><a href="#">Events</a><a href="#">Give</a></nav>
+        <button class="m-menu" type="button">Menu</button>
+      </header>
+      <div class="f-frame">
+        <span class="f-line f-line--1" aria-hidden="true"></span><span class="f-line f-line--2" aria-hidden="true"></span>
+        <p class="f-title">Crossway Bible Church &middot; San Antonio</p>
+        <h1>You are loved.</h1>
+        <svg class="f-orn" style="color:#f5a707" viewBox="0 0 320 14" aria-hidden="true"><use href="#i-orn"/></svg>
+        <p class="f-when">Sundays at 9:00 and 10:45 am</p>
+        <p class="f-addr">15759 San Pedro Ave, San Antonio, Texas 78232</p>
+        <div class="actions">
+          <a class="btn btn--solid" href="#">Plan your visit</a>
+          <a class="btn btn--line" href="#">Watch live</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="f-sec">
+      <h2>Plan your first Sunday</h2>
+      <svg class="f-orn" style="color:#1a374d" viewBox="0 0 320 14" aria-hidden="true"><use href="#i-orn"/></svg>
+      <p class="f-lead">Here is what to expect when you walk in the door, so you can arrive knowing where to go.</p>
+      <div class="f-plan">
+        <div class="f-rows">
+          <div><h3>When</h3><p>Sundays at 9:00 and 10:45 am.</p></div>
+          <div><h3>Where</h3><p>15759 San Pedro Ave, San Antonio, TX 78232.</p></div>
+          <div><h3>Parking</h3><p><span class="ph">Parking and arrival details</span><span class="ph-tag">to confirm</span></p></div>
+          <div><h3>Kids</h3><p>Crossway Kids meets at both services, from infants through 5th grade. <span class="ph">Check-in steps</span><span class="ph-tag">to confirm</span></p></div>
+        </div>
+        <div class="f-plate"><div class="photo" role="img" aria-label="Photo placeholder: worship on Sunday"><span class="photo-in"></span><span class="photo-tag">Photo: worship on Sunday</span></div></div>
+      </div>
+    </div>
+
+    <div class="f-sec f-sec--w">
+      <h2>Three steps to get plugged in</h2>
+      <svg class="f-orn" style="color:#1a374d" viewBox="0 0 320 14" aria-hidden="true"><use href="#i-orn"/></svg>
+      <div class="f-three">
+        <div class="f-step"><span class="f-num">i</span><h3>Connect</h3><p>We want to meet you!</p><a href="#">Let's connect <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+        <div class="f-step"><span class="f-num">ii</span><h3>Consider</h3><p>Learn more about us.</p><a href="#">Tell me more <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+        <div class="f-step"><span class="f-num">iii</span><h3>Commit</h3><p>Join our church!</p><a href="#">I'm ready <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+      </div>
+    </div>
+
+    <div class="f-sec">
+      <h2>The latest message</h2>
+      <svg class="f-orn" style="color:#1a374d" viewBox="0 0 320 14" aria-hidden="true"><use href="#i-orn"/></svg>
+      <div class="f-title-page">
+        <h3>Entrusted With Resources: Putting Money in Its Place</h3>
+        <p class="meta">10.18.26 &middot; Josh de Koning &middot; 1 Timothy</p>
+        <a class="btn btn--solid" href="#"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg> Watch</a>
+      </div>
+      <div class="f-toc">
+        <h3>Recent messages</h3>
+        <ul data-sermons data-toc></ul>
+      </div>
+    </div>
+
+    <div class="f-sec f-sec--w">
+      <h2>Coming up</h2>
+      <svg class="f-orn" style="color:#1a374d" viewBox="0 0 320 14" aria-hidden="true"><use href="#i-orn"/></svg>
+      <div class="f-toc">
+        <ul data-events data-toc></ul>
+      </div>
+    </div>
+
+    <footer class="f-foot">
+      <span class="f-seal" style="color:#f5a707" aria-hidden="true">CW</span>
+      <p>Crossway Bible Church<br>Sundays at 9:00 and 10:45 am<br>15759 San Pedro Ave, San Antonio, TX 78232</p>
+      <nav aria-label="Footer"><a href="#">Give</a><a href="#">Events</a><a href="#">Church Center</a><a href="#">Sermons</a></nav>
+    </footer>
+  </section>
+
+  <section class="needs">
+    <h2>Still needed from the church</h2>
+    <ul>
+      <li>CW logo files (the mark in the mockups is a stand-in)</li>
+      <li>The photo library, so photos can be cropped to the chosen direction</li>
+      <li>Parking and arrival details</li>
+      <li>How kids check-in works</li>
+      <li>Child safety policy text</li>
+      <li>Belief statements and leader bios</li>
+    </ul>
+    <p>You can also mix them, for example the Front Steps layout with the Cornerstone typography. Tell me what to carry across.</p>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+const events = [
+  { m: 'Oct', d: '25', t: 'Advanced Commitment Night' },
+  { m: 'Nov', d: '4', t: '1st Wednesday: Prayer & Praise' },
+  { m: 'Dec', d: '2', t: '1st Wednesday: Prayer & Praise' },
+  { m: 'Dec', d: '13', t: 'Student Ministry Christmas Party' }
+];
+const sermons = [
+  { date: '9.27.26', t: 'Treasuring Scripture Like Jesus', by: 'Josh de Koning', ref: 'Matthew' },
+  { date: '9.20.26', t: 'Main Character Energy', by: 'Josh Collins', ref: 'Joshua' },
+  { date: '9.13.26', t: 'How To Not Be a Pile of Rocks', by: 'Josh de Koning', ref: '1 Peter' }
+];
+const esc = s => s.replace(/&/g, '&amp;');
+
+document.querySelectorAll('[data-events]').forEach(ul => {
+  const toc = ul.hasAttribute('data-toc');
+  ul.innerHTML = events.map(e => toc
+    ? '<li class="toc-row"><span class="toc-t">' + esc(e.t) + '</span><span class="dots"></span><span class="toc-d">' + e.m + ' ' + e.d + '</span></li>'
+    : '<li class="ev"><span class="ev-date"><span class="ev-m">' + e.m + '</span><span class="ev-d">' + e.d + '</span></span><span class="ev-t">' + esc(e.t) + '</span></li>'
+  ).join('');
+});
+document.querySelectorAll('[data-sermons]').forEach(ul => {
+  const toc = ul.hasAttribute('data-toc');
+  ul.innerHTML = sermons.map(s => toc
+    ? '<li class="toc-row"><span class="toc-t">' + s.t + '</span><span class="dots"></span><span class="toc-d">' + s.date + '</span><span class="toc-m">' + s.by + ' &middot; ' + s.ref + '</span></li>'
+    : '<li class="sm"><span class="sm-date">' + s.date + '</span><span class="sm-t">' + s.t + '</span><span class="sm-by">' + s.by + ' &middot; ' + s.ref + '</span></li>'
+  ).join('');
+});
+
+document.addEventListener('click', e => {
+  if (e.target.closest('.mock a')) e.preventDefault();
+});
+
+const dirs = ['cornerstone', 'steps', 'volume'];
+const hasGsap = typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined';
+if (hasGsap) gsap.registerPlugin(ScrollTrigger);
+let mm = null;
+let current = null;
+
+function scrollReveal(targets, trigger, vars) {
+  gsap.from(targets, Object.assign({
+    opacity: 0, y: 16, duration: 0.7, stagger: 0.08, ease: 'power2.out',
+    scrollTrigger: { trigger: trigger, start: 'top 86%', once: true }
+  }, vars || {}));
+}
+
+function initCornerstone(q) {
+  const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
+  tl.from(q('.d-head'), { opacity: 0, duration: 0.6 })
+    .from(q('.d-photo .photo-in'), { scale: 1.07, duration: 2.2, ease: 'power2.out' }, 0)
+    .from(q('.d-photo .photo-tag'), { opacity: 0, duration: 0.6 }, 0.6)
+    .from(q('.d-plate'), { opacity: 0, y: 24, duration: 0.9 }, 0.5)
+    .from(q('.d-plate h1'), { opacity: 0, duration: 0.9 }, 0.8)
+    .from(q('.d-inlay'), { scaleX: 0, duration: 0.9, ease: 'power3.inOut' }, 1.1)
+    .from(q('.d-plate > :not(h1):not(.d-inlay)'), { opacity: 0, y: 8, duration: 0.6, stagger: 0.1 }, 1.2);
+  scrollReveal(q('.d-mission > *'), q('.d-mission')[0]);
+  q('.d-sec > h2').forEach(h => {
+    gsap.from(h, { opacity: 0, y: 12, duration: 0.7, ease: 'power2.out', scrollTrigger: { trigger: h, start: 'top 88%', once: true } });
+  });
+  scrollReveal(q('.d-col'), q('.d-cols')[0]);
+  scrollReveal(q('.d-step'), q('.d-three')[0], { stagger: 0.12 });
+  scrollReveal(q('.d-sermon'), q('.d-sermon')[0]);
+  scrollReveal(q('.d .sm'), q('.sm-list')[0], { stagger: 0.07 });
+  scrollReveal(q('.d .ev'), q('.d .ev-list')[0], { stagger: 0.07 });
+}
+
+function initSteps(q) {
+  const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
+  tl.from(q('.e-head'), { opacity: 0, y: -8, duration: 0.5 })
+    .fromTo(q('.e-photo'), { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.3, ease: 'power3.inOut' }, 0.1)
+    .from(q('.e-photo .photo-in'), { scale: 1.1, duration: 1.8 }, 0.1)
+    .from(q('.e-panel > *'), { opacity: 0, y: 18, duration: 0.7, stagger: 0.1 }, 0.5)
+    .from(q('.e-bar > *'), { opacity: 0, y: 10, duration: 0.5, stagger: 0.07 }, 1.1);
+  gsap.to(q('.e-photo .photo-in'), { yPercent: 5, ease: 'none', scrollTrigger: { trigger: q('.e-hero')[0], start: 'top top', end: 'bottom top', scrub: 0.6 } });
+  scrollReveal(q('.e-plan h2, .e-lead, .e-plan .photo'), q('.e-plan')[0]);
+  scrollReveal(q('.e-rows > div'), q('.e-rows')[0], { stagger: 0.1 });
+  gsap.from(q('.e-step'), { opacity: 0, y: 14, duration: 0.7, stagger: 0.12, ease: 'power2.out', scrollTrigger: { trigger: q('.e-three')[0], start: 'top 85%', once: true } });
+  scrollReveal(q('.e-news .e-sermon > *, .e-events > h2, .e .ev, .e .sm'), q('.e-news')[0], { stagger: 0.06 });
+}
+
+function initVolume(q) {
+  const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
+  tl.from(q('.f-head'), { opacity: 0, duration: 0.6 })
+    .fromTo(q('.f-line--1'), { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 1.2, ease: 'power2.inOut' }, 0.1)
+    .fromTo(q('.f-line--2'), { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 1.2, ease: 'power2.inOut' }, 0.3)
+    .from(q('.f-ribbon'), { yPercent: -100, duration: 0.9, ease: 'power3.out' }, 0.7)
+    .from(q('.f-frame > :not(.f-line)'), { opacity: 0, y: 14, duration: 0.8, stagger: 0.12 }, 0.6);
+  q('.f-sec > h2').forEach(h => {
+    gsap.from(h, { opacity: 0, y: 12, duration: 0.7, ease: 'power2.out', scrollTrigger: { trigger: h, start: 'top 88%', once: true } });
+  });
+  q('.f-sec > .f-orn').forEach(o => {
+    gsap.from(o, { opacity: 0, scaleX: 0.6, duration: 0.8, ease: 'power2.out', scrollTrigger: { trigger: o, start: 'top 90%', once: true } });
+  });
+  scrollReveal(q('.f-rows > div'), q('.f-rows')[0]);
+  scrollReveal(q('.f-plate'), q('.f-plate')[0]);
+  scrollReveal(q('.f-step'), q('.f-three')[0], { stagger: 0.12 });
+  scrollReveal(q('.f-title-page > *'), q('.f-title-page')[0]);
+  q('.f-toc ul').forEach(ul => {
+    scrollReveal(ul.querySelectorAll('.toc-t, .toc-d, .toc-m'), ul, { stagger: 0.04 });
+    gsap.from(ul.querySelectorAll('.dots'), { scaleX: 0, duration: 0.9, stagger: 0.1, ease: 'power2.out', scrollTrigger: { trigger: ul, start: 'top 86%', once: true } });
+  });
+}
+
+const inits = { cornerstone: initCornerstone, steps: initSteps, volume: initVolume };
+
+function show(id) {
+  if (mm) { mm.revert(); mm = null; }
+  current = id;
+  dirs.forEach(d => {
+    const on = d === id;
+    document.getElementById('mock-' + d).hidden = !on;
+    document.getElementById('spec-' + d).hidden = !on;
+    const tab = document.getElementById('tab-' + d);
+    tab.setAttribute('aria-selected', on ? 'true' : 'false');
+    tab.tabIndex = on ? 0 : -1;
+  });
+  try { history.replaceState(null, '', '#' + id); } catch (err) {}
+  if (!hasGsap) return;
+  const root = document.getElementById('mock-' + id);
+  mm = gsap.matchMedia();
+  mm.add({ rm: '(prefers-reduced-motion: no-preference)' }, ctx => {
+    if (!ctx.conditions.rm) return;
+    inits[id](gsap.utils.selector(root));
+  });
+  ScrollTrigger.refresh();
+}
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => show(tab.dataset.dir));
+  tab.addEventListener('keydown', e => {
+    const i = dirs.indexOf(tab.dataset.dir);
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      const next = dirs[(i + (e.key === 'ArrowRight' ? 1 : dirs.length - 1)) % dirs.length];
+      show(next);
+      document.getElementById('tab-' + next).focus();
+    }
+  });
+});
+document.getElementById('replay').addEventListener('click', () => show(current));
+
+const fromHash = location.hash.replace('#', '');
+show(dirs.indexOf(fromHash) > -1 ? fromHash : 'cornerstone');
+</script>
