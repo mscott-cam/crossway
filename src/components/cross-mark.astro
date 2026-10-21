@@ -1,0 +1,36 @@
+---
+interface Props {
+  variant?: 'amber' | 'navy';
+  draw?: boolean;
+  size?: number | string;
+  label?: string;
+  class?: string;
+}
+
+const {
+  variant = 'amber',
+  draw = false,
+  size = 48,
+  label,
+  class: className,
+} = Astro.props;
+
+const fills = { amber: '#f5a707', navy: '#1a374d' };
+const markPath =
+  'M49.5 0H104.5V48.5H153.5V105H107L101.5 102L77 77.5L52.5 102L47 105H0.5V48.5H49.5ZM62 13H92V61.5H140.5V92.5H110L77 60L44 92.5H13.5V61.5H62ZM77 97L104.5 124V181.5H49.5V124ZM77 115L91 129V168H63V129Z';
+const width = typeof size === 'number' ? `${size}px` : size;
+---
+
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 154 182"
+  class:list={['cross-mark', className]}
+  style={`width:${width};height:auto;aspect-ratio:154/182`}
+  data-draw={draw ? '' : undefined}
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+  focusable="false"
+>
+  <path fill={fills[variant]} fill-rule="evenodd" d={markPath}></path>
+</svg>

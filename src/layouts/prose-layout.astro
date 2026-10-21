@@ -1,0 +1,41 @@
+---
+import BaseLayout from './base-layout.astro';
+import Eyebrow from '../components/eyebrow.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  eyebrow?: string;
+}
+
+const { title, description, eyebrow } = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <article class="container section prose-page">
+    <header class="prose-head">
+      {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
+      <h1>{title}</h1>
+    </header>
+    <div class="prose">
+      <slot />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .prose-page {
+    max-width: calc(var(--measure) + 2 * var(--gutter));
+    margin-inline: auto;
+  }
+
+  .prose-head {
+    margin-bottom: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  .prose-head h1 {
+    margin-top: 1.25rem;
+    font-size: var(--step-h2);
+    line-height: 1.04;
+  }
+</style>
