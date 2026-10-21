@@ -226,7 +226,8 @@ test.describe('hero video pause control', () => {
   test('passes axe with the control showing', async ({ page }) => {
     await page.goto('/');
     await expect(pauseButton(page)).toBeVisible();
-    await page.waitForTimeout(1500);
+    await expect(pauseButton(page)).toHaveCSS('opacity', '1');
+    await expect(page.locator('[data-sunday-card]')).toHaveCSS('opacity', '1');
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
       .analyze();
@@ -251,7 +252,17 @@ test.describe('hero video pause control', () => {
           document.documentElement.style.fontSize = `${size}%`;
         }, scale);
       }
-      await page.waitForTimeout(2800);
+      await expect(pauseButton(page)).toHaveCSS('opacity', '1');
+      await expect
+        .poll(() =>
+          page.evaluate(() => {
+            const style = getComputedStyle(
+              document.querySelector('[data-sunday-card]')!,
+            );
+            return style.opacity === '1' && style.transform === 'none';
+          }),
+        )
+        .toBe(true);
       const boxes = await page.evaluate(() => {
         const rect = (el: Element | null) => {
           const r = el!.getBoundingClientRect();
