@@ -17,6 +17,7 @@ beforeAll(() => {
       E2E: '1',
       SANITY_FIXTURES: '1',
       SANITY_FIXTURE_DIR: 'tests/fixtures/sanity-empty',
+      PCO_FIXTURE_FILE: 'tests/fixtures/pco-empty/event_instances.json',
     },
     stdio: 'pipe',
   });
@@ -43,5 +44,17 @@ describe('a site with no sermons', () => {
     const page = html('sermons/archive/1');
     expect(page).toContain('No messages here yet.');
     expect(page).not.toContain('aria-label="Pagination"');
+  });
+});
+
+describe('a site with no upcoming events', () => {
+  it('/events shows the Church Center link and no event rows', () => {
+    const page = html('events');
+    expect(page).toContain('See all upcoming events on Church Center');
+    expect(page).toContain(
+      'href="https://crosswaysa.churchcenter.com/calendar?view=gallery"',
+    );
+    expect(page).toContain('Registrations');
+    expect(page).not.toContain('data-event');
   });
 });

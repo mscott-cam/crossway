@@ -1,0 +1,101 @@
+---
+import BaseLayout from '../layouts/base-layout.astro';
+import Eyebrow from '../components/eyebrow.astro';
+import EventList from '../components/event-list.astro';
+import { fetchUpcomingEvents } from '../lib/events/pco';
+import { site } from '../lib/site';
+
+const events = await fetchUpcomingEvents();
+---
+
+<BaseLayout
+  title="Events"
+  description="Upcoming events at Crossway Bible Church in San Antonio. Open any event on Church Center for details and sign-up."
+>
+  <div class="container section events-page">
+    <header class="events-page__head">
+      <Eyebrow>Events</Eyebrow>
+      <h1>
+        Upcoming <em>events</em>
+      </h1>
+      <p class="events-page__intro">
+        Gatherings, classes and special events at Crossway Bible Church. Open an
+        event to see the details and sign up on Church Center.
+      </p>
+      <p class="events-page__registrations">
+        <a
+          href={site.links.registrations}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Registrations <span aria-hidden="true">→</span>
+          <span class="sr-only"> (opens in a new tab)</span>
+        </a>
+      </p>
+    </header>
+
+    <section class="events-page__list" aria-labelledby="upcoming-heading">
+      <h2 class="sr-only" id="upcoming-heading">
+        Upcoming events
+      </h2>
+      <EventList events={events} variant="full" />
+    </section>
+
+    <p class="events-page__note" data-reveal="fade">
+      All events and sign-ups are managed on{' '}
+      <a
+        href={site.links.churchCenter}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Church Center<span class="sr-only"> (opens in a new tab)</span>
+      </a>
+      {'.'}
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .events-page {
+    max-width: calc(64rem + 2 * var(--gutter));
+  }
+
+  .events-page__head h1 {
+    margin-top: 1.25rem;
+    font-size: var(--step-h1);
+  }
+
+  .events-page__intro {
+    max-width: 38rem;
+    margin: 1.5rem 0 0;
+  }
+
+  .events-page__registrations {
+    margin: 1.25rem 0 0;
+    font-weight: 600;
+  }
+
+  .events-page__registrations a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    min-height: 44px;
+    color: var(--navy);
+    text-decoration-color: var(--amber-ink);
+    text-decoration-thickness: 2px;
+  }
+
+  .events-page__list {
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .events-page__note {
+    margin: 2.5rem 0 0;
+    font-size: 0.9375rem;
+  }
+
+  .events-page__note a {
+    text-decoration-color: var(--amber-ink);
+    text-decoration-thickness: 2px;
+  }
+</style>

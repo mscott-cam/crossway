@@ -1,0 +1,242 @@
+---
+import { describeEventWhen } from '../lib/dates';
+import type { ChurchEvent } from '../lib/events/pco';
+import { site } from '../lib/site';
+
+interface Props {
+  events: ChurchEvent[] | null;
+  limit?: number;
+  variant: 'home' | 'full';
+  headingLevel?: 'h2' | 'h3';
+}
+
+const { events, limit, variant, headingLevel: Heading = 'h3' } = Astro.props;
+
+const shown = (events ?? []).slice(0, limit ?? Infinity);
+const rows = shown.map((event) => ({
+  event,
+  when: describeEventWhen(event),
+}));
+const EAGER_ROWS = 3;
+---
+
+{rows.length === 0 ? (
+  <p class="event-fallback">
+    <a href={site.links.calendar} target="_blank" rel="noopener noreferrer">
+      See all upcoming events on Church Center <span aria-hidden="true">→</span>
+      <span class="sr-only"> (opens in a new tab)</span>
+    </a>
+  </p>
+) : (
+  <ul class={`event-list event-list--${variant}`}>
+    {rows.map(({ event, when }, index) => (
+      <li
+        class:list={[
+          'event',
+          { 'event--image': variant === 'full' && event.imageUrl },
+        ]}
+        data-event
+        data-reveal={index >= EAGER_ROWS ? 'fade' : undefined}
+      >
+        <div class="event__date" aria-hidden="true">
+          <span class="event__day">{when.day}</span>
+          <span class="event__month">{when.month}</span>
+        </div>
+        <div class="event__body">
+          <Heading class="event__title">
+            <a
+              class="event__link"
+              href={event.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {event.name}
+              <span class="sr-only"> (opens in a new tab)</span>
+            </a>
+          </Heading>
+          <p class="event__when">
+            <time datetime={when.datetime}>
+              {when.dateLabel}
+              {when.timeLabel && (
+                <>
+                  <span class="event__sep" aria-hidden="true">
+                    {' · '}
+                  </span>
+                  <span class="event__time">{when.timeLabel}</span>
+                </>
+              )}
+            </time>
+          </p>
+          {variant === 'full' && event.location && (
+            <p class="event__where">{event.location}</p>
+          )}
+        </div>
+        {variant === 'full' && event.imageUrl && (
+          <img
+            class="event__image"
+            src={event.imageUrl}
+            width="480"
+            height="270"
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+        )}
+      </li>
+    ))}
+  </ul>
+)}
+
+<style>
+  .event-fallback {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .event-fallback a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    min-height: 44px;
+    color: var(--navy);
+    text-decoration-color: var(--amber-ink);
+    text-decoration-thickness: 2px;
+  }
+
+  .event-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .event {
+    position: relative;
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: 0.75rem 1.25rem;
+    align-items: start;
+    padding-block: 1.5rem;
+    border-top: 1px solid var(--rule);
+  }
+
+  .event__date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1;
+  }
+
+  .event__day {
+    color: var(--navy);
+    font-family: var(--font-display);
+    font-size: 2.75rem;
+    letter-spacing: -0.02em;
+  }
+
+  .event__month {
+    margin-top: 0.4rem;
+    color: var(--amber-ink);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .event__title {
+    overflow-wrap: anywhere;
+    font-size: var(--step-h4);
+    line-height: 1.2;
+  }
+
+  .event__link {
+    text-decoration: none;
+  }
+
+  .event__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .event__link:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--amber-ink);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+  }
+
+  .event__link:focus-visible {
+    outline: none;
+  }
+
+  .event__link:focus-visible::after {
+    outline: 2px solid var(--navy);
+    outline-offset: -2px;
+  }
+
+  .event__when,
+  .event__where {
+    margin: 0.4rem 0 0;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .event__time {
+    white-space: nowrap;
+  }
+
+  .event__where {
+    margin-top: 0.15rem;
+  }
+
+  .event__image {
+    grid-column: 1 / -1;
+    width: 100%;
+    max-width: 24rem;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 6px;
+    background: var(--navy);
+  }
+
+  .event-list--home .event {
+    grid-template-columns: 3.5rem minmax(0, 1fr);
+    padding-block: 1.1rem;
+  }
+
+  .event-list--home .event__day {
+    font-size: 2rem;
+  }
+
+  .event-list--home .event__title {
+    font-size: 1.125rem;
+  }
+
+  @media (min-width: 48rem) {
+    .event-list--full .event {
+      grid-template-columns: 5.5rem minmax(0, 1fr);
+      gap: 0.75rem 2rem;
+      padding-block: 2rem;
+    }
+
+    .event-list--full .event--image {
+      grid-template-columns: 5.5rem minmax(0, 1fr) 13rem;
+    }
+
+    .event-list--full .event__day {
+      font-size: 3.5rem;
+    }
+
+    .event-list--full .event__title {
+      font-size: var(--step-h3);
+    }
+
+    .event-list--full .event__image {
+      grid-column: 3;
+      grid-row: 1;
+    }
+  }
+</style>

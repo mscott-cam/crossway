@@ -1,0 +1,536 @@
+{
+  "links": {
+    "self": "https://api.planningcenteronline.com/calendar/v2/event_instances?filter=future&include=event&order=starts_at&per_page=100"
+  },
+  "data": [
+    {
+      "type": "EventInstance",
+      "id": "90003",
+      "attributes": {
+        "all_day_event": false,
+        "compact_recurrence_description": null,
+        "created_at": "2026-08-01T15:00:00Z",
+        "ends_at": "2026-12-14T01:30:00Z",
+        "kind": "standard",
+        "location": "Student Center",
+        "name": "Student Ministry-Christmas Party",
+        "published_ends_at": null,
+        "published_starts_at": null,
+        "recurrence": null,
+        "starts_at": "2026-12-13T23:00:00Z",
+        "updated_at": "2026-09-01T15:00:00Z",
+        "church_center_url": "https://crosswaysa.churchcenter.com/calendar/event/1003"
+      },
+      "relationships": {
+        "event": {
+          "data": {
+            "type": "Event",
+            "id": "1003"
+          }
+        }
+      }
+    },
+    {
+      "type": "EventInstance",
+      "id": "90001",
+      "attributes": {
+        "all_day_event": false,
+        "compact_recurrence_description": null,
+        "created_at": "2026-08-01T15:00:00Z",
+        "ends_at": "2026-10-26T01:30:00Z",
+        "kind": "standard",
+        "location": "Main Campus",
+        "name": "Advanced Commitment Night",
+        "published_ends_at": null,
+        "published_starts_at": null,
+        "recurrence": null,
+        "starts_at": "2026-10-26T00:00:00Z",
+        "updated_at": "2026-09-01T15:00:00Z",
+        "church_center_url": "https://crosswaysa.churchcenter.com/calendar/event/1001"
+      },
+      "relationships": {
+        "event": {
+          "data": {
+            "type": "Event",
+            "id": "1001"
+          }
+        }
+      }
+    },
+    {
+      "type": "EventInstance",
+      "id": "90020",
+      "attributes": {
+        "all_day_event": false,
+        "compact_recurrence_description": null,
+        "created_at": "2026-08-01T15:00:00Z",
+        "ends_at": "2026-10-08T01:00:00Z",
+        "kind": "standard",
+        "location": "Main Campus",
+        "name": "1st Wednesday - Prayer & Praise",
+        "published_ends_at": null,
+        "published_starts_at": null,
+        "recurrence": null,
+        "starts_at": "2026-10-07T23:30:00Z",
+        "updated_at": "2026-09-01T15:00:00Z",
+        "church_center_url": "https://crosswaysa.churchcenter.com/calendar/event/1002"
+      },
+      "relationships": {
+        "event": {
+          "data": {
+            "type": "Event",
+            "id": "1002"
+          }
+        }
+      }
+    },
+    {
+      "type": "EventInstance",
+      "id": "90021",
+      "attributes": {
+        "all_day_event": false,
+        "compact_recurrence_description": null,
+        "created_at": "2026-08-01T15:00:00Z",
+        "ends_at": "2026-11-05T02:00:00Z",
+        "kind": "standard",
+        "location": "Main Campus",
+        "name": "1st Wednesday - Prayer & Praise",
+        "published_ends_at": null,
+        "published_starts_at": null,
+        "recurrence": null,
+        "starts_at": "2026-11-05T00:30:00Z",
+        "updated_at": "2026-09-01T15:00:00Z",
+        "church_center_url": "https://crosswaysa.churchcenter.com/calendar/event/1002"
+      },
+      "relationships": {
+        "event": {
+          "data": {
+            "type": "Event",
+            "id": "1002"
+          }
+        }
+      }
+    },
+    {
+      "type": "EventInstance",
+      "id": "90022",
+      "attributes": {
+        "all_day_event": false,
+        "compact_recurrence_description": null,
+        "created_at": "2026-08-01T15:00:00Z",
+        "ends_at": "2026-12-03T02:00:00Z",
+        "kind": "standard",
+        "location": "Main Campus",
+        "name": "1st Wednesday - Prayer & Praise",
+        "published_ends_at": null,
+        "published_starts_at": null,
+        "recurrence": null,
+        "starts_at": "2026-12-03T00:30:00Z",
+        "updated_at": "2026-09-01T15:00:00Z",
+        "church_center_url": "https://crosswaysa.churchcenter.com/calendar/event/1002"
+      },
+      "relationships": {
+        "event": {
+          "data": {
+            "type": "Event",
+            "id": "1002"
+          }
+        }
+      }
+    },
+    {
+      "type": "EventInstance",
+      "id": "90023",
+      "attributes": {
+        "all_day_event": false,
+        "compact_recurrence_description": null,
+        "created_at": "2026-08-01T15:00:00Z",
+        "ends_at": "2027-01-07T02:00:00Z",
+        "kind": "standard",
+        "location": "Main Campus",
+        "name": "1st Wednesday - Prayer & Praise",
+        "published_ends_at": null,
+        "published_starts_at": null,
+        "recurrence": null,
+        "starts_at": "2027-01-07T00:30:00Z",
+        "updated_at": "2026-09-01T15:00:00Z",
+        "church_center_url": "https://crosswaysa.churchcenter.com/calendar/event/1002"
+      },
+      "relationships": {
+        "event": {
+          "data": {
+            "type": "Event",
+            "id": "1002"
+          }
+        }
+      }
+    },
+    {
+      "type": "EventInstance",
+      "id": "90004",
+      "attributes": {
+        "all_day_event": false,
+        "compact_recurrence_description": null,
+        "created_at": "2026-08-01T15:00:00Z",
+        "ends_at": "2026-12-13T18:00:00Z",
+        "kind": "standard",
+        "location": null,
+        "name": "Step 2",
+        "published_ends_at": null,
+        "published_starts_at": null,
+        "recurrence": null,
+        "starts_at": "2026-12-13T16:30:00Z",
+        "updated_at": "2026-09-01T15:00:00Z",
+        "church_center_url": "https://crosswaysa.churchcenter.com/calendar/event/1004"
+      },
+      "relationships": {
+        "event": {
+          "data": {
+            "type": "Event",
+            "id": "1004"
+          }
+        }
+      }
+    },
+    {
+      "type": "EventInstance",
+      "id": "90005",
+      "attributes": {
+        "all_day_event": true,
+        "compact_recurrence_description": null,
+        "created_at": "2026-08-01T15:00:00Z",
+        "ends_at": "2026-11-15T06:00:00Z",
+        "kind": "standard",
+        "location": "Main Campus",
+        "name": "Fall Church Work Day",
+        "published_ends_at": null,
+        "published_starts_at": null,
+        "recurrence": null,
+        "starts_at": "2026-11-14T06:00:00Z",
+        "updated_at": "2026-09-01T15:00:00Z"
+      },
+      "relationships": {
+        "event": {
+          "data": {
+            "type": "Event",
+            "id": "1005"
+          }
+        }
+      }
+    },
+    {
+      "type": "EventInstance",
+      "id": "90006",
+      "attributes": {
+        "all_day_event": false,
+        "compact_recurrence_description": null,
+        "created_at": "2026-08-01T15:00:00Z",
+        "ends_at": "2026-11-22T18:00:00Z",
+        "kind": "standard",
+        "location": "Camp",
+        "name": "Men's Retreat",
+        "published_ends_at": null,
+        "published_starts_at": null,
+        "recurrence": null,
+        "starts_at": "2026-11-21T00:00:00Z",
+        "updated_at": "2026-09-01T15:00:00Z",
+        "church_center_url": "https://crosswaysa.churchcenter.com/calendar/event/1006"
+      },
+      "relationships": {
+        "event": {
+          "data": {
+            "type": "Event",
+            "id": "1006"
+          }
+        }
+      }
+    },
+    {
+      "type": "EventInstance",
+      "id": "90007",
+      "attributes": {
+        "all_day_event": false,
+        "compact_recurrence_description": null,
+        "created_at": "2026-08-01T15:00:00Z",
+        "ends_at": "2027-01-01T06:30:00Z",
+        "kind": "standard",
+        "location": "Main Campus",
+        "name": "New Year's Eve Prayer Night",
+        "published_ends_at": null,
+        "published_starts_at": null,
+        "recurrence": null,
+        "starts_at": "2027-01-01T04:00:00Z",
+        "updated_at": "2026-09-01T15:00:00Z",
+        "church_center_url": "https://crosswaysa.churchcenter.com/calendar/event/1007"
+      },
+      "relationships": {
+        "event": {
+          "data": {
+            "type": "Event",
+            "id": "1007"
+          }
+        }
+      }
+    },
+    {
+      "type": "EventInstance",
+      "id": "90008",
+      "attributes": {
+        "all_day_event": false,
+        "compact_recurrence_description": null,
+        "created_at": "2026-08-01T15:00:00Z",
+        "ends_at": "2026-10-17T19:00:00Z",
+        "kind": "standard",
+        "location": "Main Campus",
+        "name": "Fall Festival",
+        "published_ends_at": null,
+        "published_starts_at": null,
+        "recurrence": null,
+        "starts_at": "2026-10-17T15:00:00Z",
+        "updated_at": "2026-09-01T15:00:00Z",
+        "church_center_url": "https://crosswaysa.churchcenter.com/calendar/event/1008"
+      },
+      "relationships": {
+        "event": {
+          "data": {
+            "type": "Event",
+            "id": "1008"
+          }
+        }
+      }
+    },
+    {
+      "type": "EventInstance",
+      "id": "90101",
+      "attributes": {
+        "all_day_event": false,
+        "compact_recurrence_description": null,
+        "created_at": "2026-08-01T15:00:00Z",
+        "ends_at": "2026-11-10T20:00:00Z",
+        "kind": "standard",
+        "location": "Office",
+        "name": "Staff Planning Day",
+        "published_ends_at": null,
+        "published_starts_at": null,
+        "recurrence": null,
+        "starts_at": "2026-11-10T16:00:00Z",
+        "updated_at": "2026-09-01T15:00:00Z",
+        "church_center_url": "https://crosswaysa.churchcenter.com/calendar/event/2001"
+      },
+      "relationships": {
+        "event": {
+          "data": {
+            "type": "Event",
+            "id": "2001"
+          }
+        }
+      }
+    },
+    {
+      "type": "EventInstance",
+      "id": "90102",
+      "attributes": {
+        "all_day_event": false,
+        "compact_recurrence_description": null,
+        "created_at": "2026-08-01T15:00:00Z",
+        "ends_at": "2026-11-12T20:00:00Z",
+        "kind": "standard",
+        "location": null,
+        "name": "Elders Retreat",
+        "published_ends_at": null,
+        "published_starts_at": null,
+        "recurrence": null,
+        "starts_at": "2026-11-12T16:00:00Z",
+        "updated_at": "2026-09-01T15:00:00Z",
+        "church_center_url": "https://crosswaysa.churchcenter.com/calendar/event/2002"
+      },
+      "relationships": {
+        "event": {
+          "data": {
+            "type": "Event",
+            "id": "2002"
+          }
+        }
+      }
+    }
+  ],
+  "included": [
+    {
+      "type": "Event",
+      "id": "1001",
+      "attributes": {
+        "approval_status": "A",
+        "created_at": "2026-08-01T15:00:00Z",
+        "featured": false,
+        "image_url": null,
+        "link_only": false,
+        "name": "Advanced Commitment Night",
+        "registration_url": null,
+        "summary": null,
+        "updated_at": "2026-09-01T15:00:00Z",
+        "visible_in_church_center": true
+      }
+    },
+    {
+      "type": "Event",
+      "id": "1002",
+      "attributes": {
+        "approval_status": "A",
+        "created_at": "2026-08-01T15:00:00Z",
+        "featured": false,
+        "image_url": null,
+        "link_only": false,
+        "name": "1st Wednesday - Prayer & Praise",
+        "registration_url": null,
+        "summary": null,
+        "updated_at": "2026-09-01T15:00:00Z",
+        "visible_in_church_center": true
+      }
+    },
+    {
+      "type": "Event",
+      "id": "1003",
+      "attributes": {
+        "approval_status": "A",
+        "created_at": "2026-08-01T15:00:00Z",
+        "featured": false,
+        "image_url": "/dev/poster.svg",
+        "link_only": false,
+        "name": "Student Ministry-Christmas Party",
+        "registration_url": null,
+        "summary": null,
+        "updated_at": "2026-09-01T15:00:00Z",
+        "visible_in_church_center": true
+      }
+    },
+    {
+      "type": "Event",
+      "id": "1004",
+      "attributes": {
+        "approval_status": "A",
+        "created_at": "2026-08-01T15:00:00Z",
+        "featured": false,
+        "image_url": null,
+        "link_only": false,
+        "name": "Step 2",
+        "registration_url": null,
+        "summary": null,
+        "updated_at": "2026-09-01T15:00:00Z",
+        "visible_in_church_center": true
+      }
+    },
+    {
+      "type": "Event",
+      "id": "1005",
+      "attributes": {
+        "approval_status": "A",
+        "created_at": "2026-08-01T15:00:00Z",
+        "featured": false,
+        "image_url": null,
+        "link_only": false,
+        "name": "Fall Church Work Day",
+        "registration_url": null,
+        "summary": null,
+        "updated_at": "2026-09-01T15:00:00Z",
+        "visible_in_church_center": true
+      }
+    },
+    {
+      "type": "Event",
+      "id": "1006",
+      "attributes": {
+        "approval_status": "A",
+        "created_at": "2026-08-01T15:00:00Z",
+        "featured": false,
+        "image_url": null,
+        "link_only": false,
+        "name": "Men's Retreat",
+        "registration_url": null,
+        "summary": null,
+        "updated_at": "2026-09-01T15:00:00Z",
+        "visible_in_church_center": true
+      }
+    },
+    {
+      "type": "Event",
+      "id": "1007",
+      "attributes": {
+        "approval_status": "A",
+        "created_at": "2026-08-01T15:00:00Z",
+        "featured": false,
+        "image_url": null,
+        "link_only": false,
+        "name": "New Year's Eve Prayer Night",
+        "registration_url": null,
+        "summary": null,
+        "updated_at": "2026-09-01T15:00:00Z",
+        "visible_in_church_center": true
+      }
+    },
+    {
+      "type": "Event",
+      "id": "1008",
+      "attributes": {
+        "approval_status": "A",
+        "created_at": "2026-08-01T15:00:00Z",
+        "featured": false,
+        "image_url": null,
+        "link_only": false,
+        "name": "Fall Festival",
+        "registration_url": null,
+        "summary": null,
+        "updated_at": "2026-09-01T15:00:00Z",
+        "visible_in_church_center": true
+      }
+    },
+    {
+      "type": "Event",
+      "id": "2001",
+      "attributes": {
+        "approval_status": "A",
+        "created_at": "2026-08-01T15:00:00Z",
+        "featured": false,
+        "image_url": null,
+        "link_only": false,
+        "name": "Staff Planning Day",
+        "registration_url": null,
+        "summary": null,
+        "updated_at": "2026-09-01T15:00:00Z",
+        "visible_in_church_center": false
+      }
+    },
+    {
+      "type": "Event",
+      "id": "2002",
+      "attributes": {
+        "approval_status": "A",
+        "created_at": "2026-08-01T15:00:00Z",
+        "featured": false,
+        "image_url": null,
+        "link_only": true,
+        "name": "Elders Retreat",
+        "registration_url": null,
+        "summary": null,
+        "updated_at": "2026-09-01T15:00:00Z",
+        "visible_in_church_center": true
+      }
+    }
+  ],
+  "meta": {
+    "total_count": 13,
+    "count": 13,
+    "can_order_by": ["created_at", "ends_at", "starts_at", "updated_at"],
+    "can_query_by": [
+      "created_at",
+      "ends_at",
+      "kind",
+      "starts_at",
+      "updated_at"
+    ],
+    "can_include": ["event", "event_times", "resource_bookings", "tags"],
+    "parent": {
+      "id": "1",
+      "type": "Organization"
+    }
+  }
+}

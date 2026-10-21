@@ -21,6 +21,7 @@ export const site = {
     espanol: 'https://crossway-espanol.webflow.io/',
     churchCenter: 'https://crosswaysa.churchcenter.com/home',
     registrations: 'https://crosswaysa.churchcenter.com/registrations',
+    calendar: 'https://crosswaysa.churchcenter.com/calendar?view=gallery',
     facebook: 'https://www.facebook.com/CrosswayBibleChurchSA',
     instagram: 'https://www.instagram.com/crosswaybiblechurchsa/',
     applePodcasts:
