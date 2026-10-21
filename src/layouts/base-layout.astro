@@ -15,6 +15,7 @@ import SiteFooter from '../components/site-footer.astro';
 import QuestionsForm from '../components/questions-form.astro';
 import AnnouncementBar from '../components/announcement-bar.astro';
 import { getSiteSettings } from '../lib/sanity/queries';
+import { site } from '../lib/site';
 
 interface Props {
   title: string;
@@ -32,7 +33,7 @@ const {
   ogImage,
   bodyClass,
   overHero = false,
-  noindex = false,
+  noindex = !site.indexable,
   questions = true,
 } = Astro.props;
 

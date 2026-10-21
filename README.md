@@ -84,6 +84,16 @@ Troubleshooting a deploy that fails with `[build-guard] Refusing to build a prod
 
 Other missing sources stay warnings by design: Planning Center and Spreaker outages or missing credentials log `[events]` and `[audio]` lines and the site builds without them.
 
+## Search indexing
+
+The site is not indexable until launch. Three layers enforce it, all keyed to `site.indexable` in `src/lib/site.ts` (currently `false`):
+
+- Every page carries `<meta name="robots" content="noindex">` (the `noindex` default in `src/layouts/base-layout.astro`).
+- `vercel.json` sends `X-Robots-Tag: noindex, nofollow, noarchive` on every response, which also covers images, video, PDFs and the sitemap.
+- `/robots.txt` (`src/pages/robots.txt.ts`) names no sitemap. It still allows crawling on purpose: a crawler blocked by robots.txt never sees the noindex tag, and a blocked URL can still be listed when something links to it.
+
+To launch: set `indexable: true` in `src/lib/site.ts` and delete the `headers` block from `vercel.json`. `tests/unit/indexing.test.ts` fails if the two disagree. If a search engine already listed the old Vercel URL, remove it with that engine's removal tool.
+
 ## Content freshness and rebuilds
 
 Pages are generated at build time. Content only changes on the live site after a new deploy. There are two triggers.

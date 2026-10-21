@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { site } from '../../src/lib/site';
 
 test.describe('rebuild cron endpoint', () => {
   test('refuses unauthenticated requests and never succeeds without config', async ({
@@ -33,5 +34,9 @@ test('robots.txt keeps crawlers out of the API', async ({ request }) => {
   const body = await res.text();
   expect(body).toContain('Disallow: /api/');
   expect(body).toContain('Disallow: /dev/');
-  expect(body).toContain('Sitemap: https://crosswaysa.org/sitemap-index.xml');
+  if (site.indexable) {
+    expect(body).toContain('Sitemap: https://crosswaysa.org/sitemap-index.xml');
+  } else {
+    expect(body).not.toContain('Sitemap:');
+  }
 });

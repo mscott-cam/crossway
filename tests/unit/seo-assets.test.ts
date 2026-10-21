@@ -2,6 +2,7 @@ import { readFileSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
+import { robotsTxt } from '../../src/lib/seo/robots';
 import { colors } from '../../src/lib/tokens';
 
 const pub = (file: string) => resolve(__dirname, '../../public', file);
@@ -52,10 +53,22 @@ describe('web manifest', () => {
 });
 
 describe('robots.txt', () => {
-  it('points at the sitemap index the build produces', () => {
-    const robots = readFileSync(pub('robots.txt'), 'utf8');
-    expect(robots).toMatch(
+  it('points at the sitemap index the build produces once the site is indexable', () => {
+    expect(robotsTxt(true, 'https://crosswaysa.org')).toMatch(
       /^Sitemap: https:\/\/crosswaysa\.org\/sitemap-index\.xml$/m,
     );
   });
+
+  it('names no sitemap while the site is not indexable', () => {
+    expect(robotsTxt(false, 'https://crosswaysa.org')).not.toMatch(/Sitemap:/);
+  });
+
+  it.each([true, false])(
+    'keeps crawlers out of the API when indexable is %s',
+    (indexable) => {
+      const robots = robotsTxt(indexable, 'https://crosswaysa.org');
+      expect(robots).toContain('Disallow: /api/');
+      expect(robots).toContain('Disallow: /dev/');
+    },
+  );
 });

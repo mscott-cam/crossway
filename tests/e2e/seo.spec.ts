@@ -1,6 +1,8 @@
 import { expect, test, type APIRequestContext } from '@playwright/test';
 import { parse } from 'node-html-parser';
 
+import { site } from '../../src/lib/site';
+
 const ORIGIN = 'https://crosswaysa.org';
 
 async function sitemapPaths(request: APIRequestContext): Promise<string[]> {
@@ -59,6 +61,10 @@ test('the sitemap lists the site, not fixtures or endpoints', async ({
 });
 
 test('robots.txt names the sitemap the build serves', async ({ request }) => {
+  test.skip(
+    !site.indexable,
+    'the site is not indexable, so robots.txt names no sitemap',
+  );
   const robots = await (await request.get('/robots.txt')).text();
   const name = robots.match(
     /^Sitemap: https:\/\/crosswaysa\.org\/(\S+)$/m,
@@ -139,7 +145,11 @@ test('every page has unique, well-formed metadata', async ({ request }) => {
     if (html.querySelector('html')?.getAttribute('lang') !== 'en') {
       problems.push(`${path}: html lang is not en`);
     }
-    if (/noindex/i.test(robots)) problems.push(`${path}: noindex`);
+    if (/noindex/i.test(robots) === site.indexable) {
+      problems.push(
+        `${path}: robots meta "${robots}" with indexable=${site.indexable}`,
+      );
+    }
     for (const script of html.querySelectorAll(
       'script[type="application/ld+json"]',
     )) {

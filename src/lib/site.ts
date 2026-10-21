@@ -7,6 +7,7 @@ export type NavItem = {
 
 export const site = {
   name: 'Crossway Bible Church',
+  indexable: false,
   address: {
     street: '15759 San Pedro Ave',
     city: 'San Antonio',
