@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../../layouts/base-layout.astro';
+import HeroVideo from '../../components/hero-video.astro';
+---
+
+<BaseLayout
+  title="Hero video fixture"
+  description="Internal fixture page for the hero video."
+  noindex
+>
+  <div class="frame">
+    <HeroVideo poster="/video/lobby-poster" />
+  </div>
+</BaseLayout>
+
+<style>
+  .frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+  }
+</style>
