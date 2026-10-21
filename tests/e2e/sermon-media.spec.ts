@@ -351,20 +351,26 @@ test.describe('audio player', () => {
   test('clears the stored position when playback ends', async ({ page }) => {
     await open(page);
     const audio = fixture(page, 'audio');
+    const stored = () =>
+      page.evaluate((key) => localStorage.getItem(key), audioKey('b'));
     await playButton(audio).click();
     await expect(scrubber(audio)).toBeEnabled();
+    await scrubber(audio).fill('20');
+    await playButton(audio).click();
+    await expect.poll(stored).toMatch(/^2\d$/);
+
+    await playButton(audio).click();
+    await expect(
+      audio.getByRole('button', { name: 'Pause', exact: true }),
+    ).toBeVisible();
     await scrubber(audio).fill('40');
-    await expect
-      .poll(() =>
-        audio.locator('audio').evaluate((a: HTMLAudioElement) => a.ended),
-      )
-      .toBe(true);
-    expect(
-      await page.evaluate((key) => localStorage.getItem(key), audioKey('b')),
-    ).toBeNull();
+    await expect.poll(stored).toBeNull();
     await expect(
       audio.getByRole('button', { name: 'Play', exact: true }),
     ).toBeVisible();
+    expect(
+      await audio.locator('audio').evaluate((a: HTMLAudioElement) => a.ended),
+    ).toBe(true);
   });
 
   test('keeps working when localStorage throws', async ({ page }) => {
