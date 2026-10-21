@@ -1,0 +1,430 @@
+---
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../layouts/base-layout.astro';
+import Eyebrow from '../components/eyebrow.astro';
+import Placeholder from '../components/placeholder.astro';
+import { serviceTimeParts } from '../lib/format-times';
+import { getSiteSettings } from '../lib/sanity/queries';
+import { site } from '../lib/site';
+
+const entry = await getEntry('pages', 'visit');
+if (!entry) throw new Error('Missing content entry: pages/visit');
+const { Content } = await render(entry);
+const { title, description, eyebrow, lede, ageGroups = [] } = entry.data;
+
+const settings = await getSiteSettings();
+const times = serviceTimeParts(settings.serviceTimes);
+const { street, city, region, postalCode } = site.address;
+---
+
+<BaseLayout title={title} description={description}>
+  <section class="visit-intro container" aria-labelledby="visit-title">
+    {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
+    <h1 id="visit-title" data-reveal="lines">
+      {title}
+    </h1>
+    {lede && (
+      <p class="visit-intro__lede" data-reveal="fade" data-reveal-delay="0.3">
+        {lede}
+      </p>
+    )}
+  </section>
+
+  <section
+    class="visit-when on-navy"
+    data-visit-when
+    aria-labelledby="visit-when-title"
+  >
+    <div class="container visit-when__inner">
+      <div class="visit-when__times" data-reveal="fade">
+        <h2 class="eyebrow" id="visit-when-title">
+          Sundays
+        </h2>
+        {times.length > 0 && (
+          <p class="visit-when__time" data-visit-times>
+            {times.map((part) =>
+              part.kind === 'separator' ? (
+                <span class="visit-when__sep">{part.text}</span>
+              ) : part.kind === 'meridiem' ? (
+                <span class="visit-when__meridiem">{part.text}</span>
+              ) : (
+                <span class="visit-when__digits">{part.text}</span>
+              ),
+            )}
+          </p>
+        )}
+      </div>
+      <div class="visit-when__where" data-reveal="fade" data-reveal-delay="0.1">
+        <p class="visit-when__label">Where</p>
+        <address class="visit-when__address">
+          <span class="visit-when__line">{street},</span>{' '}
+          <span class="visit-when__line">
+            {city}, {region} {postalCode}
+          </span>
+        </address>
+        <div class="visit-when__actions" data-visit-actions>
+          <a
+            class="visit-btn visit-btn--solid"
+            href={site.mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Get directions <span aria-hidden="true">→</span>
+            <span class="sr-only"> (opens in a new tab)</span>
+          </a>
+          <a
+            class="visit-btn visit-btn--ghost"
+            href={site.links.live}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Can’t make it? Watch live <span aria-hidden="true">→</span>
+            <span class="sr-only"> (opens in a new tab)</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="visit-block container"
+    data-visit-sunday
+    aria-labelledby="visit-sunday-title"
+  >
+    <div class="visit-block__head" data-reveal="fade">
+      <Eyebrow>What to expect</Eyebrow>
+      <h2 id="visit-sunday-title">What a Sunday is like</h2>
+    </div>
+    <div class="visit-block__body" data-reveal="fade" data-reveal-delay="0.1">
+      <div class="visit-prose">
+        <Content />
+      </div>
+      <Placeholder label="how long a service lasts" />
+    </div>
+  </section>
+
+  <section
+    class="visit-block visit-block--ruled"
+    data-visit-kids
+    aria-labelledby="visit-kids-title"
+  >
+    <div class="container visit-block__row">
+      <div class="visit-block__head" data-reveal="fade">
+        <Eyebrow>Kids</Eyebrow>
+        <h2 id="visit-kids-title">Crossway Kids</h2>
+      </div>
+      <div class="visit-block__body" data-reveal="fade" data-reveal-delay="0.1">
+        <p class="visit-block__intro">Kids are cared for by age group.</p>
+        <ul class="visit-ages">
+          {ageGroups.map((group) => (
+            <li data-age-group>{group}</li>
+          ))}
+        </ul>
+        <p class="visit-block__more">
+          <a class="visit-link" href="/crossway-kids">
+            Learn more about Crossway Kids <span aria-hidden="true">→</span>
+          </a>
+        </p>
+        <Placeholder label="kids check-in process" />
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="visit-block container"
+    data-visit-students
+    aria-labelledby="visit-students-title"
+  >
+    <div class="visit-block__head" data-reveal="fade">
+      <Eyebrow>Students</Eyebrow>
+      <h2 id="visit-students-title">Student Ministry</h2>
+    </div>
+    <div class="visit-block__body" data-reveal="fade" data-reveal-delay="0.1">
+      <p class="visit-block__intro">Students have a ministry of their own.</p>
+      <p class="visit-block__more">
+        <a class="visit-link" href="/students">
+          Learn more about Student Ministry <span aria-hidden="true">→</span>
+        </a>
+      </p>
+    </div>
+  </section>
+
+  <section
+    class="visit-block visit-block--ruled"
+    data-visit-parking
+    aria-labelledby="visit-parking-title"
+  >
+    <div class="container visit-block__row">
+      <div class="visit-block__head" data-reveal="fade">
+        <Eyebrow>Arriving</Eyebrow>
+        <h2 id="visit-parking-title">Parking &amp; arrival</h2>
+      </div>
+      <div class="visit-block__body" data-reveal="fade" data-reveal-delay="0.1">
+        <Placeholder label="parking and arrival details" />
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="visit-closing container"
+    data-visit-questions
+    aria-labelledby="visit-questions-title"
+  >
+    <div data-reveal="fade">
+      <h2 id="visit-questions-title">Questions? We’d love to hear from you.</h2>
+      <p class="visit-block__more">
+        <a class="visit-link" href="#questions">
+          Ask below <span aria-hidden="true">→</span>
+        </a>
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .visit-intro {
+    padding-block: clamp(3rem, 7vw, 6rem) clamp(2.5rem, 5vw, 4.5rem);
+  }
+
+  .visit-intro h1,
+  .visit-block h2,
+  .visit-closing h2 {
+    overflow-wrap: anywhere;
+  }
+
+  .visit-intro h1 {
+    margin-top: 1.25rem;
+  }
+
+  .visit-intro__lede {
+    max-width: 28ch;
+    margin: 1.5rem 0 0;
+    color: var(--charcoal);
+    font-family: var(--font-text);
+    font-size: clamp(1.25rem, 1.05rem + 0.9vw, 1.75rem);
+    font-style: italic;
+    line-height: 1.35;
+  }
+
+  .visit-when {
+    padding-block: clamp(3rem, 6vw, 5rem);
+  }
+
+  .visit-when__inner {
+    display: grid;
+    gap: 2.5rem clamp(2rem, 6vw, 5rem);
+  }
+
+  .visit-when__time {
+    margin: 1.25rem 0 0;
+    color: var(--paper);
+    font-family: var(--font-display);
+    font-size: clamp(2.75rem, 2.1rem + 2.6vw, 4.5rem);
+    line-height: 1.02;
+    letter-spacing: -0.01em;
+  }
+
+  .visit-when__digits {
+    white-space: nowrap;
+  }
+
+  .visit-when__sep {
+    color: var(--mist);
+    font-family: var(--font-text);
+    font-size: 0.42em;
+    font-style: italic;
+    letter-spacing: 0;
+  }
+
+  .visit-when__meridiem {
+    color: var(--mist);
+    font-family: var(--font-ui);
+    font-size: max(0.8125rem, 0.2em);
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+
+  .visit-when__label {
+    margin: 0;
+    color: var(--mist);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+  }
+
+  .visit-when__address {
+    margin: 0.75rem 0 0;
+    color: var(--paper);
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 1.25rem + 1.1vw, 2.25rem);
+    font-style: normal;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+
+  .visit-when__line {
+    display: inline-block;
+  }
+
+  .visit-when__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+  }
+
+  .visit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0.85rem 1.4rem;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    line-height: 1.3;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease,
+      color 0.2s ease;
+  }
+
+  .visit-btn--solid {
+    background: var(--amber);
+    color: var(--navy);
+  }
+
+  .visit-btn--solid:hover {
+    background: color-mix(in srgb, var(--amber) 88%, var(--paper));
+  }
+
+  .visit-btn--ghost {
+    border: 1px solid color-mix(in srgb, var(--paper) 35%, transparent);
+    color: var(--paper);
+  }
+
+  .visit-btn--ghost:hover {
+    border-color: var(--amber);
+    background: var(--amber);
+    color: var(--navy);
+  }
+
+  .visit-block {
+    display: grid;
+    gap: 1.75rem clamp(2rem, 6vw, 5rem);
+    padding-block: clamp(3.5rem, 7vw, 6rem);
+  }
+
+  .visit-block--ruled {
+    display: block;
+    padding-block: 0;
+    border-block: 1px solid var(--rule);
+  }
+
+  .visit-block__row {
+    display: grid;
+    gap: 1.75rem clamp(2rem, 6vw, 5rem);
+    padding-block: clamp(3.5rem, 7vw, 6rem);
+  }
+
+  .visit-block__head h2 {
+    margin-top: 1.25rem;
+  }
+
+  .visit-block__body {
+    display: grid;
+    gap: 1.5rem;
+    align-content: start;
+  }
+
+  .visit-block__body > * {
+    margin: 0;
+  }
+
+  .visit-block__intro {
+    font-size: 1.25rem;
+    line-height: 1.5;
+  }
+
+  .visit-prose {
+    max-width: 38rem;
+    font-size: 1.25rem;
+    line-height: 1.6;
+  }
+
+  .visit-prose :global(p) {
+    margin: 0;
+  }
+
+  .visit-prose :global(p + p) {
+    margin-top: 1em;
+  }
+
+  .visit-ages {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 9.5rem), 1fr));
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .visit-ages li {
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+    background: var(--paper);
+    color: var(--navy);
+    font-family: var(--font-display);
+    font-size: 1.3125rem;
+    line-height: 1.15;
+    overflow-wrap: break-word;
+  }
+
+  .visit-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    min-height: 44px;
+    color: var(--navy);
+    font-weight: 600;
+    text-decoration-color: var(--amber-ink);
+    text-decoration-thickness: 2px;
+  }
+
+  .visit-closing {
+    padding-block: clamp(3rem, 6vw, 5rem);
+  }
+
+  .visit-closing {
+    padding-bottom: clamp(1.5rem, 3vw, 2.5rem);
+  }
+
+  .visit-closing h2 {
+    max-width: 30ch;
+    font-size: var(--step-h3);
+    text-wrap: balance;
+  }
+
+  .visit-closing .visit-block__more {
+    margin: 1rem 0 0;
+  }
+
+  @media (min-width: 60rem) {
+    .visit-when__inner {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      align-items: end;
+    }
+
+    .visit-block,
+    .visit-block__row {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      align-items: start;
+    }
+  }
+</style>
