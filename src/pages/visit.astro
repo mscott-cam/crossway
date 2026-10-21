@@ -1,16 +1,19 @@
 ---
 import { getEntry, render } from 'astro:content';
+import { z } from 'astro/zod';
 import BaseLayout from '../layouts/base-layout.astro';
 import Eyebrow from '../components/eyebrow.astro';
 import Placeholder from '../components/placeholder.astro';
 import { serviceTimeParts } from '../lib/format-times';
 import { getSiteSettings } from '../lib/sanity/queries';
 import { site } from '../lib/site';
+import { ageGroups } from '../lib/kids';
 
 const entry = await getEntry('pages', 'visit');
 if (!entry) throw new Error('Missing content entry: pages/visit');
 const { Content } = await render(entry);
-const { title, description, eyebrow, lede, ageGroups = [] } = entry.data;
+const { title, description, eyebrow } = entry.data;
+const { lede } = z.object({ lede: z.string().optional() }).parse(entry.data);
 
 const settings = await getSiteSettings();
 const times = serviceTimeParts(settings.serviceTimes);
@@ -110,11 +113,11 @@ const { street, city, region, postalCode } = site.address;
   >
     <div class="container visit-block__row">
       <div class="visit-block__head" data-reveal="fade">
-        <Eyebrow>Kids</Eyebrow>
+        <Eyebrow>Church life</Eyebrow>
         <h2 id="visit-kids-title">Crossway Kids</h2>
       </div>
       <div class="visit-block__body" data-reveal="fade" data-reveal-delay="0.1">
-        <p class="visit-block__intro">Kids are cared for by age group.</p>
+        <p class="visit-block__intro">Crossway Kids serves these age groups.</p>
         <ul class="visit-ages">
           {ageGroups.map((group) => (
             <li data-age-group>{group}</li>
@@ -136,14 +139,16 @@ const { street, city, region, postalCode } = site.address;
     aria-labelledby="visit-students-title"
   >
     <div class="visit-block__head" data-reveal="fade">
-      <Eyebrow>Students</Eyebrow>
-      <h2 id="visit-students-title">Student Ministry</h2>
+      <Eyebrow>Church life</Eyebrow>
+      <h2 id="visit-students-title">Students</h2>
     </div>
     <div class="visit-block__body" data-reveal="fade" data-reveal-delay="0.1">
-      <p class="visit-block__intro">Students have a ministry of their own.</p>
+      <p class="visit-block__intro">
+        Learn about Crossway’s ministry for students.
+      </p>
       <p class="visit-block__more">
         <a class="visit-link" href="/students">
-          Learn more about Student Ministry <span aria-hidden="true">→</span>
+          Learn more about Students <span aria-hidden="true">→</span>
         </a>
       </p>
     </div>
@@ -171,12 +176,12 @@ const { street, city, region, postalCode } = site.address;
     aria-labelledby="visit-questions-title"
   >
     <div data-reveal="fade">
-      <h2 id="visit-questions-title">Questions? We’d love to hear from you.</h2>
-      <p class="visit-block__more">
-        <a class="visit-link" href="#questions">
-          Ask below <span aria-hidden="true">→</span>
+      <h2 id="visit-questions-title">
+        <a class="visit-closing__link" href="#questions">
+          Questions? We’d love to hear from you.
+          <span aria-hidden="true">→</span>
         </a>
-      </p>
+      </h2>
     </div>
   </section>
 </BaseLayout>
@@ -398,11 +403,7 @@ const { street, city, region, postalCode } = site.address;
   }
 
   .visit-closing {
-    padding-block: clamp(3rem, 6vw, 5rem);
-  }
-
-  .visit-closing {
-    padding-bottom: clamp(1.5rem, 3vw, 2.5rem);
+    padding-block: clamp(3rem, 6vw, 5rem) clamp(1.5rem, 3vw, 2.5rem);
   }
 
   .visit-closing h2 {
@@ -411,8 +412,12 @@ const { street, city, region, postalCode } = site.address;
     text-wrap: balance;
   }
 
-  .visit-closing .visit-block__more {
-    margin: 1rem 0 0;
+  .visit-closing__link {
+    display: inline-block;
+    min-height: 44px;
+    color: var(--navy);
+    text-decoration-color: var(--amber-ink);
+    text-decoration-thickness: 2px;
   }
 
   @media (min-width: 60rem) {

@@ -91,6 +91,7 @@ test.describe('plan a visit page', () => {
     await expect(sunday).toContainText('peaceful');
     await expect(sunday).toContainText('inspiring');
     await expect(sunday).toContainText(/hard questions/i);
+    await expect(page.locator('main')).not.toContainText(/why we gather/i);
     await expect(page.locator('main')).not.toContainText(/come as you are/i);
     await expect(page.locator('main')).not.toContainText(/what to wear/i);
   });
@@ -102,6 +103,8 @@ test.describe('plan a visit page', () => {
     const kids = page.locator('[data-visit-kids]');
     const items = kids.locator('[data-age-group]');
     await expect(items).toHaveText(AGE_GROUPS);
+    await expect(kids).toContainText('Crossway Kids serves these age groups.');
+    await expect(kids).not.toContainText(/cared for/i);
     await expect(
       kids.getByRole('link', { name: /Learn more about Crossway Kids/ }),
     ).toHaveAttribute('href', '/crossway-kids');
@@ -109,10 +112,15 @@ test.describe('plan a visit page', () => {
 
   test('links to students', async ({ page }) => {
     await page.goto('/visit');
+    const students = page.locator('[data-visit-students]');
     await expect(
-      page
-        .locator('[data-visit-students]')
-        .getByRole('link', { name: /Student Ministry/ }),
+      students.getByRole('heading', { level: 2, name: 'Students' }),
+    ).toBeVisible();
+    await expect(students).toContainText(
+      'Learn about Crossway’s ministry for students.',
+    );
+    await expect(
+      students.getByRole('link', { name: /Learn more about Students/ }),
     ).toHaveAttribute('href', '/students');
   });
 
@@ -142,8 +150,10 @@ test.describe('plan a visit page', () => {
     await expect(page.locator('main form')).toHaveCount(0);
     const ask = page
       .locator('[data-visit-questions]')
-      .getByRole('link', { name: /Ask below/ });
+      .getByRole('link', { name: 'Questions? We’d love to hear from you.' });
     await expect(ask).toHaveAttribute('href', '#questions');
+    expect((await ask.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    await expect(page.locator('[data-visit-questions] a')).toHaveCount(1);
     await ask.click();
     await expect(page).toHaveURL(/#questions$/);
     await expect(page.locator('#questions')).toBeInViewport();
