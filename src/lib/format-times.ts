@@ -26,3 +26,9 @@ export function formatServiceTimes(times: string[]): string {
     .map((part) => part.text)
     .join('');
 }
+
+export function formatFooterTimes(times: string[]): string {
+  return serviceTimeParts(times)
+    .map((part) => (part.kind === 'meridiem' ? 'a' : part.text))
+    .join('');
+}

@@ -3,11 +3,21 @@ import LogoLockup from './logo-lockup.astro';
 import NavLink from './nav-link.astro';
 import { nav, site } from '../lib/site';
 import type { NavItem } from '../lib/site';
+import { formatFooterTimes } from '../lib/format-times';
+
+interface Props {
+  serviceTimes?: string[];
+}
 
 const year = new Date().getFullYear();
 const { city, region, postalCode } = site.address;
 const cityLine = `${city}, ${region} ${postalCode}`;
-const [first, second] = site.fallbackServiceTimes;
+const { serviceTimes } = Astro.props;
+const times = formatFooterTimes(
+  serviceTimes?.some((time) => time.trim())
+    ? serviceTimes
+    : site.fallbackServiceTimes,
+);
 
 type FooterLink = NavItem & { sameTab?: boolean };
 type Column = { heading: string; links: FooterLink[] };
@@ -56,9 +66,7 @@ const columns: Column[] = [
         <a class="site-footer__logo" href="/">
           <LogoLockup tone="dark" />
         </a>
-        <p class="site-footer__times">
-          Meeting Sundays {first} &amp; {second}a
-        </p>
+        <p class="site-footer__times">Meeting Sundays {times}</p>
         <address class="site-footer__address">
           <NavLink href={site.mapsUrl} external newTab={false}>
             {site.address.street}

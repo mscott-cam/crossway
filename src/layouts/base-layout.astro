@@ -107,7 +107,7 @@ const ogImageIsDefault = !ogImage;
       <slot />
     </main>
     {questions && <QuestionsForm />}
-    <SiteFooter />
+    <SiteFooter serviceTimes={settings.serviceTimes} />
     <script>
       import '../scripts/motion';
     </script>
