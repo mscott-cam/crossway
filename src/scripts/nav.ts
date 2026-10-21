@@ -119,8 +119,15 @@ function initMenu(header: HTMLElement) {
   });
 
   const isDesktop = () => getComputedStyle(toggle).display === 'none';
+  let settle = 0;
   const closeOnDesktop = () => {
-    if (isOpen() && isDesktop()) setOpen(false);
+    if (!isOpen() || !isDesktop()) return;
+    cancelAnimationFrame(settle);
+    settle = requestAnimationFrame(() => {
+      settle = requestAnimationFrame(() => {
+        if (isOpen() && isDesktop()) setOpen(false);
+      });
+    });
   };
   if (bar) new ResizeObserver(closeOnDesktop).observe(bar);
 

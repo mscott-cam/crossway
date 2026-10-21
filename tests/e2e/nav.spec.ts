@@ -245,12 +245,51 @@ test.describe('mobile menu', () => {
     expect(results.violations).toEqual([]);
   });
 
+  test('reserves the scrollbar gutter so opening the menu does not shift the page', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    await expect(page.locator('html')).toHaveCSS('scrollbar-gutter', 'stable');
+    const width = () =>
+      page.evaluate(() => document.documentElement.clientWidth);
+    const before = await width();
+    await page.getByRole('button', { name: 'Menu' }).click();
+    await expect(page.locator('html')).toHaveClass(/menu-open/);
+    expect(await width()).toBe(before);
+  });
+
   test('closes when the viewport grows to desktop width', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: 'Menu' }).click();
     await page.setViewportSize(desktop);
     await expect(page.locator('main')).toHaveJSProperty('inert', false);
     await expect(page.locator('html')).not.toHaveClass(/menu-open/);
+  });
+
+  test('ignores a one-frame layout flip to desktop while open', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const menu = page.getByRole('button', { name: 'Menu' });
+    await menu.click();
+    await expect(menu).toHaveAttribute('aria-expanded', 'true');
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          const root = document.documentElement;
+          requestAnimationFrame(() => {
+            root.style.fontSize = '4px';
+            requestAnimationFrame(() => {
+              root.style.fontSize = '';
+              requestAnimationFrame(() =>
+                requestAnimationFrame(() => resolve()),
+              );
+            });
+          });
+        }),
+    );
+    await page.waitForTimeout(150);
+    await expect(menu).toHaveAttribute('aria-expanded', 'true');
   });
 });
 
