@@ -7,6 +7,8 @@ import '@fontsource/hanken-grotesk/latin-500.css';
 import '@fontsource/hanken-grotesk/latin-600.css';
 import '@fontsource/hanken-grotesk/latin-700.css';
 import '../styles/global.css';
+import displayFont from '@fontsource/libre-caslon-display/files/libre-caslon-display-latin-400-normal.woff2?url';
+import uiFont from '@fontsource/hanken-grotesk/files/hanken-grotesk-latin-400-normal.woff2?url';
 import { colors, tokensToCss } from '../lib/tokens';
 import SiteHeader from '../components/site-header.astro';
 import SiteFooter from '../components/site-footer.astro';
@@ -69,6 +71,14 @@ const ogImageIsDefault = !ogImage;
     />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content={ogImageUrl} />
+    <link
+      rel="preload"
+      href={displayFont}
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="preload" href={uiFont} as="font" type="font/woff2" crossorigin />
     <slot name="head" />
     <style is:inline set:html={tokensToCss()}></style>
     <script is:inline>

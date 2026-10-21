@@ -1,8 +1,59 @@
+@font-face {
+  font-family: 'Libre Caslon Display Fallback';
+  src: local('Georgia');
+  size-adjust: 82.6%;
+  ascent-override: 117.44%;
+  descent-override: 32.2%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Libre Caslon Text Fallback';
+  src: local('Georgia');
+  size-adjust: 107.62%;
+  ascent-override: 90.13%;
+  descent-override: 24.16%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Libre Caslon Text Fallback';
+  font-style: italic;
+  src: local('Georgia Italic');
+  size-adjust: 104.94%;
+  ascent-override: 92.44%;
+  descent-override: 24.78%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Hanken Grotesk Fallback';
+  font-weight: 400 500;
+  src: local('Arial');
+  size-adjust: 101.83%;
+  ascent-override: 98.21%;
+  descent-override: 29.76%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'Hanken Grotesk Fallback';
+  font-weight: 600 900;
+  src: local('Arial Bold');
+  size-adjust: 95.46%;
+  ascent-override: 104.76%;
+  descent-override: 31.74%;
+  line-gap-override: 0%;
+}
+
 :root {
-  --font-display: 'Libre Caslon Display', 'Libre Caslon Text', Georgia, serif;
-  --font-text: 'Libre Caslon Text', Georgia, serif;
+  --font-display:
+    'Libre Caslon Display', 'Libre Caslon Display Fallback', Georgia, serif;
+  --font-text:
+    'Libre Caslon Text', 'Libre Caslon Text Fallback', Georgia, serif;
   --font-ui:
-    'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    'Hanken Grotesk', 'Hanken Grotesk Fallback', system-ui, -apple-system,
+    'Segoe UI', Roboto, sans-serif;
 
   --step-hero: clamp(4rem, 12.5vw, 13rem);
   --step-h1: clamp(2.75rem, 1.9rem + 4.2vw, 5.5rem);

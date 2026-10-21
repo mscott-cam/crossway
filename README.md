@@ -93,3 +93,7 @@ cd studio && npx sanity dataset import /tmp/leaders.ndjson production --missing
 ### Importing sermons
 
 See [scripts/README-import.md](scripts/README-import.md) for the Webflow sermon and series import.
+
+## Performance gate
+
+`npm run build:e2e && npm run perf` runs Lighthouse CI (mobile emulation, slow 4G, 3 runs, median) against the fixtures build served locally on port 4410. `scripts/lhci-server.mjs` fronts the node adapter with brotli so the lab matches Vercel, which compresses text. Thresholds are in `lighthouserc.json`: all four categories at least 0.9, LCP at most 2500 ms, CLS at most 0.1, TBT at most 300 ms. Real Sanity, Planning Center, Vimeo and Spreaker network behavior is not part of this measurement.
