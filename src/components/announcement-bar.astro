@@ -1,0 +1,74 @@
+---
+import type { Announcement } from '../lib/sanity/types';
+
+interface Props {
+  announcement: Announcement;
+}
+
+const { announcement } = Astro.props;
+const text = announcement.text?.trim() ?? '';
+const href = announcement.href?.trim() || undefined;
+const show = announcement.enabled && text !== '';
+const external = Boolean(href && /^https?:\/\//i.test(href));
+---
+
+{show && (
+  <aside
+    class="announcement on-navy"
+    aria-label="Announcement"
+    data-announcement
+  >
+    <p class="announcement__text">
+      {href ? (
+        <a
+          class="announcement__link"
+          href={href}
+          target={external ? '_blank' : undefined}
+          rel={external ? 'noopener noreferrer' : undefined}
+        >
+          {text}
+          <span class="announcement__arrow" aria-hidden="true">
+            →
+          </span>
+          {external && <span class="sr-only"> (opens in a new tab)</span>}
+        </a>
+      ) : (
+        text
+      )}
+    </p>
+  </aside>
+)}
+
+<style>
+  .announcement {
+    flex: none;
+    padding: 0.6rem var(--gutter);
+    text-align: center;
+  }
+
+  .announcement__text {
+    max-width: var(--container);
+    margin: 0 auto;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.45;
+    letter-spacing: 0.01em;
+    text-wrap: balance;
+  }
+
+  .announcement__link {
+    color: inherit;
+    text-decoration-color: var(--amber);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+  }
+
+  .announcement__link:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  .announcement__arrow {
+    margin-left: 0.4em;
+    color: var(--amber);
+  }
+</style>

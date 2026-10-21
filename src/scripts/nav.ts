@@ -70,7 +70,10 @@ function initMenu(header: HTMLElement) {
   const outside = () =>
     Array.from(document.body.children).filter(
       (el): el is HTMLElement =>
-        el instanceof HTMLElement && el !== header && el.tagName !== 'SCRIPT',
+        el instanceof HTMLElement &&
+        el !== header &&
+        !el.contains(header) &&
+        el.tagName !== 'SCRIPT',
     );
 
   const isOpen = () => toggle.getAttribute('aria-expanded') === 'true';

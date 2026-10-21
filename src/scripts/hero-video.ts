@@ -16,7 +16,7 @@ const mayPlay = () =>
   !saveData() &&
   document.visibilityState === 'visible';
 
-function attachSources(video: HTMLVideoElement) {
+function attachSources(video: HTMLVideoElement, start: number) {
   const sources: VideoSource[] = JSON.parse(video.dataset.sources ?? '[]');
   for (const { src, type, media } of sources) {
     if (media && !window.matchMedia(media).matches) continue;
@@ -25,6 +25,15 @@ function attachSources(video: HTMLVideoElement) {
     el.type = type;
     video.append(el);
   }
+  if (start > 0) {
+    video.addEventListener(
+      'loadedmetadata',
+      () => {
+        video.currentTime = start;
+      },
+      { once: true },
+    );
+  }
   video.load();
 }
 
@@ -32,6 +41,7 @@ function setup(root: HTMLElement) {
   const video = root.querySelector('video');
   if (!video) return;
   let attached = false;
+  const start = Math.max(0, parseFloat(video.dataset.start ?? '') || 0);
 
   video.addEventListener('playing', () => root.classList.add('is-playing'));
 
@@ -43,7 +53,7 @@ function setup(root: HTMLElement) {
     }
     if (!attached) {
       attached = true;
-      attachSources(video);
+      attachSources(video, start);
     }
     video.play().catch(() => {});
   };

@@ -2,9 +2,10 @@
 interface Props {
   poster: string;
   preloadPoster?: boolean;
+  posterTime?: number;
 }
 
-const { poster, preloadPoster = false } = Astro.props;
+const { poster, preloadPoster = false, posterTime = 3 } = Astro.props;
 const base = poster.replace(/\/$/, '');
 const dir = base.slice(0, base.lastIndexOf('/'));
 
@@ -62,6 +63,7 @@ const sources = [
     tabindex="-1"
     disablepictureinpicture
     data-sources={JSON.stringify(sources)}
+    data-start={posterTime > 0 ? String(posterTime) : undefined}
   ></video>
 </div>
 

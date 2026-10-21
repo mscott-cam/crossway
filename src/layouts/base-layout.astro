@@ -11,6 +11,8 @@ import { tokensToCss } from '../lib/tokens';
 import SiteHeader from '../components/site-header.astro';
 import SiteFooter from '../components/site-footer.astro';
 import QuestionsForm from '../components/questions-form.astro';
+import AnnouncementBar from '../components/announcement-bar.astro';
+import { getSiteSettings } from '../lib/sanity/queries';
 
 interface Props {
   title: string;
@@ -32,6 +34,7 @@ const {
   questions = true,
 } = Astro.props;
 
+const settings = await getSiteSettings();
 const siteName = 'Crossway Bible Church';
 const fullTitle = title.includes(siteName) ? title : `${title} | ${siteName}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
@@ -60,6 +63,7 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).href : undefined;
       content={ogImageUrl ? 'summary_large_image' : 'summary'}
     />
     {ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
+    <slot name="head" />
     <style is:inline set:html={tokensToCss()}></style>
     <script is:inline>
       (function () {
@@ -75,7 +79,14 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).href : undefined;
     <a class="skip-link" href="#main">
       Skip to content
     </a>
-    <SiteHeader overHero={overHero} />
+    <AnnouncementBar announcement={settings.announcement} />
+    {overHero ? (
+      <div class="header-anchor">
+        <SiteHeader overHero />
+      </div>
+    ) : (
+      <SiteHeader />
+    )}
     <main id="main" tabindex="-1">
       <slot />
     </main>
@@ -86,3 +97,12 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).href : undefined;
     </script>
   </body>
 </html>
+
+<style is:global>
+  .header-anchor {
+    position: relative;
+    z-index: 50;
+    flex: none;
+    height: 0;
+  }
+</style>
