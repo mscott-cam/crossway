@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../../layouts/base-layout.astro';
+import CrossMark from '../../components/cross-mark.astro';
+---
+
+<BaseLayout
+  title="Motion fixture"
+  description="Internal fixture page for the motion system."
+  noindex
+>
+  <section class="container fixture">
+    <h1 data-reveal="lines">
+      Lines rise into view <em>one by one</em> as the page loads
+    </h1>
+    <p data-reveal="fade" data-reveal-delay="0.3">
+      Fade variant already in the first viewport, delayed by 0.3 seconds.
+    </p>
+    <CrossMark draw size={96} />
+  </section>
+
+  <section class="container fixture">
+    <h2 data-reveal="lines">A second headline that reveals line by line</h2>
+    <p data-reveal="up">Up variant, rising eighty pixels.</p>
+  </section>
+
+  <section class="container fixture">
+    <div class="parallax-frame">
+      <div class="parallax-item" data-parallax="0.2"></div>
+    </div>
+  </section>
+
+  <section class="container fixture">
+    <CrossMark draw variant="navy" size={96} />
+    <p data-reveal="up" data-reveal-delay="0.2">
+      Up variant with a 0.2 second delay.
+    </p>
+  </section>
+
+  <section class="container fixture">
+    <p data-reveal="fade">Last fixture, fade variant.</p>
+  </section>
+</BaseLayout>
+
+<style>
+  .fixture {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2rem;
+    min-height: 100svh;
+  }
+
+  .parallax-frame {
+    height: 60svh;
+    overflow: hidden;
+    background: var(--navy);
+  }
+
+  .parallax-item {
+    height: 130%;
+    margin-top: -15%;
+    background: linear-gradient(var(--amber), var(--mist));
+    will-change: transform;
+  }
+</style>

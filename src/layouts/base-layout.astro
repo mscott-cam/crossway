@@ -17,6 +17,7 @@ interface Props {
   ogImage?: string;
   bodyClass?: string;
   overHero?: boolean;
+  noindex?: boolean;
 }
 
 const {
@@ -25,6 +26,7 @@ const {
   ogImage,
   bodyClass,
   overHero = false,
+  noindex = false,
 } = Astro.props;
 
 const siteName = 'Crossway Bible Church';
@@ -41,6 +43,7 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).href : undefined;
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <meta name="theme-color" content="#F3F0E8" />
+    {noindex && <meta name="robots" content="noindex" />}
     <link rel="canonical" href={canonical.href} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta property="og:site_name" content={siteName} />
@@ -56,7 +59,11 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).href : undefined;
     {ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
     <style is:inline set:html={tokensToCss()}></style>
     <script is:inline>
-      document.documentElement.classList.add('js');
+      var root = document.documentElement;
+      root.classList.add('js');
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        root.classList.add('reduced');
+      }
     </script>
   </head>
   <body class={bodyClass} data-over-hero={overHero ? '' : undefined}>
@@ -68,5 +75,8 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).href : undefined;
       <slot />
     </main>
     <SiteFooter />
+    <script>
+      import '../scripts/motion';
+    </script>
   </body>
 </html>
