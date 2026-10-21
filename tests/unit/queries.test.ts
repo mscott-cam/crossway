@@ -7,9 +7,20 @@ import { sermonSlug } from '../../src/lib/slug';
 const fetchMock = vi.fn();
 const createClientMock = vi.fn((_config: unknown) => ({ fetch: fetchMock }));
 
+const cache = vi.hoisted(() => ({
+  readCache: vi.fn(),
+  writeCache: vi.fn(),
+}));
+const feedFetchMock = vi.fn();
+
 vi.mock('@sanity/client', () => ({
   createClient: (config: unknown) => createClientMock(config),
 }));
+vi.mock('../../src/lib/cache', () => cache);
+
+const quietFeed = `<?xml version="1.0"?><rss xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" version="2.0"><channel><title>Show</title><item><title>Ancient</title><pubDate>Sun, 02 Jan 2000 18:00:00 +0000</pubDate><enclosure url="https://dts.podtrac.com/redirect.mp3/api.spreaker.com/download/episode/1/sermon_audio.mp3" type="audio/mpeg"/></item></channel></rss>`;
+const feedResponse = (body: string) =>
+  ({ ok: true, status: 200, text: async () => body }) as Response;
 
 const speaker = { _id: 'sp1', name: 'Josh Collins', slug: { current: 'josh' } };
 const series = {
@@ -43,6 +54,11 @@ function configure() {
 beforeEach(() => {
   fetchMock.mockReset();
   createClientMock.mockClear();
+  cache.readCache.mockReset();
+  cache.writeCache.mockReset();
+  feedFetchMock.mockReset();
+  feedFetchMock.mockResolvedValue(feedResponse(quietFeed));
+  vi.stubGlobal('fetch', feedFetchMock);
   vi.stubEnv('SANITY_PROJECT_ID', '');
   vi.stubEnv('SANITY_FIXTURES', '');
   vi.stubEnv('SANITY_FIXTURE_SETTINGS', '');
@@ -52,6 +68,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
 
@@ -260,6 +277,150 @@ describe('getSermons with a mocked client', () => {
   });
 });
 
+describe('getSermons audio matching', () => {
+  const episodeXml = (id: string, title: string, pub: string) =>
+    `<item><title>${title}</title><pubDate>${pub}</pubDate><enclosure url="https://dts.podtrac.com/redirect.mp3/api.spreaker.com/download/episode/${id}/sermon_audio.mp3" type="audio/mpeg"/></item>`;
+  const feedOf = (...items: string[]) =>
+    `<?xml version="1.0"?><rss version="2.0"><channel><title>Show</title>${items.join('')}</channel></rss>`;
+  const mp3 = (id: string) =>
+    `https://dts.podtrac.com/redirect.mp3/api.spreaker.com/download/episode/${id}/sermon_audio.mp3`;
+
+  it('attaches audio from the fetched feed', async () => {
+    configure();
+    fetchMock.mockResolvedValue([
+      rawSermon('Entrusted With Resources', '2026-10-18'),
+      rawSermon('Pinned', '2026-09-06', { spreakerEpisodeId: '22' }),
+      rawSermon('Overridden', '2026-08-30', {
+        audioOverrideUrl: 'https://example.org/o.mp3',
+      }),
+      rawSermon('Silent', '2019-01-06'),
+    ]);
+    feedFetchMock.mockResolvedValue(
+      feedResponse(
+        feedOf(
+          episodeXml(
+            '11',
+            'Entrusted With Resources',
+            'Mon, 19 Oct 2026 03:30:00 +0000',
+          ),
+          episodeXml('22', 'Other title', 'Sun, 01 Feb 2026 20:00:00 +0000'),
+          episodeXml('33', 'Orphan', 'Sun, 04 Oct 2026 22:43:56 +0000'),
+        ),
+      ),
+    );
+    const { getSermons } = await load();
+    const sermons = await getSermons();
+    const byTitle = Object.fromEntries(sermons.map((s) => [s.title, s.audio]));
+    expect(byTitle['Entrusted With Resources']).toEqual({
+      url: mp3('11'),
+      source: 'date-match',
+    });
+    expect(byTitle.Pinned).toEqual({ url: mp3('22'), source: 'spreaker-id' });
+    expect(byTitle.Overridden).toEqual({
+      url: 'https://example.org/o.mp3',
+      source: 'override',
+    });
+    expect(byTitle.Silent).toBeUndefined();
+    expect(sermons.map((s) => s.date)).toEqual([
+      '2026-10-18',
+      '2026-09-06',
+      '2026-08-30',
+      '2019-01-06',
+    ]);
+  });
+
+  it('fetches the feed once however often getSermons is called', async () => {
+    configure();
+    fetchMock.mockResolvedValue([rawSermon('One', '2026-10-18')]);
+    const { getSermons } = await load();
+    const [a, b] = await Promise.all([getSermons(), getSermons()]);
+    await getSermons();
+    expect(a).toBe(b);
+    expect(feedFetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('writes audio-report with unmatched sermons and episodes', async () => {
+    configure();
+    fetchMock.mockResolvedValue([
+      rawSermon('Matched', '2026-10-18'),
+      rawSermon('Remember the Old Paths', '2019-01-06'),
+    ]);
+    feedFetchMock.mockResolvedValue(
+      feedResponse(
+        feedOf(
+          episodeXml('11', 'Matched', 'Sun, 18 Oct 2026 22:13:15 +0000'),
+          episodeXml('33', 'Trusting', 'Sun, 04 Oct 2026 22:43:56 +0000'),
+        ),
+      ),
+    );
+    const { getSermons } = await load();
+    await getSermons();
+    const reports = cache.writeCache.mock.calls.filter(
+      ([key]) => key === 'audio-report',
+    );
+    expect(reports).toHaveLength(1);
+    expect(reports[0][1]).toEqual({
+      generatedAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+      unmatchedSermons: [
+        {
+          slug: sermonSlug('Remember the Old Paths', '2019-01-06'),
+          title: 'Remember the Old Paths',
+          date: '2019-01-06',
+        },
+      ],
+      unmatchedEpisodes: [
+        {
+          id: '33',
+          title: 'Trusting',
+          pubDate: '2026-10-04T22:43:56.000Z',
+        },
+      ],
+    });
+  });
+
+  it('still applies overrides and keeps the old report when the feed is unavailable', async () => {
+    configure();
+    fetchMock.mockResolvedValue([
+      rawSermon('Overridden', '2026-08-30', {
+        audioOverrideUrl: 'https://example.org/o.mp3',
+      }),
+      rawSermon('Plain', '2026-08-23'),
+    ]);
+    feedFetchMock.mockRejectedValue(new Error('offline'));
+    const { getSermons } = await load();
+    const sermons = await getSermons();
+    expect(sermons[0].audio?.source).toBe('override');
+    expect(sermons[1].audio).toBeUndefined();
+    expect(
+      cache.writeCache.mock.calls.filter(([key]) => key === 'audio-report'),
+    ).toHaveLength(0);
+  });
+
+  it('does not touch the feed when there are no sermons', async () => {
+    configure();
+    fetchMock.mockResolvedValue([]);
+    const { getSermons } = await load();
+    expect(await getSermons()).toEqual([]);
+    expect(feedFetchMock).not.toHaveBeenCalled();
+    expect(cache.writeCache).not.toHaveBeenCalled();
+  });
+
+  it('does not mutate the sermons it matched', async () => {
+    configure();
+    const rows = [rawSermon('One', '2026-10-18')];
+    fetchMock.mockResolvedValue(rows);
+    feedFetchMock.mockResolvedValue(
+      feedResponse(
+        feedOf(episodeXml('11', 'One', 'Sun, 18 Oct 2026 22:13:15 +0000')),
+      ),
+    );
+    const { getSermons } = await load();
+    const [sermon] = await getSermons();
+    expect(sermon.audio?.url).toBe(mp3('11'));
+    expect('audio' in rows[0]).toBe(false);
+  });
+});
+
 describe('other fetchers with a mocked client', () => {
   it('flattens series slugs and artwork', async () => {
     configure();
@@ -392,6 +553,34 @@ describe('fixture mode', () => {
     vi.stubEnv('VERCEL_ENV', 'preview');
     const q = await load();
     expect((await q.getSermons()).length).toBeGreaterThanOrEqual(30);
+  });
+
+  it('matches audio from tests/fixtures/spreaker-feed.xml with no network', async () => {
+    vi.stubEnv('SANITY_PROJECT_ID', 'abc123');
+    const { getSermons } = await load();
+    const sermons = await getSermons();
+    const bySlug = Object.fromEntries(sermons.map((s) => [s.slug, s.audio]));
+    const mp3 = (id: string) =>
+      `https://dts.podtrac.com/redirect.mp3/api.spreaker.com/download/episode/${id}/sermon_audio.mp3`;
+    expect(
+      bySlug['entrusted-with-resources-putting-money-in-its-place-2026-10-18'],
+    ).toEqual({
+      url: mp3('75851174'),
+      source: 'date-match',
+    });
+    const dateMatches = sermons.filter((s) => s.audio?.source === 'date-match');
+    expect(dateMatches.length).toBeGreaterThanOrEqual(3);
+    expect(bySlug['gospel-repair-2026-05-31']).toEqual({
+      url: mp3('72266218'),
+      source: 'spreaker-id',
+    });
+    expect(bySlug['faith-and-favoritism-2026-08-23']?.source).toBe('override');
+    expect(bySlug['remember-the-old-paths-2019-01-06']).toBeUndefined();
+    expect(feedFetchMock).not.toHaveBeenCalled();
+    const report = cache.writeCache.mock.calls.find(
+      ([key]) => key === 'audio-report',
+    )![1] as { unmatchedEpisodes: { title: string }[] };
+    expect(report.unmatchedEpisodes.map((e) => e.title)).toEqual(['Trusting']);
   });
 
   it('returns sermons date-descending', async () => {

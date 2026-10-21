@@ -21,6 +21,8 @@
     "@fontsource/libre-caslon-text": "^5.3.0",
     "@sanity/client": "^8.10.1",
     "astro": "^7.4.1",
+    "fast-xml-parser": "^5.11.2",
+    "fast-xml-validator": "^1.4.2",
     "gsap": "^3.15.0"
   },
   "devDependencies": {

@@ -1,5 +1,8 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { matchAudio } from '../audio/match-audio';
+import { fetchSpreakerFeed } from '../audio/spreaker';
+import { writeCache } from '../cache';
 import { sermonSlug } from '../slug';
 import { env, getClient, isFixtureMode, isSanityConfigured } from './client';
 import type {
@@ -258,13 +261,41 @@ const sortSermons = (sermons: Sermon[]) =>
     (a, b) => b.date.localeCompare(a.date) || a.title.localeCompare(b.title),
   );
 
-export const getSermons = memoize(() =>
-  load(
-    'getSermons',
-    () => 'sermons.json',
-    SERMONS_QUERY,
-    (raw) => sortSermons(list('getSermons', normalizeSermon)(raw)),
-    [],
+async function withAudio(sermons: Sermon[]): Promise<Sermon[]> {
+  if (sermons.length === 0) return sermons;
+  const episodes = await fetchSpreakerFeed();
+  const {
+    sermons: matched,
+    unmatchedSermons,
+    unmatchedEpisodes,
+  } = matchAudio(sermons, episodes);
+  if (episodes.length > 0) {
+    writeCache('audio-report', {
+      generatedAt: new Date().toISOString(),
+      unmatchedSermons: unmatchedSermons.map(({ slug, title, date }) => ({
+        slug,
+        title,
+        date,
+      })),
+      unmatchedEpisodes: unmatchedEpisodes.map(({ id, title, pubDate }) => ({
+        id,
+        title,
+        pubDate,
+      })),
+    });
+  }
+  return matched;
+}
+
+export const getSermons = memoize(async () =>
+  withAudio(
+    await load(
+      'getSermons',
+      () => 'sermons.json',
+      SERMONS_QUERY,
+      (raw) => sortSermons(list('getSermons', normalizeSermon)(raw)),
+      [],
+    ),
   ),
 );
 
