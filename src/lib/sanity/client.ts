@@ -1,8 +1,8 @@
 import { createClient, type SanityClient } from '@sanity/client';
+import { isConfiguredProjectId } from '../ops/build-guard';
 
 const API_VERSION = '2025-02-19';
 const REQUEST_TIMEOUT_MS = 15000;
-const PLACEHOLDER_PROJECT_IDS = ['your-project-id', 'placeholder', 'todo'];
 
 export function env(name: string): string {
   const value = process.env[name] ?? import.meta.env?.[name];
@@ -10,8 +10,7 @@ export function env(name: string): string {
 }
 
 export function isSanityConfigured(): boolean {
-  const id = env('SANITY_PROJECT_ID');
-  return id !== '' && !PLACEHOLDER_PROJECT_IDS.includes(id.toLowerCase());
+  return isConfiguredProjectId(env('SANITY_PROJECT_ID'));
 }
 
 let fixtureNoticeLogged = false;

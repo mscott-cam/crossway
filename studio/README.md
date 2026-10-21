@@ -12,6 +12,8 @@ Sanity Studio for crosswaysa.org content: sermons, series, speakers, leaders and
 
 Without the env vars the Studio builds against a placeholder project ID and cannot load or save content.
 
+The site reads the same project through `SANITY_PROJECT_ID` and `SANITY_DATASET`, set in Vercel. A production site build fails without them. See the [root README](../README.md#environment-variables) for the full variable list, the publish webhook and the launch checklist (deploying the Studio with `npm run deploy`, inviting the editor).
+
 ## Adding a sermon
 
 Fill in Title, Date, Speaker, Series, Book of the Bible and Vimeo link, click Generate on Web address, then Publish. Everything else is optional.

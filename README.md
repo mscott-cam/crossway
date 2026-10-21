@@ -1,20 +1,88 @@
 # Crossway Bible Church website
 
-Astro (static-first) site for crosswaysa.org, deployed on Vercel. Content lives in Sanity (sermons, series, speakers, leaders, site settings), events come from Planning Center and sermon audio from the Spreaker feed. The Studio is in `studio/` (see `studio/README.md`).
+Astro (static-first) site for crosswaysa.org, deployed on Vercel. Content lives in Sanity (sermons, series, speakers, leaders, site settings), events come from Planning Center and sermon audio from the Spreaker feed. The Studio is in `studio/` (see [studio/README.md](studio/README.md)). Product and design intent: `PRODUCT.md` and `docs/2026-10-20-crossway-site-design.md`.
 
 ## Setup
 
-```
-npm install
-cp .env.example .env   # fill in what you have; every variable has a safe fallback
-npm run dev
-npm test               # unit tests
-npm run test:e2e       # builds with fixtures and runs Playwright
-```
+1. Clone the repo. Node 22 or newer.
+2. `npm install`
+3. `cp .env.example .env` and fill in what you have. Every variable is documented in [Environment variables](#environment-variables). With nothing set, a local build or `npm run dev` runs with empty content and default settings (it logs warnings).
+4. `npm run dev` serves the site at http://localhost:4321. To work with bundled fixture content and no network access, start it with `SANITY_FIXTURES=1 npm run dev`.
+5. The Studio is a separate package: `cd studio`, `npm install`, `cp .env.example .env`, `npm run dev` (details in [studio/README.md](studio/README.md)).
 
-Node 22 or newer. Setting `SANITY_FIXTURES=1` builds against bundled fixture content with no network access.
+| Script                                                                 | What it does                                                                                                                                                 |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `npm run dev`                                                          | Astro dev server.                                                                                                                                            |
+| `npm run build`                                                        | Production build (Vercel adapter, output in `.vercel/output`). Then runs `postbuild`, which prints the [audio report](#audio-report). Never fails the build. |
+| `npm run build:e2e`                                                    | Fixtures build with the Node adapter (`SANITY_FIXTURES=1 E2E=1`). Used by the e2e and perf scripts.                                                          |
+| `npm run preview`                                                      | Serves a build locally.                                                                                                                                      |
+| `npm test`                                                             | Unit tests (Vitest).                                                                                                                                         |
+| `npm run test:e2e`                                                     | Builds the fixtures builds, then runs Playwright against them.                                                                                               |
+| `npm run perf`                                                         | Lighthouse CI against the fixtures build (run `npm run build:e2e` first).                                                                                    |
+| `npm run format`                                                       | Prettier on the whole repo.                                                                                                                                  |
+| `npx astro check`                                                      | Type check.                                                                                                                                                  |
+| `scripts/import-webflow.ts`                                            | One-time Webflow sermon and series import into Sanity: [scripts/README-import.md](scripts/README-import.md).                                                 |
+| `scripts/scrape-pages.ts`                                              | Drafts Markdown from a live crosswaysa.org page (used to copy page content; `--base` sets the origin).                                                       |
+| `scripts/make-leaders-seed.ts`                                         | Regenerates `scripts/leaders-seed.json` from the `/who-we-are` frontmatter. See [Seeding leaders](#seeding-leaders).                                         |
+| `scripts/encode-hero-video.sh`, `make-poster.mjs`, `make-og-image.mjs` | Asset generators for the hero video, its poster and the default share image. Outputs are committed in `public/`.                                             |
 
-The launch checklist will be added here.
+## Environment variables
+
+Set these in Vercel under Project, Settings, Environment Variables. BUILD variables are read while the site builds, so changing one needs a new deploy. RUNTIME variables are read by server routes on each request. Production-only variables (cron, form delivery) only matter for the Production environment; set the content variables for Preview too, or preview deploys have no content.
+
+"Required" means required for a working production site. Most variables degrade rather than crash, but a few do not:
+
+- Production builds fail without `SANITY_PROJECT_ID` ([build guard](#production-build-guard)).
+- In production the contact form answers 503 unless `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL` and `TURNSTILE_SECRET_KEY` are all set.
+- The cron endpoint answers 503 unless `CRON_SECRET` and `VERCEL_DEPLOY_HOOK_URL` are set.
+
+| Variable                   | When    | Required in production                     | Used by                                                                                                                                      |
+| -------------------------- | ------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SANITY_PROJECT_ID`        | BUILD   | Yes (build fails)                          | `src/lib/sanity/client.ts`, `scripts/require-content.mjs`. Also read by `scripts/import-webflow.ts`.                                         |
+| `SANITY_DATASET`           | BUILD   | No, default `production`                   | `src/lib/sanity/client.ts`. Also the import script.                                                                                          |
+| `SANITY_API_READ_TOKEN`    | BUILD   | Only for a private dataset                 | `src/lib/sanity/client.ts`.                                                                                                                  |
+| `PCO_APP_ID`, `PCO_SECRET` | BUILD   | No (events page shows its empty state)     | `src/lib/events/pco.ts`. Planning Center personal access token.                                                                              |
+| `RESEND_API_KEY`           | RUNTIME | Yes                                        | `src/lib/contact/email.ts`, `src/lib/contact/handle.ts`.                                                                                     |
+| `CONTACT_TO_EMAIL`         | RUNTIME | Yes                                        | Recipient(s) of form messages, comma-separated allowed.                                                                                      |
+| `CONTACT_FROM_EMAIL`       | RUNTIME | Yes                                        | Sender on the verified Resend domain. Outside production, unset falls back to Resend's shared `onboarding@resend.dev`.                       |
+| `CONTACT_PUBLIC_EMAIL`     | BUILD   | No (a visible placeholder shows until set) | `src/components/questions-form.astro`, `contact-fallback.astro`. Public address in the form's failure and no-JavaScript text. Not secret.    |
+| `TURNSTILE_SITE_KEY`       | BUILD   | Yes                                        | `src/components/questions-form.astro`. Without it no widget mounts.                                                                          |
+| `TURNSTILE_SECRET_KEY`     | RUNTIME | Yes                                        | `src/lib/contact/handle.ts`. Checked on submit.                                                                                              |
+| `VERCEL_DEPLOY_HOOK_URL`   | RUNTIME | Yes, for the daily rebuild                 | `src/lib/ops/rebuild.ts`. Deploy Hook URL the cron POSTs. Secret.                                                                            |
+| `CRON_SECRET`              | RUNTIME | Yes, for the daily rebuild                 | `src/lib/ops/rebuild.ts`. Bearer token Vercel Cron sends to `/api/cron/rebuild`. Secret.                                                     |
+| `VERCEL_ENV`               | both    | Set by Vercel                              | `production`, `preview` or `development`. Never set it by hand. Drives the build guard, the fixtures block and the form's production checks. |
+
+Other variables, none of which belong in Vercel:
+
+| Variable                                            | Where                 | Purpose                                                                                                  |
+| --------------------------------------------------- | --------------------- | -------------------------------------------------------------------------------------------------------- |
+| `SANITY_API_WRITE_TOKEN`                            | Local shell           | Editor token for `scripts/import-webflow.ts`. Never put it in Vercel or `.env` files that get committed. |
+| `SANITY_STUDIO_PROJECT_ID`, `SANITY_STUDIO_DATASET` | `studio/.env`         | The Studio's project and dataset (dataset defaults to `production`). Build-time for the Studio.          |
+| `ALLOW_EMPTY_CONTENT`                               | Vercel (escape hatch) | `1` downgrades the production no-content build failure to a warning. Leave unset.                        |
+
+### Test-only
+
+Set by the npm scripts, never by hand and never in Vercel. `SANITY_FIXTURES` is ignored when `VERCEL_ENV=production`: the build logs an error and uses Sanity.
+
+| Variable                                                            | Purpose                                                                                                                                                    |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `E2E=1`                                                             | Node adapter build for Playwright and Lighthouse; disables the build guard and dev-page pruning. Setting it in Vercel would bypass the guard, so never do. |
+| `SANITY_FIXTURES=1`                                                 | Read content from `tests/fixtures` instead of Sanity. Not honored when `VERCEL_ENV=production`.                                                            |
+| `SANITY_FIXTURE_SETTINGS`, `SANITY_FIXTURE_DIR`, `PCO_FIXTURE_FILE` | Pick alternate fixture files (announcement bar, empty states).                                                                                             |
+| `CROSSWAY_CACHE_DIR`                                                | Moves the build cache (audio report) for hermetic tests.                                                                                                   |
+| `RESEND_API_KEY=e2e-fake`                                           | With `E2E=1` and a non-production `VERCEL_ENV`, the form uses a stub transport instead of Resend.                                                          |
+
+### Production build guard
+
+A production deploy (`VERCEL_ENV=production`) with no real `SANITY_PROJECT_ID` would ship an empty site: no sermons, no series, default settings. `scripts/require-content.mjs` (logic in `src/lib/ops/build-guard.ts`) fails that build before anything is built, with a message naming what to set. Unset, blank and placeholder ids all count as missing. Preview, development and local builds are never blocked, and `E2E=1` builds are exempt.
+
+Troubleshooting a deploy that fails with `[build-guard] Refusing to build a production deploy with no content`:
+
+1. Set `SANITY_PROJECT_ID` (and `SANITY_DATASET` if not `production`) for the Production environment in Vercel, then redeploy. Environment variable changes do not apply to existing deployments.
+2. `SANITY_FIXTURES=1` does not help; fixtures are ignored in production.
+3. To deploy an empty site deliberately (for example to check hosting before Sanity exists), set `ALLOW_EMPTY_CONTENT=1`. The build then only prints a warning. Remove it afterwards.
+
+Other missing sources stay warnings by design: Planning Center and Spreaker outages or missing credentials log `[events]` and `[audio]` lines and the site builds without them.
 
 ## Content freshness and rebuilds
 
@@ -35,37 +103,21 @@ Editors' changes go live when Sanity calls a Vercel Deploy Hook.
 
 ### 2. Daily cron
 
-`vercel.json` declares a Vercel Cron that calls `GET /api/cron/rebuild` every day at `0 11 * * *` (UTC). That is 6 am in Central Daylight Time and 5 am in Central Standard Time. The daily run picks up new Planning Center events and Spreaker episodes, which do not notify the site.
+`vercel.json` declares a Vercel Cron that calls `GET /api/cron/rebuild` every day at `0 11 * * *` (UTC). The daily run picks up new Planning Center events and Spreaker episodes, which do not notify the site.
+
+On Vercel's Hobby plan a cron fires anywhere within the scheduled hour (precision of plus or minus 59 minutes), so the run lands between 11:00 and 11:59 UTC: 6:00 to 6:59 am Central Daylight Time, or 5:00 to 5:59 am Central Standard Time. The project is meant to run on the Pro plan (see the checklist), which does not have that limit.
 
 The endpoint checks `Authorization: Bearer $CRON_SECRET` (Vercel Cron sends this header automatically when `CRON_SECRET` is set), then POSTs `VERCEL_DEPLOY_HOOK_URL`. It fails closed: it answers 503 if either variable is unset or if the hook URL is not an `https://api.vercel.com/v1/integrations/deploy/...` URL, and 401 for a missing or wrong token. It never logs the secret or the hook URL.
 
-Setup: set `CRON_SECRET` (any long random string) and `VERCEL_DEPLOY_HOOK_URL` in the Vercel Production environment, then redeploy. Hobby plans only allow daily crons, which is all this needs; Pro is also fine. The cron runs on production deployments only. To check it, open Project, Settings, Cron Jobs, and press Run.
+Setup: set `CRON_SECRET` (any long random string) and `VERCEL_DEPLOY_HOOK_URL` in the Vercel Production environment, then redeploy. The cron runs on production deployments only. To check it, open Project, Settings, Cron Jobs, and press Run.
 
 How the cron is wired: `@astrojs/vercel` writes `.vercel/output/config.json` without a `crons` key and does not read `crons` from `vercel.json`. Vercel's own build step merges `vercel.json` `crons` into the output config. This was checked by running `vercel build` locally on this repo: the resulting `config.json` contains the cron.
-
-### Environment variables
-
-Set these in Vercel for the Production environment. BUILD variables are read while the site builds, so changing one needs a new deploy. RUNTIME variables are read by server routes on each request.
-
-| Variable                 | Build | Runtime | Purpose                                                                                     |
-| ------------------------ | ----- | ------- | ------------------------------------------------------------------------------------------- |
-| `SANITY_PROJECT_ID`      | yes   |         | Sanity project. Unset: the site builds with empty content and default settings.             |
-| `SANITY_DATASET`         | yes   |         | Defaults to `production`.                                                                   |
-| `SANITY_API_READ_TOKEN`  | yes   |         | Read token, only needed if the dataset is private.                                          |
-| `PCO_APP_ID`             | yes   |         | Planning Center personal access token app id. Unset: the events page shows its empty state. |
-| `PCO_SECRET`             | yes   |         | Planning Center personal access token secret.                                               |
-| `RESEND_API_KEY`         |       | yes     | Contact form email delivery.                                                                |
-| `CONTACT_TO_EMAIL`       |       | yes     | Recipient(s) of contact form messages.                                                      |
-| `CONTACT_FROM_EMAIL`     |       | yes     | Sender on the verified Resend domain. Required in production.                               |
-| `CONTACT_PUBLIC_EMAIL`   | yes   |         | Public address shown in the form's failure and no-JavaScript text. Not secret.              |
-| `TURNSTILE_SITE_KEY`     | yes   |         | Cloudflare Turnstile site key. Without it the widget does not mount.                        |
-| `TURNSTILE_SECRET_KEY`   |       | yes     | Turnstile secret, checked on submit.                                                        |
-| `VERCEL_DEPLOY_HOOK_URL` |       | yes     | Deploy Hook URL the cron POSTs. Secret.                                                     |
-| `CRON_SECRET`            |       | yes     | Bearer token Vercel Cron sends to `/api/cron/rebuild`. Secret.                              |
 
 ### Audio report
 
 After every `npm run build`, the `postbuild` script (`scripts/audio-report.ts`) prints the result of the last sermon-to-Spreaker matching run, read from `node_modules/.cache/crossway/audio-report.json`. It never fails the build.
+
+The Vercel project's Build Command must stay the framework default (leave the override off) so Vercel runs `npm run build` and therefore `postbuild`. Overriding it to `astro build` silently drops the report. Confirm the audio report line appears in the first production build log.
 
 "Unmatched sermons" are sermons in Sanity that were not paired with a Spreaker episode, so they have no audio. "Unmatched episodes" are Spreaker episodes that no sermon claimed. The report shows the first 20 of each.
 
@@ -75,7 +127,7 @@ No report is written when the Spreaker feed is empty or unavailable, when there 
 
 ### Outages at build time
 
-A Sanity or Spreaker outage during a build does not fail it. The affected source logs a warning and the site ships with empty or limited content (no sermons, no audio, default settings). Check the Vercel build log after each deploy for `[sanity]`, `[audio]` and `[events]` warnings, and redeploy if any appear.
+A Sanity or Spreaker outage during a build does not fail it. The affected source logs a warning and the site ships with empty or limited content (no sermons, no audio, default settings). The exception is a production build with no Sanity project configured at all, which fails ([Production build guard](#production-build-guard)); an outage with a configured project still degrades silently. Check the Vercel build log after each deploy for `[sanity]`, `[audio]` and `[events]` warnings, and redeploy if any appear.
 
 Legacy sermon redirects (old Webflow `/sermons/{slug}` URLs to the new dated slugs) are computed at build time from Sanity. If Sanity is down during a build, those 301s are missing from that deployment. Redeploy once Sanity is back.
 
@@ -94,6 +146,111 @@ cd studio && npx sanity dataset import /tmp/leaders.ndjson production --missing
 
 See [scripts/README-import.md](scripts/README-import.md) for the Webflow sermon and series import.
 
-## Performance gate
+## Quality gates
 
-`npm run build:e2e && npm run perf` runs Lighthouse CI (mobile emulation, slow 4G, 3 runs, median) against the fixtures build served locally on port 4410. `scripts/lhci-server.mjs` fronts the node adapter with brotli so the lab matches Vercel, which compresses text. Thresholds are in `lighthouserc.json`: all four categories at least 0.9, LCP at most 2500 ms, CLS at most 0.1, TBT at most 300 ms. Real Sanity, Planning Center, Vimeo and Spreaker network behavior is not part of this measurement.
+| Command            | Checks                                                                                                                                                                                                                                                                                                                                                                          |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm test`         | Vitest unit tests: data transforms, Sanity and Planning Center parsing, forms, redirects, SEO output, the rebuild endpoint and the build guard. Includes hermetic temp-root production builds (redirects, SEO, guard) that take a few seconds each.                                                                                                                             |
+| `npm run test:e2e` | Builds the fixtures builds (including the announcement-bar variant), then Playwright on Chromium: navigation, every page, sermon media, events, the contact form, motion and reduced motion, axe accessibility, and the responsive gate (every route at 320, 390, 768, 1024, 1280 and 1600 px, plus enlarged text, with screenshots in `test-results/responsive/`). No retries. |
+| `npm run perf`     | Lighthouse CI, run `npm run build:e2e` first. Mobile emulation (slow 4G), 3 runs per URL, median. Asserts performance, accessibility, best practices and SEO at least 0.9, LCP at most 2500 ms, CLS at most 0.1, TBT at most 300 ms, on `/`, `/sermons`, one sermon detail, `/visit` and `/entrusted`. Thresholds are in `lighthouserc.json`.                                   |
+
+Run `npm test` and `npx astro check` before every commit. Run `npm run test:e2e` before a deploy. `npm run perf` binds ports 4410 and 4411.
+
+Last measured (Task 21 part A): `npm test` and `npm run test:e2e` all green; Lighthouse mobile median across the five URLs: performance 98 to 99, accessibility 100, best practices 100, SEO 100; worst LCP about 2.1 s (limit 2.5 s), CLS 0, TBT 0.
+
+What that measurement is: the fixtures build served locally with `scripts/lhci-server.mjs`, which fronts the Node adapter with brotli so text transfer matches Vercel (the Node adapter alone serves uncompressed, which overstated LCP at 3.0 to 3.3 s). Real Sanity, Planning Center, Vimeo and Spreaker traffic is not included. A Lighthouse run against the first Vercel preview URL is a launch step (see the checklist).
+
+## Launch checklist
+
+Owner-dependent steps, in order. Nothing here has been done yet. Tick items as they are completed.
+
+### 1. Accounts and projects
+
+- [ ] Sanity (owner): create a project at sanity.io/manage with a `production` dataset (or run `npx sanity init` inside `studio/`). Note the project ID.
+- [ ] Put the ID in `studio/.env` as `SANITY_STUDIO_PROJECT_ID`, run `npm --prefix studio run dev`, create one test sermon with the six required fields, then delete it.
+- [ ] Deploy the Studio: `npm --prefix studio run deploy` (run `npx sanity login` in `studio/` first if needed).
+- [ ] Invite the sermon editor: sanity.io/manage, the project, Members, Invite, Editor role.
+
+### 2. Import content
+
+- [ ] In Webflow, export the CMS collections "Sermons" and "Series" as CSV into `scripts/data/` (gitignored).
+- [ ] `npx tsx scripts/import-webflow.ts --sermons scripts/data/sermons.csv --series scripts/data/series.csv --dry-run`. Read every line under `problems`: unknown books (add aliases, see [scripts/README-import.md](scripts/README-import.md)), sermons with no speaker, series that did not resolve, column headers that were not matched (use `--map`). The real Webflow column names have never been seen; expect to adjust.
+- [ ] Create a Sanity Editor token (sanity.io/manage, API, Tokens). Run the import for real (default mode never overwrites existing documents): `SANITY_PROJECT_ID=... SANITY_API_WRITE_TOKEN=... npx tsx scripts/import-webflow.ts --sermons ... --series ...`. Open a few sermons in the Studio.
+- [ ] Seed the leaders (commands in [Seeding leaders](#seeding-leaders)).
+
+### 3. Contact form email (Resend)
+
+- [ ] Create a Resend account and add the sending domain crosswaysa.org.
+- [ ] Add the SPF and DKIM DNS records Resend shows. This is needed before the DNS cutover, not at it. Wait for Resend to show the domain as verified.
+- [ ] Set `RESEND_API_KEY`, `CONTACT_TO_EMAIL` (the church inbox) and `CONTACT_FROM_EMAIL` (an address on the verified domain) in Vercel.
+
+### 4. Spam protection (Cloudflare Turnstile)
+
+- [ ] Create a Turnstile widget. Restrict it to the production hostnames (and the preview hostname while testing).
+- [ ] Set `TURNSTILE_SITE_KEY` (BUILD) and `TURNSTILE_SECRET_KEY` (RUNTIME) in Vercel, then redeploy so the site key is baked in.
+
+### 5. Events (Planning Center)
+
+- [ ] Create a personal access token in Planning Center (Calendar) and set `PCO_APP_ID` and `PCO_SECRET` in Vercel.
+- [ ] Confirm each event the church wants listed is marked visible in Church Center.
+- [ ] After the first build, check `/events`. The live API response shape and pagination were never verified against a real account. A `[events]` warning in the build log means the page fell back to a Church Center link.
+
+### 6. Vercel
+
+- [ ] Create the project on the Kordial team (Pro plan; Hobby is for non-commercial use and limits crons). Framework preset Astro, Node 22.
+- [ ] Leave the Build Command and Output Directory at the framework defaults (no override), so `npm run build` runs and prints the audio report.
+- [ ] Set every [environment variable](#environment-variables) for Production, and the content ones (Sanity, PCO, Turnstile site key, Resend) for Preview too.
+- [ ] Create the Deploy Hook and set `VERCEL_DEPLOY_HOOK_URL` and `CRON_SECRET` ([Content freshness](#content-freshness-and-rebuilds)). Create the Sanity webhook and publish a test edit.
+- [ ] First preview deploy. Read the build log: warnings from `[sanity]`, `[audio]`, `[events]`; the redirects warnings for unusual Webflow slugs; and the audio report line.
+- [ ] Check that `/culture`, `/who-we-are`, `/what-we-believe` and the other no-slash pages load on Vercel. With `trailingSlash: 'never'` Vercel serves `x/index.html`; that was only verified locally.
+- [ ] Run Lighthouse (mobile) on the preview URL for `/`, `/sermons`, one sermon, `/visit` and `/entrusted`. Targets: all four categories at least 90, LCP under 2.5 s, CLS under 0.1. If Deployment Protection blocks PageSpeed Insights, use Chrome DevTools.
+- [ ] Production deploy from the production branch. Confirm the guard did not fire and the cron shows under Settings, Cron Jobs.
+
+### 7. Content the church must supply
+
+- [ ] The `/visit` page has three placeholders: parking and arrival details, the kids check-in process, and how long a service lasts (`src/pages/visit.astro`). Required before launch.
+- [ ] `CONTACT_PUBLIC_EMAIL`: a public address for the form's failure text. Until it is set, a hidden "public contact email" placeholder is present in the HTML of every page that has the form (checked: 17 pages in a production build).
+- [ ] Before launch this must return nothing: `grep -r data-placeholder .vercel/output/static` after a production build. With `CONTACT_PUBLIC_EMAIL` set, only `/visit` matches (until its three placeholders are filled).
+- [ ] Optional: logo vector files and official colors, the original hero video file for a higher-quality encode (`scripts/encode-hero-video.sh`), better photography.
+
+### 8. Owner review of wording
+
+I wrote these as summaries or inferences; none should state anything the live site does not, but they deserve a read.
+
+- [ ] Page titles and descriptions: `description` in every file in `src/content/pages/*.md`, and the descriptions in `src/pages/index.astro`, `src/pages/events.astro`, `src/pages/sermons/index.astro` and `src/pages/series/index.astro`.
+- [ ] `/networks`: the live site shows only logos, so the link names are inferred: Southern Baptist Theological Seminary, 9Marks, The Gospel Coalition, Great Commission Collective (`src/content/pages/networks.md`).
+- [ ] `/entrusted`: the Gift Chart alt text and "Gift chart as text" table (checked against the image; the Totals column sums to $6,500,000), in `src/content/pages/entrusted.md`.
+- [ ] The Entrusted paragraph on the home page (`src/components/entrusted-feature.astro`).
+- [ ] Naming: the site says "Students" (nav, `/visit`, page title "Crossway Students"). Confirm the church does not prefer "Student Ministry".
+
+### 9. Known issue: Entrusted worksheet graphic
+
+- [ ] `public/documents/entrusted-worksheet.svg` (and partly `entrusted-giving-split.svg`) uses Adobe fonts that do not load when an SVG is used as an `<img>`, so its text overlaps (for example "YEARCOMMITMENT"). The file is byte-identical to the live site's, so the live page has the same problem. Fix: ask the church's designer for an outlined-text export, or approve an HTML rebuild of the worksheet's equation. The alt text carries the verified transcription.
+
+### 10. DNS cutover
+
+- [ ] A day or more ahead, lower the TTL on the crosswaysa.org records.
+- [ ] Add crosswaysa.org (and www) to the Vercel project and switch the records to what Vercel shows. Keep Webflow running until everything below is verified.
+- [ ] Confirm the Español link (`crossway-espanol.webflow.io`) still works after the cutover.
+- [ ] Spot-check 10 old sermon URLs. The legacy-slug 301s only exist for sermons whose slug differs from the Webflow path; the rest keep the same path.
+- [ ] Open every preserved path: `/culture`, `/who-we-are`, `/what-we-believe`, `/child-safety`, `/networks`, `/small-groups`, `/students`, `/crossway-kids`, `/biblical-counseling`, `/christian-stewardship`, `/entrusted`, `/sermons`, and a few `/series/...`.
+
+### 11. After launch
+
+- [ ] Submit `https://crosswaysa.org/sitemap-index.xml` in Google Search Console.
+- [ ] Confirm the Spreaker and Apple Podcasts links work and new episodes appear on the next daily rebuild.
+- [ ] Send a real message through the production form and confirm it arrives at the church inbox.
+
+## Known limitations and decisions
+
+- The contact form has no rate limiting and no Origin check beyond Turnstile, the honeypot and a 20 KB body cap.
+- Lighthouse numbers come from the fixtures build, not real services. See [Quality gates](#quality-gates).
+- GSAP is on the critical path (about 300 ms of lab LCP). Deliberate: it powers the reveal mechanism that keeps content hidden until it animates in without a flash.
+- The hero video has a pause control (WCAG 2.2.2); under reduced motion or data saver it is a still poster.
+- Data freshness: sermons, series and settings update on Sanity publish (webhook); events and new Spreaker episodes on the daily cron. A Planning Center edit can take up to a day to appear.
+- A Sanity, Spreaker or Planning Center outage at build time degrades with warnings, not a failed build. Production without any Sanity project now fails by the build guard.
+- Legacy sermon redirects are computed at build time from Sanity.
+- Playwright runs Chromium only. The real-Chrome default-font-size test skips if Chrome is not installed.
+- Lighthouse CLS depends on lab fonts. The fallback fonts are metric-matched, so web font swaps do not shift layout.
+- `npm audit` reports 20 advisories (14 high). Three high ones are in production dependencies: `path-to-regexp` through `@astrojs/vercel` and `@vercel/routing-utils`, used at build time to generate routes. The rest are in the `@lhci/cli` tree and the Studio's transitive dependencies (dev and build time only). They are left unfixed because the suggested fixes downgrade the adapter or Lighthouse CI to ancient versions.
+- `package.json` `engines` is `node >=22`; set the Vercel project's Node version to 22.x explicitly.

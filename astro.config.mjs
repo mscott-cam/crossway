@@ -3,6 +3,7 @@ import sitemap from '@astrojs/sitemap';
 import vercel from '@astrojs/vercel';
 import { loadAstroRedirects } from './scripts/build-redirects.ts';
 import { pruneDevPages } from './scripts/prune-dev-pages.mjs';
+import { requireContent } from './scripts/require-content.mjs';
 import { getSermonsWithoutAudio } from './src/lib/sanity/queries.ts';
 
 const isE2E = process.env.E2E === '1';
@@ -20,6 +21,7 @@ export default defineConfig({
   trailingSlash: 'never',
   redirects,
   integrations: [
+    requireContent(),
     sitemap({
       filter: (page) => !/^\/(dev|api)(\/|$)/.test(new URL(page).pathname),
     }),

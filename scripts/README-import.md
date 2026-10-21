@@ -1,5 +1,7 @@
 # Webflow import
 
+Part of the launch checklist in the [root README](../README.md#launch-checklist). `SANITY_API_WRITE_TOKEN` is a local-only Editor token; never put it in Vercel.
+
 ```
 npx tsx scripts/import-webflow.ts --sermons scripts/data/sermons.csv --series scripts/data/series.csv --dry-run
 SANITY_PROJECT_ID=... SANITY_API_WRITE_TOKEN=... npx tsx scripts/import-webflow.ts --sermons ... --series ...
