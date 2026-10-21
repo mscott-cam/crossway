@@ -5,18 +5,18 @@ export interface PlaybackInput {
   saveData: boolean;
   visible: boolean;
   userPaused: boolean;
-}
-
-export function canPlay(input: PlaybackInput): boolean {
-  return !input.reduceMotion && !input.saveData;
+  hasPlayed: boolean;
 }
 
 export function shouldPlay(input: PlaybackInput): boolean {
-  return canPlay(input) && input.visible && !input.userPaused;
+  return (
+    !input.reduceMotion && !input.saveData && input.visible && !input.userPaused
+  );
 }
 
 export function showsControl(input: PlaybackInput): boolean {
-  return canPlay(input);
+  if (input.reduceMotion || input.saveData) return false;
+  return input.hasPlayed || input.userPaused;
 }
 
 export function controlLabel(userPaused: boolean): string {

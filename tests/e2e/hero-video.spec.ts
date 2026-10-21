@@ -210,6 +210,25 @@ test.describe('hero video pause control', () => {
     });
   });
 
+  test('there is no control when the video files cannot be loaded', async ({
+    page,
+  }) => {
+    await page.route(/\/video\/lobby-(720|1280)\.(webm|mp4)/, (route) =>
+      route.abort(),
+    );
+    await page.goto('/');
+    await page.waitForLoadState('load');
+    await expect
+      .poll(() =>
+        page
+          .locator('[data-hero-video] video')
+          .evaluate((v: HTMLVideoElement) => v.networkState),
+      )
+      .toBe(3);
+    await expect(pauseButton(page)).toHaveCount(0);
+    await expect(page.locator('[data-hero-video] picture img')).toBeVisible();
+  });
+
   test('there is no control under data saver', async ({ page }) => {
     await page.addInitScript(() => {
       Object.defineProperty(navigator, 'connection', {

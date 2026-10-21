@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import {
-  canPlay,
   controlLabel,
   readStoredPause,
   serializePause,
@@ -14,6 +13,7 @@ const base: PlaybackInput = {
   saveData: false,
   visible: true,
   userPaused: false,
+  hasPlayed: false,
 };
 
 describe('shouldPlay', () => {
@@ -44,16 +44,35 @@ describe('shouldPlay', () => {
   });
 });
 
-describe('control visibility', () => {
-  it('is offered whenever the video could play, including while paused or hidden', () => {
-    expect(canPlay(base)).toBe(true);
-    expect(showsControl({ ...base, userPaused: true })).toBe(true);
-    expect(showsControl({ ...base, visible: false })).toBe(true);
+describe('showsControl', () => {
+  it('is absent until playback has actually started', () => {
+    expect(showsControl(base)).toBe(false);
   });
 
-  it('is absent when the poster is all that is ever shown', () => {
-    expect(showsControl({ ...base, reduceMotion: true })).toBe(false);
-    expect(showsControl({ ...base, saveData: true })).toBe(false);
+  it('appears once the video has played', () => {
+    expect(showsControl({ ...base, hasPlayed: true })).toBe(true);
+  });
+
+  it('stays while the tab is hidden or the visitor has paused after playing', () => {
+    expect(showsControl({ ...base, hasPlayed: true, visible: false })).toBe(
+      true,
+    );
+    expect(showsControl({ ...base, hasPlayed: true, userPaused: true })).toBe(
+      true,
+    );
+  });
+
+  it('is offered when the visitor paused earlier this session, so they can resume', () => {
+    expect(showsControl({ ...base, userPaused: true })).toBe(true);
+  });
+
+  it('is never offered under reduced motion or save-data', () => {
+    expect(showsControl({ ...base, hasPlayed: true, reduceMotion: true })).toBe(
+      false,
+    );
+    expect(showsControl({ ...base, userPaused: true, saveData: true })).toBe(
+      false,
+    );
   });
 });
 

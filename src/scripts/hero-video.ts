@@ -81,12 +81,14 @@ function setup(root: HTMLElement) {
   let attached = false;
   const start = Math.max(0, parseFloat(video.dataset.start ?? '') || 0);
   let userPaused = loadPaused();
+  let hasPlayed = false;
   const toggle = createToggle(root.closest<HTMLElement>('[data-hero]') ?? root);
   const input = (): PlaybackInput => ({
     reduceMotion: reduceMotion.matches,
     saveData: saveData(),
     visible: document.visibilityState === 'visible',
     userPaused,
+    hasPlayed,
   });
   const renderToggle = () => {
     toggle.hidden = !showsControl(input());
@@ -110,6 +112,10 @@ function setup(root: HTMLElement) {
   };
   for (const type of ['playing', 'seeked', 'timeupdate'])
     video.addEventListener(type, reveal);
+  video.addEventListener('playing', () => {
+    hasPlayed = true;
+    renderToggle();
+  });
 
   const sync = () => {
     renderToggle();

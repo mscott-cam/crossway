@@ -51,6 +51,17 @@ async function revealLazyMedia(page: Page) {
   });
 }
 
+async function setTextScale(page: Page, percent: number) {
+  await page.evaluate((size) => {
+    document.documentElement.style.fontSize = `${size}%`;
+  }, percent);
+  await expect
+    .poll(() =>
+      page.evaluate(() => getComputedStyle(document.documentElement).fontSize),
+    )
+    .toBe(`${(16 * percent) / 100}px`);
+}
+
 async function headerGeometry(page: Page) {
   return page.evaluate(() => {
     const box = (el: Element | null) => {
@@ -103,7 +114,9 @@ test.describe('every public route across widths', () => {
       for (const width of WIDTHS) {
         await page.setViewportSize({ width, height: 800 });
         await page.evaluate(() => window.scrollTo(0, 0));
-        await page.waitForTimeout(60);
+        await expect
+          .poll(() => page.evaluate(() => window.innerWidth))
+          .toBe(width);
         const at = `${route} @${width}`;
 
         const report = await page.evaluate(() => {
@@ -216,6 +229,23 @@ test.describe('every public route across widths', () => {
   }
 });
 
+test.describe('the full wordmark at default text on phones', () => {
+  test.use({ reducedMotion: 'reduce' });
+
+  for (const width of [320, 360, 390]) {
+    test(`shows the full lockup at ${width}px and 100% text`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+      const g = await headerGeometry(page);
+      expect(g.logo!.width).toBeGreaterThan(100);
+      expect(g.menu!.left).toBeGreaterThanOrEqual(g.logo!.right);
+      expect(g.scrollWidth).toBeLessThanOrEqual(g.viewport);
+    });
+  }
+});
+
 test.describe('enlarged text on phones', () => {
   test.use({ reducedMotion: 'reduce' });
   test.describe.configure({ mode: 'parallel' });
@@ -228,11 +258,8 @@ test.describe('enlarged text on phones', () => {
         }) => {
           await page.setViewportSize({ width, height: 800 });
           await page.goto(route, { waitUntil: 'domcontentloaded' });
-          await page.evaluate((size) => {
-            document.documentElement.style.fontSize = `${size}%`;
-          }, scale);
+          await setTextScale(page, scale);
           await page.evaluate(() => document.fonts.ready);
-          await page.waitForTimeout(250);
 
           expect(await h1Spill(page), 'h1 text spills').toBeLessThanOrEqual(1);
           const g = await headerGeometry(page);
@@ -262,9 +289,7 @@ test.describe('enlarged text on phones', () => {
   }) => {
     await page.setViewportSize({ width: 390, height: 800 });
     await page.goto('/who-we-are', { waitUntil: 'domcontentloaded' });
-    await page.evaluate(() => {
-      document.documentElement.style.fontSize = '200%';
-    });
+    await setTextScale(page, 200);
     await page.locator('.menu-button').click();
     await expect(page.locator('#mobile-menu')).toBeVisible();
     const g = await headerGeometry(page);
@@ -285,10 +310,7 @@ test.describe('enlarged text across every route', () => {
         await page.setViewportSize({ width, height: 800 });
         await page.goto(route, { waitUntil: 'domcontentloaded' });
         for (const scale of [125, 150, 200]) {
-          await page.evaluate((size) => {
-            document.documentElement.style.fontSize = `${size}%`;
-          }, scale);
-          await page.waitForTimeout(80);
+          await setTextScale(page, scale);
           const g = await headerGeometry(page);
           if (g.scrollWidth > g.viewport)
             problems.push(

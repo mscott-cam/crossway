@@ -1,4 +1,5 @@
 import { createServer, request } from 'node:http';
+import { connect } from 'node:net';
 import { spawn } from 'node:child_process';
 import { brotliCompressSync, constants } from 'node:zlib';
 
@@ -67,6 +68,45 @@ const proxy = createServer((req, res) => {
   req.pipe(forward);
 });
 
-proxy.listen(port, host, () => {
-  console.log(`Server listening on http://${host}:${port}`);
+const shutdown = (code) => {
+  upstream.kill();
+  process.exit(code);
+};
+
+proxy.on('error', (error) => {
+  console.error(`lhci-proxy failed: ${error.message}`);
+  shutdown(1);
 });
+
+function whenUpstreamAccepts(attempts = 100) {
+  return new Promise((resolve, reject) => {
+    const probe = () => {
+      const socket = connect(upstreamPort, host);
+      socket.once('connect', () => {
+        socket.destroy();
+        resolve();
+      });
+      socket.once('error', () => {
+        socket.destroy();
+        if (attempts-- <= 0) reject(new Error('upstream never came up'));
+        else setTimeout(probe, 100);
+      });
+    };
+    probe();
+  });
+}
+
+whenUpstreamAccepts()
+  .then(
+    () =>
+      new Promise((resolve) => {
+        proxy.listen(port, host, resolve);
+      }),
+  )
+  .then(() => {
+    console.log(`lhci-proxy ready on http://${host}:${port}`);
+  })
+  .catch((error) => {
+    console.error(`lhci-proxy failed: ${error.message}`);
+    shutdown(1);
+  });

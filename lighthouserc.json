@@ -2,7 +2,7 @@
   "ci": {
     "collect": {
       "startServerCommand": "PORT=4410 HOST=127.0.0.1 RESEND_API_KEY=lhci-fake CONTACT_TO_EMAIL=lhci@example.com node scripts/lhci-server.mjs",
-      "startServerReadyPattern": "Server listening",
+      "startServerReadyPattern": "lhci-proxy ready",
       "startServerReadyTimeout": 30000,
       "numberOfRuns": 3,
       "url": [
