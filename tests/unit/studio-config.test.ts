@@ -19,8 +19,15 @@ describe('studio config', () => {
       },
       { id: 'sermon', title: 'Sermon', schemaType: 'sermon', value: {} },
     ];
-    const templates = config.schema?.templates;
-    const resolved =
+    type Template = { id: string };
+    const templates = (
+      config as unknown as {
+        schema?: {
+          templates?: Template[] | ((prev: Template[]) => Template[]);
+        };
+      }
+    ).schema?.templates;
+    const resolved: Template[] =
       typeof templates === 'function'
         ? templates(prev as never)
         : (templates ?? prev);
@@ -29,11 +36,17 @@ describe('studio config', () => {
 
   it('hides siteSettings from the new-document menu', () => {
     const prev = [{ templateId: 'siteSettings' }, { templateId: 'sermon' }];
-    const options = config.document?.newDocumentOptions;
-    const resolved =
-      typeof options === 'function'
-        ? options(prev as never, {} as never)
-        : prev;
+    type Option = { templateId: string };
+    const options = (
+      config as unknown as {
+        document?: {
+          newDocumentOptions?:
+            Option[] | ((prev: Option[], context: unknown) => Option[]);
+        };
+      }
+    ).document?.newDocumentOptions;
+    const resolved: Option[] =
+      typeof options === 'function' ? options(prev, {}) : prev;
     expect(resolved.map((o) => o.templateId)).toEqual(['sermon']);
   });
 });

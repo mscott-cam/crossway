@@ -1,4 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { siteSettings } from '../../studio/schemaTypes/site-settings';
 import { BOOKS } from '../../src/lib/books';
 import { sermonSlug } from '../../src/lib/slug';
 
@@ -44,6 +46,7 @@ beforeEach(() => {
   vi.stubEnv('SANITY_PROJECT_ID', '');
   vi.stubEnv('SANITY_FIXTURES', '');
   vi.stubEnv('SANITY_FIXTURE_SETTINGS', '');
+  vi.stubEnv('VERCEL_ENV', '');
   vi.spyOn(console, 'warn').mockImplementation(() => {});
 });
 
@@ -177,10 +180,54 @@ describe('getSermons with a mocked client', () => {
         dataset: 'production',
         useCdn: true,
         perspective: 'published',
+        timeout: 15000,
         token: 'tok',
         apiVersion: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
       }),
     );
+  });
+
+  it('warns once, naming the ids, when rows are dropped', async () => {
+    configure();
+    fetchMock.mockResolvedValue([
+      rawSermon('Good', '2026-10-18'),
+      rawSermon('No Speaker', '2026-10-11', { speaker: null }),
+      rawSermon('No Series', '2026-10-04', { series: null }),
+    ]);
+    const { getSermons } = await load();
+    await getSermons();
+    await getSermons();
+    expect(console.warn).toHaveBeenCalledTimes(1);
+    const message = String(vi.mocked(console.warn).mock.calls[0][0]);
+    expect(message).toContain('getSermons');
+    expect(message).toContain('sermon-No Speaker');
+    expect(message).toContain('sermon-No Series');
+    expect(message).not.toContain('sermon-Good');
+  });
+
+  it('warns once for dropped speakers and series', async () => {
+    configure();
+    fetchMock.mockResolvedValue([
+      { _id: 'sp-ok', name: 'A', slug: { current: 'a' } },
+      { _id: 'sp-bad', name: 'B', slug: null },
+    ]);
+    const { getSpeakers } = await load();
+    expect(await getSpeakers()).toHaveLength(1);
+    expect(console.warn).toHaveBeenCalledTimes(1);
+    expect(String(vi.mocked(console.warn).mock.calls[0][0])).toContain(
+      'sp-bad',
+    );
+  });
+
+  it('logs nothing for a clean fetch', async () => {
+    configure();
+    fetchMock.mockResolvedValue([
+      rawSermon('One', '2026-10-18'),
+      rawSermon('Two', '2026-10-11'),
+    ]);
+    const { getSermons } = await load();
+    expect(await getSermons()).toHaveLength(2);
+    expect(console.warn).not.toHaveBeenCalled();
   });
 
   it('returns [] and does not throw when the fetch fails', async () => {
@@ -255,6 +302,42 @@ describe('other fetchers with a mocked client', () => {
   });
 });
 
+describe('site settings defaults', () => {
+  const rowShape = (rows: unknown) =>
+    (rows as { label: string; value: string; href?: string }[]).map(
+      ({ label, value, href }) => ({ label, value, href }),
+    );
+  const initialValueOf = (name: string) =>
+    (
+      siteSettings.fields.find((f) => f.name === name) as
+        { initialValue?: unknown } | undefined
+    )?.initialValue;
+
+  it('matches the Studio initial values', async () => {
+    const { DEFAULT_SITE_SETTINGS } = await load();
+    expect(DEFAULT_SITE_SETTINGS.serviceTimes).toEqual(
+      initialValueOf('serviceTimes'),
+    );
+    expect(DEFAULT_SITE_SETTINGS.showEntrustedOnHome).toBe(
+      initialValueOf('showEntrustedOnHome'),
+    );
+    expect(DEFAULT_SITE_SETTINGS.announcement).toEqual(
+      initialValueOf('announcement'),
+    );
+    expect(rowShape(DEFAULT_SITE_SETTINGS.sundayCardRows)).toEqual(
+      rowShape(initialValueOf('sundayCardRows')),
+    );
+  });
+
+  it('matches tests/fixtures/sanity/settings.json', async () => {
+    const { DEFAULT_SITE_SETTINGS } = await load();
+    const fixture = JSON.parse(
+      readFileSync('tests/fixtures/sanity/settings.json', 'utf8'),
+    );
+    expect(fixture).toEqual(DEFAULT_SITE_SETTINGS);
+  });
+});
+
 describe('fixture mode', () => {
   beforeEach(() => {
     vi.stubEnv('SANITY_FIXTURES', '1');
@@ -266,7 +349,36 @@ describe('fixture mode', () => {
     expect((await q.getSermons()).length).toBeGreaterThanOrEqual(30);
     expect(fetchMock).not.toHaveBeenCalled();
     expect(createClientMock).not.toHaveBeenCalled();
+  });
+
+  it('warns once that fixture data is in use', async () => {
+    const q = await load();
+    await Promise.all([q.getSermons(), q.getSeriesList(), q.getSiteSettings()]);
+    expect(console.warn).toHaveBeenCalledTimes(1);
+    expect(String(vi.mocked(console.warn).mock.calls[0][0])).toContain(
+      'using fixture data',
+    );
+  });
+
+  it('ignores the flag on Vercel production and says so', async () => {
+    vi.stubEnv('VERCEL_ENV', 'production');
+    vi.stubEnv('SANITY_PROJECT_ID', 'abc123');
+    fetchMock.mockResolvedValue([]);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const q = await load();
+    expect(await q.getSermons()).toEqual([]);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(console.error).toHaveBeenCalledTimes(1);
+    expect(String(vi.mocked(console.error).mock.calls[0][0])).toContain(
+      'SANITY_FIXTURES',
+    );
     expect(console.warn).not.toHaveBeenCalled();
+  });
+
+  it('still honours the flag on Vercel preview', async () => {
+    vi.stubEnv('VERCEL_ENV', 'preview');
+    const q = await load();
+    expect((await q.getSermons()).length).toBeGreaterThanOrEqual(30);
   });
 
   it('returns sermons date-descending', async () => {

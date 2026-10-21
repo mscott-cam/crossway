@@ -189,9 +189,23 @@ function normalizeSettings(raw: Raw): SiteSettings {
 const present = <T>(value: T | undefined): value is T => value !== undefined;
 
 const list =
-  <T>(normalize: (raw: Raw) => T | undefined) =>
-  (raw: unknown): T[] =>
-    Array.isArray(raw) ? raw.map(normalize).filter(present) : [];
+  <T>(label: string, normalize: (raw: Raw) => T | undefined) =>
+  (raw: unknown): T[] => {
+    if (!Array.isArray(raw)) return [];
+    const kept: T[] = [];
+    const dropped: string[] = [];
+    for (const row of raw as Raw[]) {
+      const value = normalize(row);
+      if (value === undefined) dropped.push(str(row?._id) ?? '(no id)');
+      else kept.push(value);
+    }
+    if (dropped.length > 0) {
+      console.warn(
+        `[sanity] ${label} dropped ${dropped.length} incomplete row(s): ${dropped.join(', ')}`,
+      );
+    }
+    return kept;
+  };
 
 const FIXTURE_DIR = 'tests/fixtures/sanity';
 
@@ -248,7 +262,7 @@ export const getSermons = memoize(() =>
     'getSermons',
     () => 'sermons.json',
     SERMONS_QUERY,
-    (raw) => sortSermons(list(normalizeSermon)(raw)),
+    (raw) => sortSermons(list('getSermons', normalizeSermon)(raw)),
     [],
   ),
 );
@@ -258,7 +272,7 @@ export const getSeriesList = memoize(() =>
     'getSeriesList',
     () => 'series.json',
     SERIES_QUERY,
-    list(normalizeSeries),
+    list('getSeriesList', normalizeSeries),
     [],
   ),
 );
@@ -268,7 +282,7 @@ export const getSpeakers = memoize(() =>
     'getSpeakers',
     () => 'speakers.json',
     SPEAKERS_QUERY,
-    list(normalizeSpeaker),
+    list('getSpeakers', normalizeSpeaker),
     [],
   ),
 );
@@ -279,9 +293,10 @@ export const getLeaders = memoize(() =>
     () => 'leaders.json',
     LEADERS_QUERY,
     (raw) =>
-      list(normalizeLeader)(raw).sort(
-        (a, b) => a.order - b.order || a.name.localeCompare(b.name),
-      ),
+      list(
+        'getLeaders',
+        normalizeLeader,
+      )(raw).sort((a, b) => a.order - b.order || a.name.localeCompare(b.name)),
     [],
   ),
 );

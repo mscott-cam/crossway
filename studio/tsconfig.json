@@ -11,6 +11,11 @@
     "esModuleInterop": true,
     "types": ["node"]
   },
-  "include": ["**/*.ts", "**/*.tsx", "../src/lib/books.ts"],
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "../src/lib/books.ts",
+    "../src/lib/slug.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }
