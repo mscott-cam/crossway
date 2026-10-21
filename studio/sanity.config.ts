@@ -14,8 +14,6 @@ export default defineConfig({
   plugins: [structureTool({ structure })],
   schema: {
     types: schemaTypes,
-    templates: (templates) =>
-      templates.filter(({ schemaType }) => !SINGLETON_TYPES.has(schemaType)),
   },
   document: {
     newDocumentOptions: (prev) =>
