@@ -39,7 +39,7 @@ export function getClient(): SanityClient {
     projectId: env('SANITY_PROJECT_ID'),
     dataset: env('SANITY_DATASET') || 'production',
     apiVersion: API_VERSION,
-    useCdn: true,
+    useCdn: false,
     perspective: 'published',
     timeout: REQUEST_TIMEOUT_MS,
     ...(token ? { token } : {}),

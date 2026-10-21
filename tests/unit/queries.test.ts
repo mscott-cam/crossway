@@ -198,7 +198,7 @@ describe('getSermons with a mocked client', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it('reads published content through the CDN', async () => {
+  it('reads published content straight from the API, not the CDN', async () => {
     configure();
     vi.stubEnv('SANITY_API_READ_TOKEN', 'tok');
     fetchMock.mockResolvedValue([]);
@@ -208,7 +208,7 @@ describe('getSermons with a mocked client', () => {
       expect.objectContaining({
         projectId: 'abc123',
         dataset: 'production',
-        useCdn: true,
+        useCdn: false,
         perspective: 'published',
         timeout: 15000,
         token: 'tok',
