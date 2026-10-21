@@ -106,6 +106,53 @@ describe('parseSpreakerFeed', () => {
     ]);
   });
 
+  it('decodes decimal and hex numeric character references', async () => {
+    const { parseSpreakerFeed } = await load();
+    const xml = feed(
+      item(
+        `<title>Don&#8217;t &#x2019; Stop</title>${enclosure('1')}<pubDate>Sun, 18 Oct 2026 22:13:15 +0000</pubDate>`,
+      ),
+    );
+    expect(parseSpreakerFeed(xml)[0].title).toBe('Don’t ’ Stop');
+  });
+
+  it('does not decode twice', async () => {
+    const { parseSpreakerFeed } = await load();
+    const xml = feed(
+      item(
+        `<title>A &amp;#8217; B &amp;amp; C</title>${enclosure('1')}<pubDate>Sun, 18 Oct 2026 22:13:15 +0000</pubDate>`,
+      ),
+    );
+    expect(parseSpreakerFeed(xml)[0].title).toBe('A &#8217; B &amp; C');
+  });
+
+  it('leaves CDATA content undecoded', async () => {
+    const { parseSpreakerFeed } = await load();
+    const xml = feed(
+      item(
+        `<title><![CDATA[Don&#8217;t &amp; &#x2019;]]></title>${enclosure('1')}<pubDate>Sun, 18 Oct 2026 22:13:15 +0000</pubDate>`,
+      ),
+    );
+    expect(parseSpreakerFeed(xml)[0].title).toBe('Don&#8217;t &amp; &#x2019;');
+  });
+
+  it('does not expand DOCTYPE entities (entity bomb)', async () => {
+    const { parseSpreakerFeed } = await load();
+    const doctype = `<!DOCTYPE feed [<!ENTITY a "aaaaaaaaaa"><!ENTITY b "&a;&a;&a;&a;&a;&a;&a;&a;&a;&a;"><!ENTITY c "&b;&b;&b;&b;&b;&b;&b;&b;&b;&b;"><!ENTITY d "&c;&c;&c;&c;&c;&c;&c;&c;&c;&c;"><!ENTITY e "&d;&d;&d;&d;&d;&d;&d;&d;&d;&d;">]]>`;
+    const xml = `<?xml version="1.0"?>${doctype}<rss version="2.0"><channel><item><title>&e;&e;&e;&e;&e;&e;&e;&e;&e;&e;</title>${enclosure('1')}<pubDate>Sun, 18 Oct 2026 22:13:15 +0000</pubDate></item></channel></rss>`;
+    const started = Date.now();
+    const episodes = parseSpreakerFeed(xml);
+    expect(Date.now() - started).toBeLessThan(2000);
+    for (const e of episodes) expect(e.title.length).toBeLessThan(1000);
+  });
+
+  it('does not let a custom DOCTYPE entity inject text', async () => {
+    const { parseSpreakerFeed } = await load();
+    const xml = `<?xml version="1.0"?><!DOCTYPE feed [<!ENTITY who "Injected">]><rss version="2.0"><channel><item><title>Hello &who;</title>${enclosure('1')}<pubDate>Sun, 18 Oct 2026 22:13:15 +0000</pubDate></item></channel></rss>`;
+    const [episode] = parseSpreakerFeed(xml);
+    expect(episode?.title ?? '').not.toContain('Injected');
+  });
+
   it('keeps numeric-looking titles as strings', async () => {
     const { parseSpreakerFeed } = await load();
     const xml = feed(
@@ -175,6 +222,68 @@ describe('fetchSpreakerFeed', () => {
     expect(console.warn).not.toHaveBeenCalled();
   });
 
+  it('retries once after a failure and returns the episodes without a fallback warning', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('blip'))
+      .mockResolvedValueOnce(okResponse(FEED));
+    vi.stubGlobal('fetch', fetchMock);
+    const { fetchSpreakerFeed } = await load();
+    const episodes = await fetchSpreakerFeed({ retryDelayMs: 0 });
+    expect(episodes).toHaveLength(9);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(cache.readCache).not.toHaveBeenCalled();
+    expect(cache.writeCache).toHaveBeenCalledWith('spreaker-feed', episodes);
+    expect(console.warn).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['an HTTP error', { ok: false, status: 502, text: async () => '' }],
+    ['an unreadable feed', okResponse('<rss><channel><item>')],
+  ])('retries after %s', async (_name, first) => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(first)
+      .mockResolvedValue(okResponse(FEED));
+    vi.stubGlobal('fetch', fetchMock);
+    const { fetchSpreakerFeed } = await load();
+    const episodes = await fetchSpreakerFeed({ retryDelayMs: 0 });
+    expect(episodes).toHaveLength(9);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(console.warn).not.toHaveBeenCalled();
+  });
+
+  it('falls back to the cache after both attempts fail, with one warning', async () => {
+    const cached = [
+      {
+        id: '1',
+        title: 'Cached',
+        pubDate: '2026-10-18T22:13:15.000Z',
+        mp3Url: 'https://example.org/1.mp3',
+      },
+    ];
+    cache.readCache.mockReturnValue(cached);
+    const fetchMock = vi.fn().mockRejectedValue(new Error('offline'));
+    vi.stubGlobal('fetch', fetchMock);
+    const { fetchSpreakerFeed } = await load();
+    await expect(fetchSpreakerFeed({ retryDelayMs: 0 })).resolves.toEqual(
+      cached,
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(console.warn).toHaveBeenCalledTimes(1);
+  });
+
+  it('gives every attempt its own timeout signal', async () => {
+    const fetchMock = vi.fn().mockRejectedValue(new Error('offline'));
+    vi.stubGlobal('fetch', fetchMock);
+    const { fetchSpreakerFeed } = await load();
+    await fetchSpreakerFeed({ retryDelayMs: 0 });
+    const signals = fetchMock.mock.calls.map((call) => call[1]?.signal);
+    expect(signals[0]).toBeInstanceOf(AbortSignal);
+    expect(signals[1]).toBeInstanceOf(AbortSignal);
+    expect(signals[0]).not.toBe(signals[1]);
+  });
+
   it('memoizes: one network call however many callers', async () => {
     const fetchMock = vi.fn().mockResolvedValue(okResponse(FEED));
     vi.stubGlobal('fetch', fetchMock);
@@ -196,7 +305,9 @@ describe('fetchSpreakerFeed', () => {
     cache.readCache.mockReturnValue(cached);
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
     const { fetchSpreakerFeed } = await load();
-    await expect(fetchSpreakerFeed()).resolves.toEqual(cached);
+    await expect(fetchSpreakerFeed({ retryDelayMs: 0 })).resolves.toEqual(
+      cached,
+    );
     expect(cache.readCache).toHaveBeenCalledWith('spreaker-feed');
     expect(cache.writeCache).not.toHaveBeenCalled();
     expect(console.warn).toHaveBeenCalledTimes(1);
@@ -209,7 +320,7 @@ describe('fetchSpreakerFeed', () => {
     cache.readCache.mockReturnValue(undefined);
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
     const { fetchSpreakerFeed } = await load();
-    await expect(fetchSpreakerFeed()).resolves.toEqual([]);
+    await expect(fetchSpreakerFeed({ retryDelayMs: 0 })).resolves.toEqual([]);
     expect(console.warn).toHaveBeenCalledTimes(1);
   });
 
@@ -222,7 +333,7 @@ describe('fetchSpreakerFeed', () => {
         .mockResolvedValue({ ok: false, status: 503, text: async () => '' }),
     );
     const { fetchSpreakerFeed } = await load();
-    await expect(fetchSpreakerFeed()).resolves.toEqual([]);
+    await expect(fetchSpreakerFeed({ retryDelayMs: 0 })).resolves.toEqual([]);
     expect(console.warn).toHaveBeenCalledTimes(1);
   });
 
@@ -241,7 +352,9 @@ describe('fetchSpreakerFeed', () => {
       vi.fn().mockResolvedValue(okResponse('<rss><channel><item>')),
     );
     const { fetchSpreakerFeed } = await load();
-    await expect(fetchSpreakerFeed()).resolves.toEqual(cached);
+    await expect(fetchSpreakerFeed({ retryDelayMs: 0 })).resolves.toEqual(
+      cached,
+    );
     expect(cache.writeCache).not.toHaveBeenCalled();
     expect(console.warn).toHaveBeenCalledTimes(1);
   });
@@ -250,7 +363,7 @@ describe('fetchSpreakerFeed', () => {
     cache.readCache.mockReturnValue({ nope: true });
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
     const { fetchSpreakerFeed } = await load();
-    await expect(fetchSpreakerFeed()).resolves.toEqual([]);
+    await expect(fetchSpreakerFeed({ retryDelayMs: 0 })).resolves.toEqual([]);
   });
 
   it('never throws even when reading the response body fails', async () => {
@@ -266,7 +379,7 @@ describe('fetchSpreakerFeed', () => {
       }),
     );
     const { fetchSpreakerFeed } = await load();
-    await expect(fetchSpreakerFeed()).resolves.toEqual([]);
+    await expect(fetchSpreakerFeed({ retryDelayMs: 0 })).resolves.toEqual([]);
   });
 
   it('reads the fixture feed with no network or cache in fixture mode', async () => {

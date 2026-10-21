@@ -1,5 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { readCache, writeCache } from '../../src/lib/cache';
@@ -62,6 +69,27 @@ describe('cache', () => {
     expect(() => writeCache('../evil', 1)).not.toThrow();
     expect(readCache('../evil')).toBeUndefined();
     expect(existsSync(join(dir, '..', 'evil.json'))).toBe(false);
+  });
+
+  it('leaves no temporary files after a write', () => {
+    writeCache('thing', { a: 1 });
+    writeCache('thing', { a: 2 });
+    expect(readdirSync(dir)).toEqual(['thing.json']);
+  });
+
+  it('keeps the previous value when a write cannot complete', () => {
+    writeCache('thing', 'old');
+    const circular: Record<string, unknown> = {};
+    circular.self = circular;
+    writeCache('thing', circular);
+    expect(readCache('thing')).toBe('old');
+    expect(readdirSync(dir)).toEqual(['thing.json']);
+  });
+
+  it('cleans up its temporary file when the final rename fails', () => {
+    mkdirSync(join(dir, 'thing.json'));
+    expect(() => writeCache('thing', 1)).not.toThrow();
+    expect(readdirSync(dir)).toEqual(['thing.json']);
   });
 
   it('defaults to node_modules/.cache/crossway', () => {

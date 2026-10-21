@@ -263,28 +263,34 @@ const sortSermons = (sermons: Sermon[]) =>
 
 async function withAudio(sermons: Sermon[]): Promise<Sermon[]> {
   if (sermons.length === 0) return sermons;
-  const episodes = await fetchSpreakerFeed();
-  const {
-    sermons: matched,
-    unmatchedSermons,
-    unmatchedEpisodes,
-  } = matchAudio(sermons, episodes);
-  if (episodes.length > 0) {
-    writeCache('audio-report', {
-      generatedAt: new Date().toISOString(),
-      unmatchedSermons: unmatchedSermons.map(({ slug, title, date }) => ({
-        slug,
-        title,
-        date,
-      })),
-      unmatchedEpisodes: unmatchedEpisodes.map(({ id, title, pubDate }) => ({
-        id,
-        title,
-        pubDate,
-      })),
-    });
+  try {
+    const episodes = await fetchSpreakerFeed();
+    const {
+      sermons: matched,
+      unmatchedSermons,
+      unmatchedEpisodes,
+    } = matchAudio(sermons, episodes);
+    if (episodes.length > 0 && !isFixtureMode()) {
+      writeCache('audio-report', {
+        generatedAt: new Date().toISOString(),
+        unmatchedSermons: unmatchedSermons.map(({ slug, title, date }) => ({
+          slug,
+          title,
+          date,
+        })),
+        unmatchedEpisodes: unmatchedEpisodes.map(({ id, title, pubDate }) => ({
+          id,
+          title,
+          pubDate,
+        })),
+      });
+    }
+    return matched;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn(`[audio] matching failed; sermons have no audio: ${message}`);
+    return sermons;
   }
-  return matched;
 }
 
 export const getSermons = memoize(async () =>

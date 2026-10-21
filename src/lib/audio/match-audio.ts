@@ -38,7 +38,10 @@ function addDays(date: string, days: number): string {
 }
 
 export function matchAudio(sermons: Sermon[], episodes: Episode[]): AudioMatch {
-  const results: Sermon[] = sermons.map((sermon) => ({ ...sermon }));
+  const results: Sermon[] = sermons.map((sermon) => {
+    const { audio: _previous, ...fresh } = sermon;
+    return fresh;
+  });
   const byId = new Map<string, Episode>();
   for (const episode of episodes) {
     if (!byId.has(episode.id)) byId.set(episode.id, episode);

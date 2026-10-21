@@ -1,4 +1,10 @@
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { join } from 'node:path';
 
 const SAFE_KEY = /^[a-z0-9][a-z0-9._-]*$/i;
@@ -23,12 +29,16 @@ export function readCache<T>(key: string): T | undefined {
 
 export function writeCache(key: string, value: unknown): void {
   if (!SAFE_KEY.test(key)) return;
+  let temp: string | undefined;
   try {
     const json = JSON.stringify(value);
     if (json === undefined) return;
-    mkdirSync(cacheDir(), { recursive: true });
-    writeFileSync(join(cacheDir(), `${key}.json`), json);
+    const dir = cacheDir();
+    mkdirSync(dir, { recursive: true });
+    temp = join(dir, `.${key}.${process.pid}.${Date.now()}.tmp`);
+    writeFileSync(temp, json);
+    renameSync(temp, join(dir, `${key}.json`));
   } catch {
-    return;
+    if (temp) rmSync(temp, { recursive: true, force: true });
   }
 }

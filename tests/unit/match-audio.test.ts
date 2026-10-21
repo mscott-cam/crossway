@@ -75,6 +75,30 @@ describe('matchAudio by date', () => {
     expect(wednesday.sermons[0].audio).toBeUndefined();
   });
 
+  it('handles month and year boundaries in the window', () => {
+    const s = sermon('Title', '2026-12-31');
+    const inside = matchAudio(
+      [s],
+      [episode('1', 'Title', 'Sat, 02 Jan 2027 18:00:00 +0000')],
+    );
+    expect(inside.sermons[0].audio?.url).toBe(mp3('1'));
+    const outside = matchAudio(
+      [s],
+      [episode('1', 'Title', 'Sun, 03 Jan 2027 18:00:00 +0000')],
+    );
+    expect(outside.sermons[0].audio).toBeUndefined();
+    const chicago = matchAudio(
+      [s],
+      [episode('1', 'Title', 'Mon, 04 Jan 2027 05:30:00 +0000')],
+    );
+    expect(chicago.sermons[0].audio).toBeUndefined();
+    const lateChicago = matchAudio(
+      [s],
+      [episode('1', 'Title', 'Sun, 03 Jan 2027 05:30:00 +0000')],
+    );
+    expect(lateChicago.sermons[0].audio?.url).toBe(mp3('1'));
+  });
+
   it('does not match an episode published before the sermon date', () => {
     const result = matchAudio(
       [sermon('Title', '2026-10-18')],
@@ -360,6 +384,17 @@ describe('matchAudio reporting and purity', () => {
       expect(s.audio).toBeDefined();
     });
     expect(inputs.every((s) => s.audio === undefined)).toBe(true);
+  });
+
+  it('ignores audio already attached to its inputs', () => {
+    const attached = sermon('Title', '2026-10-18', {
+      audio: { url: 'https://example.org/old.mp3', source: 'override' },
+    });
+    const result = matchAudio(
+      [attached],
+      [episode('1', 'Title', 'Sun, 18 Oct 2026 22:13:15 +0000')],
+    );
+    expect(result.sermons[0].audio?.source).toBe('date-match');
   });
 
   it('handles empty inputs', () => {

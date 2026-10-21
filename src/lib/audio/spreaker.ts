@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { XMLParser } from 'fast-xml-parser';
 import { SyntaxValidator } from 'fast-xml-validator';
+import { ENTITY_ACTION, EntityDecoder } from '@nodable/entities';
 import { readCache, writeCache } from '../cache';
 import { isFixtureMode } from '../sanity/client';
 
@@ -18,6 +19,7 @@ export const SPREAKER_FEED_URL =
 const FIXTURE_FEED = 'tests/fixtures/spreaker-feed.xml';
 const CACHE_KEY = 'spreaker-feed';
 const TIMEOUT_MS = 15000;
+const RETRY_DELAY_MS = 750;
 const EPISODE_ID = /\/episode\/(\d+)\//;
 
 const parser = new XMLParser({
@@ -26,6 +28,22 @@ const parser = new XMLParser({
   parseTagValue: false,
   parseAttributeValue: false,
   isArray: (name) => name === 'item',
+  processEntities: {
+    enabled: true,
+    maxEntitySize: 1000,
+    maxEntityCount: 10,
+    maxTotalExpansions: 10000,
+    maxExpandedLength: 1_000_000,
+  },
+  entityDecoder: new EntityDecoder({
+    numericAllowed: true,
+    limit: {
+      maxTotalExpansions: 10000,
+      maxExpandedLength: 1_000_000,
+      applyLimitsTo: 'all',
+    },
+    onInputEntity: () => ENTITY_ACTION.BLOCK,
+  }) as any,
 });
 
 const text = (value: unknown): string => {
@@ -73,18 +91,32 @@ export function parseSpreakerFeed(xml: string): Episode[] {
   }
 }
 
-async function loadFeed(): Promise<Episode[]> {
+async function requestFeed(): Promise<Episode[]> {
+  const response = await fetch(SPREAKER_FEED_URL, {
+    signal: AbortSignal.timeout(TIMEOUT_MS),
+  });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const episodes = parseSpreakerFeed(await response.text());
+  if (episodes.length === 0) throw new Error('feed had no readable episodes');
+  return episodes;
+}
+
+const wait = (ms: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+async function loadFeed(retryDelayMs: number): Promise<Episode[]> {
   if (isFixtureMode()) {
     const xml = await readFile(join(process.cwd(), FIXTURE_FEED), 'utf8');
     return parseSpreakerFeed(xml);
   }
   try {
-    const response = await fetch(SPREAKER_FEED_URL, {
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-    });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const episodes = parseSpreakerFeed(await response.text());
-    if (episodes.length === 0) throw new Error('feed had no readable episodes');
+    let episodes: Episode[];
+    try {
+      episodes = await requestFeed();
+    } catch {
+      await wait(retryDelayMs);
+      episodes = await requestFeed();
+    }
     writeCache(CACHE_KEY, episodes);
     return episodes;
   } catch (error) {
@@ -99,11 +131,15 @@ async function loadFeed(): Promise<Episode[]> {
 
 let pending: Promise<Episode[]> | undefined;
 
-export function fetchSpreakerFeed(): Promise<Episode[]> {
-  pending ??= loadFeed().catch((error) => {
-    const message = error instanceof Error ? error.message : String(error);
-    console.warn(`[spreaker] could not read the feed: ${message}`);
-    return [];
-  });
+export function fetchSpreakerFeed(
+  options: { retryDelayMs?: number } = {},
+): Promise<Episode[]> {
+  pending ??= loadFeed(options.retryDelayMs ?? RETRY_DELAY_MS).catch(
+    (error) => {
+      const message = error instanceof Error ? error.message : String(error);
+      console.warn(`[spreaker] could not read the feed: ${message}`);
+      return [];
+    },
+  );
   return pending;
 }

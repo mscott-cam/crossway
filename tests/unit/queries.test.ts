@@ -396,6 +396,36 @@ describe('getSermons audio matching', () => {
     ).toHaveLength(0);
   });
 
+  it('returns sermons without audio, with one warning, when matching throws', async () => {
+    configure();
+    fetchMock.mockResolvedValue([
+      rawSermon('One', '2026-10-18'),
+      rawSermon('Two', '2026-10-11', {
+        audioOverrideUrl: 'https://example.org/o.mp3',
+      }),
+    ]);
+    feedFetchMock.mockRejectedValue(new Error('offline'));
+    cache.readCache.mockReturnValue([
+      {
+        id: '1',
+        title: 'Corrupt',
+        pubDate: 'not a date',
+        mp3Url: 'https://example.org/1.mp3',
+      },
+    ]);
+    const { getSermons } = await load();
+    const sermons = await getSermons();
+    expect(sermons.map((s) => s.title)).toEqual(['One', 'Two']);
+    expect(sermons.every((s) => s.audio === undefined)).toBe(true);
+    const audioWarnings = vi
+      .mocked(console.warn)
+      .mock.calls.filter(([m]) => String(m).includes('audio'));
+    expect(audioWarnings.length).toBeGreaterThanOrEqual(1);
+    expect(
+      cache.writeCache.mock.calls.filter(([key]) => key === 'audio-report'),
+    ).toHaveLength(0);
+  });
+
   it('does not touch the feed when there are no sermons', async () => {
     configure();
     fetchMock.mockResolvedValue([]);
@@ -577,10 +607,18 @@ describe('fixture mode', () => {
     expect(bySlug['faith-and-favoritism-2026-08-23']?.source).toBe('override');
     expect(bySlug['remember-the-old-paths-2019-01-06']).toBeUndefined();
     expect(feedFetchMock).not.toHaveBeenCalled();
-    const report = cache.writeCache.mock.calls.find(
-      ([key]) => key === 'audio-report',
-    )![1] as { unmatchedEpisodes: { title: string }[] };
-    expect(report.unmatchedEpisodes.map((e) => e.title)).toEqual(['Trusting']);
+    expect(
+      cache.writeCache.mock.calls.filter(([key]) => key === 'audio-report'),
+    ).toHaveLength(0);
+    const { parseSpreakerFeed } = await import('../../src/lib/audio/spreaker');
+    const { matchAudio } = await import('../../src/lib/audio/match-audio');
+    const result = matchAudio(
+      sermons,
+      parseSpreakerFeed(
+        readFileSync('tests/fixtures/spreaker-feed.xml', 'utf8'),
+      ),
+    );
+    expect(result.unmatchedEpisodes.map((e) => e.title)).toEqual(['Trusting']);
   });
 
   it('returns sermons date-descending', async () => {
