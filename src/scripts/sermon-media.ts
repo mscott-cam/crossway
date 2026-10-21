@@ -44,9 +44,8 @@ function setup(root: HTMLElement) {
     tab.addEventListener('keydown', (event) => {
       const last = tabs.length - 1;
       let target: number | null = null;
-      if (event.key === 'ArrowRight' || event.key === 'ArrowDown')
-        target = index === last ? 0 : index + 1;
-      else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp')
+      if (event.key === 'ArrowRight') target = index === last ? 0 : index + 1;
+      else if (event.key === 'ArrowLeft')
         target = index === 0 ? last : index - 1;
       else if (event.key === 'Home') target = 0;
       else if (event.key === 'End') target = last;

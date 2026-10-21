@@ -31,6 +31,8 @@ const playButton = (root: Locator) =>
   root.getByRole('button', { name: /^(Play|Pause)$/ });
 const speedButton = (root: Locator) =>
   root.getByRole('button', { name: /Playback speed/ });
+const speedValue = (root: Locator) =>
+  speedButton(root).locator('[data-speed-value]');
 const scrubber = (root: Locator) => root.getByRole('slider');
 const currentTime = (root: Locator) =>
   root.locator('audio').evaluate((a: HTMLAudioElement) => a.currentTime);
@@ -113,6 +115,33 @@ test.describe('sermon media toggle', () => {
     await page.keyboard.press('End');
     await expect(listen).toBeFocused();
     await expect(listen).toHaveAttribute('aria-selected', 'true');
+  });
+
+  test('ArrowUp and ArrowDown do not switch tabs or block scrolling', async ({
+    page,
+  }) => {
+    await open(page);
+    const both = fixture(page, 'both');
+    const watch = both.getByRole('tab', { name: 'Watch' });
+    await watch.focus();
+    await page.evaluate(() => {
+      (window as unknown as { prevented: string[] }).prevented = [];
+      window.addEventListener('keydown', (event) => {
+        if (event.defaultPrevented)
+          (window as unknown as { prevented: string[] }).prevented.push(
+            event.key,
+          );
+      });
+    });
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowUp');
+    await expect(watch).toBeFocused();
+    await expect(watch).toHaveAttribute('aria-selected', 'true');
+    expect(
+      await page.evaluate(
+        () => (window as unknown as { prevented: string[] }).prevented,
+      ),
+    ).toEqual([]);
   });
 
   test('switching away from Listen pauses the audio', async ({ page }) => {
@@ -216,20 +245,20 @@ test.describe('audio player', () => {
     await open(page);
     const audio = fixture(page, 'audio');
     const speed = speedButton(audio);
-    await expect(speed).toHaveText('1×');
+    await expect(speedValue(audio)).toHaveText('1×');
     await speed.click();
-    await expect(speed).toHaveText('1.25×');
+    await expect(speedValue(audio)).toHaveText('1.25×');
     expect(
       await audio
         .locator('audio')
         .evaluate((a: HTMLAudioElement) => a.playbackRate),
     ).toBe(1.25);
     await speed.click();
-    await expect(speed).toHaveText('1.5×');
+    await expect(speedValue(audio)).toHaveText('1.5×');
     await speed.click();
-    await expect(speed).toHaveText('2×');
+    await expect(speedValue(audio)).toHaveText('2×');
     await speed.click();
-    await expect(speed).toHaveText('1×');
+    await expect(speedValue(audio)).toHaveText('1×');
   });
 
   test('starts with a hidden preload-none native element and a labelled scrubber', async ({
@@ -240,7 +269,9 @@ test.describe('audio player', () => {
     const native = audio.locator('audio');
     await expect(native).toHaveAttribute('preload', 'none');
     await expect(native).toBeHidden();
-    await expect(audio.getByRole('slider')).toHaveAccessibleName(/seek/i);
+    await expect(audio.getByRole('slider')).toHaveAccessibleName(
+      'Seek: Audio Only Sermon',
+    );
     await expect(audio.locator('[data-elapsed]')).toHaveText('0:00');
   });
 
@@ -253,9 +284,9 @@ test.describe('audio player', () => {
     ).toBeVisible();
     await expect(audio.locator('[data-total]')).toHaveText('0:40');
     await expect(scrubber(audio)).toBeEnabled();
-    await audio.getByRole('button', { name: /Forward 15/ }).click();
+    await audio.getByRole('button', { name: /^\+15/ }).click();
     await expect.poll(() => currentTime(audio)).toBeGreaterThanOrEqual(15);
-    await audio.getByRole('button', { name: /Back 15/ }).click();
+    await audio.getByRole('button', { name: /^−15/ }).click();
     await expect.poll(() => currentTime(audio)).toBeLessThan(15);
     await playButton(audio).click();
   });
@@ -331,8 +362,87 @@ test.describe('audio player', () => {
     await expect(scrubber(audio)).toBeEnabled();
     await playButton(audio).click();
     await speedButton(audio).click();
-    await expect(speedButton(audio)).toHaveText('1.25×');
+    await expect(speedValue(audio)).toHaveText('1.25×');
     expect(errors).toEqual([]);
+  });
+
+  test('accessible names contain the visible text', async ({ page }) => {
+    await open(page);
+    const audio = fixture(page, 'audio');
+    await expect(
+      audio.getByRole('button', { name: /^−15 seconds/ }),
+    ).toHaveText(/^−15/);
+    await expect(
+      audio.getByRole('button', { name: /^\+15 seconds/ }),
+    ).toHaveText(/^\+15/);
+    const speed = speedButton(audio);
+    await expect(speed).toHaveAccessibleName('Playback speed 1×');
+    await speed.click();
+    await expect(speed).toHaveAccessibleName('Playback speed 1.25×');
+    await expect(speed).not.toHaveAttribute('aria-label', /.*/);
+  });
+
+  test('announces speed changes once, in a polite live region', async ({
+    page,
+  }) => {
+    await open(page);
+    const audio = fixture(page, 'audio');
+    await speedButton(audio).click();
+    const live = audio.locator('[aria-live="polite"]');
+    await expect(live).toHaveCount(1);
+    await expect(live).toHaveText('Playback speed 1.25×');
+  });
+
+  test('reserves the enhanced height so hydration does not shift the page', async ({
+    page,
+    browser,
+  }) => {
+    for (const width of [1000, 375]) {
+      const plain = await browser.newContext({
+        javaScriptEnabled: false,
+        viewport: { width, height: 900 },
+      });
+      const plainPage = await plain.newPage();
+      await open(plainPage);
+      const before = (await fixture(plainPage, 'audio')
+        .locator('[data-audio-player]')
+        .boundingBox())!.height;
+      await plain.close();
+
+      await page.setViewportSize({ width, height: 900 });
+      await open(page);
+      const player = fixture(page, 'audio').locator('[data-audio-player]');
+      await expect(player).toHaveClass(/is-ready/);
+      const after = (await player.boundingBox())!.height;
+      expect(Math.abs(after - before)).toBeLessThanOrEqual(1);
+    }
+  });
+
+  test('shows an error and retries the load when playback fails', async ({
+    page,
+  }) => {
+    let requests = 0;
+    await page.route('**/dev/missing.mp3*', (route) => {
+      requests += 1;
+      return route.fulfill({ status: 404, body: 'nope' });
+    });
+    await open(page);
+    const broken = fixture(page, 'broken');
+    const message = broken.locator('.audio-player__message');
+    await expect(message).toBeAttached();
+    expect(
+      await message.evaluate((el) => getComputedStyle(el).display),
+    ).not.toBe('none');
+    await expect(message).toHaveAttribute('role', 'status');
+    await playButton(broken).click();
+    await expect(message).toContainText(/could not be loaded/i);
+    await expect.poll(() => requests).toBeGreaterThanOrEqual(1);
+    const first = requests;
+    await expect(
+      broken.getByRole('button', { name: 'Play', exact: true }),
+    ).toBeVisible();
+    await playButton(broken).click();
+    await expect.poll(() => requests).toBeGreaterThan(first);
   });
 
   test('controls are at least 44px and show focus', async ({ page }) => {
@@ -345,9 +455,9 @@ test.describe('audio player', () => {
     }
     await playButton(audio).focus();
     await page.keyboard.press('Tab');
-    await expect(audio.getByRole('button', { name: /Back 15/ })).toBeFocused();
+    await expect(audio.getByRole('button', { name: /^−15/ })).toBeFocused();
     const outline = await audio
-      .getByRole('button', { name: /Back 15/ })
+      .getByRole('button', { name: /^−15/ })
       .evaluate((el) => getComputedStyle(el).outlineStyle);
     expect(outline).not.toBe('none');
   });

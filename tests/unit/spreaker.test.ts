@@ -238,7 +238,10 @@ describe('fetchSpreakerFeed', () => {
   });
 
   it.each([
-    ['an HTTP error', { ok: false, status: 502, text: async () => '' }],
+    [
+      'an HTTP error',
+      { ok: false, status: 502, text: async (): Promise<string> => '' },
+    ],
     ['an unreadable feed', okResponse('<rss><channel><item>')],
   ])('retries after %s', async (_name, first) => {
     const fetchMock = vi
@@ -328,9 +331,11 @@ describe('fetchSpreakerFeed', () => {
     cache.readCache.mockReturnValue(undefined);
     vi.stubGlobal(
       'fetch',
-      vi
-        .fn()
-        .mockResolvedValue({ ok: false, status: 503, text: async () => '' }),
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 503,
+        text: async (): Promise<string> => '',
+      }),
     );
     const { fetchSpreakerFeed } = await load();
     await expect(fetchSpreakerFeed({ retryDelayMs: 0 })).resolves.toEqual([]);

@@ -51,20 +51,24 @@ function setup(root: HTMLElement) {
   ui.innerHTML = `
     <div class="audio-player__controls">
       <button type="button" class="audio-player__button audio-player__button--play" data-play aria-label="Play">${playIcon}</button>
-      <button type="button" class="audio-player__button" data-back aria-label="Back 15 seconds">−15</button>
-      <button type="button" class="audio-player__button" data-forward aria-label="Forward 15 seconds">+15</button>
+      <button type="button" class="audio-player__button" data-back>−15<span class="sr-only"> seconds, back</span></button>
+      <button type="button" class="audio-player__button" data-forward>+15<span class="sr-only"> seconds, forward</span></button>
       <span class="audio-player__spacer"></span>
-      <button type="button" class="audio-player__button" data-speed></button>
+      <button type="button" class="audio-player__button" data-speed><span class="sr-only">Playback speed </span><span data-speed-value></span></button>
     </div>
     <div class="audio-player__timeline">
       <span class="audio-player__time" data-elapsed>0:00</span>
-      <input class="audio-player__scrubber" type="range" min="0" max="0" step="1" value="0" disabled aria-label="Seek" data-scrubber />
+      <input class="audio-player__scrubber" type="range" min="0" max="0" step="1" value="0" disabled data-scrubber />
       <span class="audio-player__time" data-total>${UNKNOWN_TOTAL}</span>
     </div>
     <p class="audio-player__message" role="status"></p>
     <span class="sr-only" role="status" aria-live="polite" data-announce></span>
   `;
   root.append(ui);
+  ui.querySelector('[data-scrubber]')?.setAttribute(
+    'aria-label',
+    `Seek: ${root.dataset.title ?? 'audio'}`,
+  );
 
   const $ = <T extends HTMLElement>(selector: string) =>
     ui.querySelector(selector) as T;
@@ -75,6 +79,7 @@ function setup(root: HTMLElement) {
   const elapsed = $<HTMLElement>('[data-elapsed]');
   const total = $<HTMLElement>('[data-total]');
   const scrubber = $<HTMLInputElement>('[data-scrubber]');
+  const speedValue = $<HTMLElement>('[data-speed-value]');
   const message = $<HTMLElement>('.audio-player__message');
   const announce = $<HTMLElement>('[data-announce]');
 
@@ -133,8 +138,7 @@ function setup(root: HTMLElement) {
   const setSpeed = (speed: number) => {
     audio.defaultPlaybackRate = speed;
     audio.playbackRate = speed;
-    speedButton.textContent = `${speed}×`;
-    speedButton.setAttribute('aria-label', `Playback speed ${speed}×`);
+    speedValue.textContent = `${speed}×`;
   };
 
   const onMetadata = () => {
@@ -185,6 +189,7 @@ function setup(root: HTMLElement) {
     render(true);
   });
   audio.addEventListener('error', () => {
+    loadRequested = false;
     window.clearInterval(saveTimer);
     setPlaying(false);
     message.textContent = 'This audio could not be loaded. Please try again.';
@@ -193,6 +198,7 @@ function setup(root: HTMLElement) {
   playButton.addEventListener('click', () => {
     if (audio.paused) {
       message.textContent = '';
+      if (audio.error) audio.load();
       audio.play().catch(() => undefined);
     } else {
       audio.pause();

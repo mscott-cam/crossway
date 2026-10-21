@@ -50,6 +50,16 @@ const fixtures = [
     },
   },
   {
+    name: 'broken',
+    label: 'Audio that fails to load',
+    sermon: {
+      ...base,
+      slug: 'broken-audio-2026-10-11',
+      title: 'Broken Audio Sermon',
+      audio: { url: '/dev/missing.mp3', source: 'override' as const },
+    },
+  },
+  {
     name: 'invalid',
     label: 'Invalid Vimeo URL with audio',
     sermon: {
