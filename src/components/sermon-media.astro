@@ -94,6 +94,7 @@ const uid = sermon.slug.replace(/[^a-z0-9_-]/gi, '-');
 <style is:global>
   .sermon-media {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 1.25rem;
     width: 100%;
   }
@@ -101,6 +102,7 @@ const uid = sermon.slug.replace(/[^a-z0-9_-]/gi, '-');
   .sermon-media__tabs {
     display: inline-flex;
     justify-self: start;
+    max-width: 100%;
     padding: 4px;
     border: 1px solid var(--rule);
     border-radius: 999px;
@@ -112,9 +114,9 @@ const uid = sermon.slug.replace(/[^a-z0-9_-]/gi, '-');
   }
 
   .sermon-media__tabs [role='tab'] {
-    min-width: 6.5rem;
+    min-width: 0;
     min-height: 44px;
-    padding: 0 1.5rem;
+    padding: 0 clamp(0.75rem, 4vw, 1.5rem);
     border: 0;
     border-radius: 999px;
     background: transparent;

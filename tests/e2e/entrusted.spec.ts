@@ -255,6 +255,27 @@ test.describe('/entrusted', () => {
     expect(right).toBeLessThanOrEqual(320);
   });
 
+  test('all four gift chart columns fit without scrolling at 320px', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 640 });
+    await page.goto('/entrusted');
+    await page.locator('details.chart-text summary').click();
+    const region = page.locator('details.chart-text [role="region"]');
+    const { scrollWidth, clientWidth } = await region.evaluate((el) => ({
+      scrollWidth: el.scrollWidth,
+      clientWidth: el.clientWidth,
+    }));
+    expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+    const lastCell = await page
+      .locator('details.chart-text thead th:last-child')
+      .evaluate((el) => el.getBoundingClientRect().right);
+    const regionRight = await region.evaluate(
+      (el) => el.getBoundingClientRect().right,
+    );
+    expect(lastCell).toBeLessThanOrEqual(regionRight);
+  });
+
   test('gift chart amounts never break across lines at 390px', async ({
     page,
   }) => {

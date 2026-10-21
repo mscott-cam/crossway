@@ -95,6 +95,7 @@ body {
   font-size: 1.125rem;
   line-height: 1.6;
   font-weight: 400;
+  overflow-wrap: break-word;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -297,6 +298,7 @@ html.js:not(.reduced):not(.motion-ready) [data-draw] {
   line-height: 1.4;
   letter-spacing: 0.28em;
   text-transform: uppercase;
+  overflow-wrap: anywhere;
 }
 
 .eyebrow::before {

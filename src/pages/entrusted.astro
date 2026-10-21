@@ -204,6 +204,21 @@ const jumps = [
     font-weight: 700;
   }
 
+  @media (max-width: 22.5rem) {
+    .entrusted-body :global(.chart-text table) {
+      font-size: 0.875rem;
+    }
+
+    .entrusted-body :global(.chart-text :is(th, td)) {
+      padding-inline: 0.25rem;
+    }
+
+    .entrusted-body :global(.chart-text thead th) {
+      font-size: 0.75rem;
+      letter-spacing: 0.03em;
+    }
+  }
+
   .entrusted-faq {
     margin-top: clamp(3rem, 7vw, 5rem);
   }

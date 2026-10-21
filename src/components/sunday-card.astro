@@ -197,6 +197,16 @@ const rows = settings.sundayCardRows.map((row) => ({
     outline-color: var(--paper);
   }
 
+  @container (max-width: 19.9rem) {
+    .sunday-card {
+      padding-inline: 1.25rem;
+    }
+
+    .sunday-card__times {
+      font-size: min(clamp(2.75rem, 2.1rem + 2.6vw, 4rem), 14vw);
+    }
+  }
+
   @container (min-width: 40rem) and (max-width: 68.74rem) {
     .sunday-card {
       display: grid;

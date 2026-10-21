@@ -111,6 +111,7 @@ const EAGER_ROWS = 3;
   }
 
   .event-list {
+    container-type: inline-size;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -220,6 +221,23 @@ const EAGER_ROWS = 3;
 
   .event-list--home .event__title {
     font-size: 1.125rem;
+  }
+
+  @container (max-width: 15rem) {
+    .event,
+    .event-list--home .event {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .event__date {
+      flex-direction: row;
+      gap: 0.6rem;
+      align-items: baseline;
+    }
+
+    .event__month {
+      margin-top: 0;
+    }
   }
 
   @media (min-width: 48rem) {
