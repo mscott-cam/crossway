@@ -2,6 +2,12 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { colors } from '../../src/lib/tokens';
+
+const rgb = (hex: string) => {
+  const n = parseInt(hex.replace('#', ''), 16);
+  return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`;
+};
 
 type FixtureSermon = {
   title: string;
@@ -184,20 +190,54 @@ test.describe('filter route', () => {
     });
   });
 
-  test('sends unknown, empty or hostile input to /sermons', async ({
+  test('redirects a well-formed speaker slug even if it has no page yet', async ({
     page,
   }) => {
+    expect(await redirect(page, '?speaker=nobody')).toEqual({
+      status: 303,
+      location: '/sermons/speaker/nobody',
+    });
+  });
+
+  test('redirects a real book with no sermons to its (absent) page', async ({
+    page,
+  }) => {
+    expect(await redirect(page, '?book=obadiah')).toEqual({
+      status: 303,
+      location: '/sermons/book/obadiah',
+    });
+  });
+
+  test('lets the book win when both a book and a speaker are given', async ({
+    page,
+  }) => {
+    expect(await redirect(page, '?book=john&speaker=josh-collins')).toEqual({
+      status: 303,
+      location: '/sermons/book/john',
+    });
+  });
+
+  test('is cacheable at the edge', async ({ page }) => {
+    const response = await page.request.get('/sermons/filter?book=john', {
+      maxRedirects: 0,
+    });
+    expect(response.headers()['cache-control']).toBe('public, s-maxage=3600');
+  });
+
+  test('sends empty or invalid input to /sermons', async ({ page }) => {
     for (const query of [
       '',
       '?book=',
       '?speaker=',
       '?book=not-a-book',
-      '?speaker=nobody',
-      '?book=obadiah',
       '?book=//evil.example',
       '?speaker=https://evil.example',
+      '?speaker=//evil.example',
       '?book=../../etc/passwd',
+      '?speaker=../../etc/passwd',
+      '?speaker=Not%20A%20Slug',
       '?book=%0d%0aSet-Cookie:x=1',
+      '?speaker=%0d%0aSet-Cookie:x=1',
     ]) {
       expect(await redirect(page, query), query).toEqual({
         status: 303,
@@ -241,6 +281,23 @@ test.describe('sermon detail', () => {
       .locator('[data-sermon-card] a')
       .evaluateAll((els) => els.map((el) => el.getAttribute('href')));
     expect(hrefs).toEqual(expected);
+  });
+
+  test('omits More from this series for a single-sermon series', async ({
+    page,
+  }) => {
+    const lone = bySlug('one-word-from-the-lord-2023-05-07');
+    expect(
+      sermons.filter((s) => s.series.slug === lone.series.slug),
+    ).toHaveLength(1);
+    await page.goto(`/sermons/${lone.slug}`);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+      lone.title,
+    );
+    await expect(
+      page.getByRole('region', { name: 'More from this series' }),
+    ).toHaveCount(0);
+    await expect(page.getByText('More from this series')).toHaveCount(0);
   });
 
   test('offers Apple Podcasts and Spreaker', async ({ page }) => {
@@ -373,18 +430,59 @@ test.describe('series pages', () => {
     page,
   }) => {
     await page.goto('/series');
-    expect(await page.locator('[data-series-card] img').count()).toBe(0);
-    const card = page.locator('[data-series-card]').first();
+    const card = page
+      .locator('[data-series-card]')
+      .filter({ hasNot: page.locator('img') })
+      .first();
+    await expect(card.locator('img')).toHaveCount(0);
     const title = card.getByRole('heading', { level: 2 });
     await expect(title).toBeVisible();
     await expect(card.locator('.series-card__type')).toHaveCSS(
       'background-color',
-      'rgb(26, 55, 77)',
+      rgb(colors.navy),
     );
-    await expect(title).toHaveCSS('color', 'rgb(243, 240, 232)');
+    await expect(title).toHaveCSS('color', rgb(colors.paper));
     expect(
       await title.evaluate((el) => getComputedStyle(el).fontFamily),
     ).toMatch(/Caslon/);
+  });
+
+  test('a series with artwork renders an image with dimensions and alt', async ({
+    page,
+  }) => {
+    await page.goto('/series');
+    const card = page.locator('[data-series-card]').filter({
+      has: page.getByRole('heading', { name: 'Walking With Wisdom' }),
+    });
+    const img = card.locator('img');
+    await expect(img).toHaveCount(1);
+    await expect(img).toHaveAttribute('src', '/dev/poster.svg');
+    await expect(img).toHaveAttribute('width', '1280');
+    await expect(img).toHaveAttribute('height', '720');
+    await expect(img).toHaveAttribute(
+      'alt',
+      'Walking With Wisdom series artwork',
+    );
+    await expect(img).toHaveAttribute('loading', 'lazy');
+    expect(
+      await page
+        .locator('[data-series-card] img')
+        .evaluateAll((els) => els.filter((el) => !el.getAttribute('src'))),
+    ).toEqual([]);
+    expect(
+      await img.evaluate((el) => (el as HTMLImageElement).naturalWidth),
+    ).toBeGreaterThan(0);
+  });
+
+  test('the artwork series page shows its artwork', async ({ page }) => {
+    await page.goto('/series/walking-with-wisdom');
+    const img = page.locator('img.series-art');
+    await expect(img).toHaveAttribute(
+      'alt',
+      'Walking With Wisdom series artwork',
+    );
+    await expect(img).toHaveAttribute('width', '1280');
+    expect(await cardHrefs(page)).toHaveLength(2);
   });
 
   test('unknown series are 404', async ({ page }) => {
@@ -576,11 +674,15 @@ test.describe('motion', () => {
       await page.waitForLoadState('load');
       expect(await page.locator('[data-reveal]').count()).toBeGreaterThan(0);
       await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-      await page.waitForTimeout(1500);
-      const opacities = await page.$$eval('[data-reveal]', (els) =>
-        els.map((el) => getComputedStyle(el).opacity),
-      );
-      for (const opacity of opacities) expect(opacity).toBe('1');
+      await expect
+        .poll(
+          () =>
+            page.$$eval('[data-reveal]', (els) =>
+              els.map((el) => getComputedStyle(el).opacity),
+            ),
+          { timeout: 5000 },
+        )
+        .toEqual(Array(await page.locator('[data-reveal]').count()).fill('1'));
     });
   }
 
@@ -593,4 +695,63 @@ test.describe('motion', () => {
       expect(kinds).toEqual(['fade']);
     }
   });
+});
+
+test.describe('largest contentful paint', () => {
+  test('the latest message media is not revealed or lazy-gated', async ({
+    page,
+  }) => {
+    await page.goto('/sermons');
+    const media = page.locator('.feature__media');
+    await expect(media).toHaveCount(1);
+    expect(
+      await media.evaluate((el) => el.closest('[data-reveal]') !== null),
+    ).toBe(false);
+    expect(
+      await page
+        .locator('.feature__media [data-sermon-media]')
+        .evaluate((el) => el.closest('[data-reveal]') !== null),
+    ).toBe(false);
+    await expect(page.locator('.feature__media')).toHaveCSS('opacity', '1');
+  });
+
+  test('the detail media is not inside a reveal', async ({ page }) => {
+    await page.goto(`/sermons/${newest.slug}`);
+    expect(
+      await page
+        .locator('[data-sermon-media]')
+        .evaluate((el) => el.closest('[data-reveal]') !== null),
+    ).toBe(false);
+  });
+});
+
+test.describe('long unbroken titles', () => {
+  const long = sermons.find((s) => !s.title.includes(' '))!;
+
+  test('the fixture has an unbroken word over 60 characters', () => {
+    expect(long.title.length).toBeGreaterThan(60);
+  });
+
+  for (const url of [
+    '/sermons/archive/2',
+    `/sermons/${long.slug}`,
+    '/series/stand-alone-messages',
+    '/sermons/book/proverbs',
+    '/sermons/speaker/josh-collins',
+  ]) {
+    test(`${url} has no horizontal overflow at 320px`, async ({ page }) => {
+      await page.setViewportSize({ width: 320, height: 800 });
+      await page.goto(url);
+      await page.waitForLoadState('load');
+      await expect(
+        page.getByText(long.title, { exact: true }).first(),
+      ).toBeAttached();
+      const overflow = await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth -
+          document.documentElement.clientWidth,
+      );
+      expect(overflow).toBeLessThanOrEqual(0);
+    });
+  }
 });

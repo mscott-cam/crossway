@@ -213,8 +213,13 @@ const list =
 
 const FIXTURE_DIR = 'tests/fixtures/sanity';
 
+function fixtureDir(): string {
+  const name = env('SANITY_FIXTURE_DIR');
+  return /^tests\/fixtures\/[a-z0-9-]+$/i.test(name) ? name : FIXTURE_DIR;
+}
+
 async function readFixture(file: string): Promise<unknown> {
-  const text = await readFile(join(process.cwd(), FIXTURE_DIR, file), 'utf8');
+  const text = await readFile(join(process.cwd(), fixtureDir(), file), 'utf8');
   return JSON.parse(text);
 }
 

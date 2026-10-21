@@ -12,3 +12,4 @@ playwright-report/
 .astro/
 .lighthouseci/
 .sanity/
+dist-empty-states/

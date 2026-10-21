@@ -6,12 +6,19 @@ import VimeoFacade from './vimeo-facade.astro';
 
 interface Props {
   sermon: Pick<Sermon, 'slug' | 'title' | 'vimeoUrl' | 'audio'>;
+  thumb?: string | null;
+  priority?: boolean;
 }
 
-const { sermon } = Astro.props;
+const { sermon, priority = false } = Astro.props;
 const videoId = sermon.vimeoUrl ? parseVimeoId(sermon.vimeoUrl) : null;
 const audioUrl = sermon.audio?.url || null;
-const thumb = videoId ? await getVimeoThumb(videoId) : null;
+const thumb =
+  Astro.props.thumb !== undefined
+    ? Astro.props.thumb
+    : videoId
+      ? await getVimeoThumb(videoId)
+      : null;
 const both = Boolean(videoId && audioUrl);
 const uid = sermon.slug.replace(/[^a-z0-9_-]/gi, '-');
 ---
@@ -58,7 +65,12 @@ const uid = sermon.slug.replace(/[^a-z0-9_-]/gi, '-');
         aria-labelledby={both ? `media-tab-watch-${uid}` : undefined}
         data-panel="watch"
       >
-        <VimeoFacade id={videoId} title={sermon.title} thumb={thumb} />
+        <VimeoFacade
+          id={videoId}
+          title={sermon.title}
+          thumb={thumb}
+          priority={priority}
+        />
       </div>
     )}
     {audioUrl && (

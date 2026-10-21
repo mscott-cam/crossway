@@ -31,5 +31,24 @@
     "title": "Stand Alone Messages",
     "slug": "stand-alone-messages",
     "isStandalone": true
+  },
+  {
+    "_id": "series-walking-with-wisdom",
+    "title": "Walking With Wisdom",
+    "slug": "walking-with-wisdom",
+    "description": "A short series in Proverbs.",
+    "isStandalone": false,
+    "artwork": {
+      "url": "/dev/poster.svg",
+      "width": 1280,
+      "height": 720,
+      "alt": "Walking With Wisdom series artwork"
+    }
+  },
+  {
+    "_id": "series-a-lone-word",
+    "title": "A Lone Word",
+    "slug": "a-lone-word",
+    "isStandalone": false
   }
 ]

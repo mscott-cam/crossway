@@ -5,9 +5,10 @@ interface Props {
   id: string;
   title: string;
   thumb: string | null;
+  priority?: boolean;
 }
 
-const { id, title, thumb } = Astro.props;
+const { id, title, thumb, priority = false } = Astro.props;
 const [videoId, hash] = id.split('?h=');
 const pageUrl = hash
   ? `https://vimeo.com/${videoId}/${hash}`
@@ -28,7 +29,8 @@ const pageUrl = hash
       alt=""
       width="1280"
       height="720"
-      loading="lazy"
+      loading={priority ? 'eager' : 'lazy'}
+      fetchpriority={priority ? 'high' : undefined}
       decoding="async"
     />
   ) : (

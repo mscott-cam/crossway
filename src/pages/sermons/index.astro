@@ -39,7 +39,7 @@ const latestHasMedia = Boolean(
   description="Watch and listen to messages from Crossway Bible Church in San Antonio. Browse by series, book of the Bible or speaker."
 >
   <div class="container section sermons-page">
-    <header class="sermons-page__head" data-reveal="fade">
+    <header class="sermons-page__head">
       <Eyebrow>Sermons</Eyebrow>
       <h1>
         Messages from <em>God’s Word</em>
@@ -47,18 +47,14 @@ const latestHasMedia = Boolean(
     </header>
 
     {latest ? (
-      <section
-        class="block"
-        aria-labelledby="latest-heading"
-        data-reveal="fade"
-      >
+      <section class="block" aria-labelledby="latest-heading">
         <h2 class="eyebrow" id="latest-heading">
           Latest message
         </h2>
         <div class:list={['feature', { 'feature--text': !latestHasMedia }]}>
           {latestHasMedia && (
             <div class="feature__media">
-              <SermonMedia sermon={latest} />
+              <SermonMedia sermon={latest} priority />
             </div>
           )}
           <div class="feature__text">
@@ -148,11 +144,13 @@ const latestHasMedia = Boolean(
 
   .feature {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 2rem;
     align-items: end;
   }
 
   .feature__text h3 {
+    overflow-wrap: anywhere;
     font-size: var(--step-h2);
     line-height: 1.06;
   }

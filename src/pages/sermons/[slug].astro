@@ -46,7 +46,7 @@ const body = sermon.description ? paragraphs(sermon.description) : [];
 
     {hasMedia && (
       <div class="sermon-page__media">
-        <SermonMedia sermon={sermon} />
+        <SermonMedia sermon={sermon} priority />
       </div>
     )}
 
@@ -135,6 +135,7 @@ const body = sermon.description ? paragraphs(sermon.description) : [];
   }
 
   .sermon-page__head h1 {
+    overflow-wrap: anywhere;
     margin-top: 1.25rem;
     font-size: var(--step-h2);
     line-height: 1.04;

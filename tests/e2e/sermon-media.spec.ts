@@ -184,6 +184,26 @@ test.describe('vimeo facade', () => {
     await expect(video.getByRole('button')).toHaveCount(0);
   });
 
+  test('a priority thumbnail is eager with high fetch priority', async ({
+    page,
+  }) => {
+    await open(page);
+    const img = fixture(page, 'priority').locator('[data-vimeo-facade] img');
+    await expect(img).toHaveAttribute('src', '/dev/poster.svg');
+    await expect(img).toHaveAttribute('loading', 'eager');
+    await expect(img).toHaveAttribute('fetchpriority', 'high');
+    await expect(img).toHaveAttribute('alt', '');
+  });
+
+  test('a regular thumbnail stays lazy with no fetch priority', async ({
+    page,
+  }) => {
+    await open(page);
+    const img = fixture(page, 'poster').locator('[data-vimeo-facade] img');
+    await expect(img).toHaveAttribute('loading', 'lazy');
+    await expect(img).not.toHaveAttribute('fetchpriority', /.*/);
+  });
+
   test('shows a lazy 16:9 decorative poster when a thumbnail exists', async ({
     page,
   }) => {

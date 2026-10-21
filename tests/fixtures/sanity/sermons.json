@@ -763,5 +763,101 @@
     "spreakerEpisodeId": "13864183",
     "webflowPath": "/sermons/orchestrating-a-festive-crisis-2015-03-29",
     "vimeoUrl": "https://vimeo.com/76979906"
+  },
+  {
+    "_id": "sermon-wisdom-begins-with-fear-2025-03-02",
+    "title": "Wisdom Begins With Fear",
+    "date": "2025-03-02",
+    "speaker": {
+      "_id": "speaker-josh-collins",
+      "name": "Josh Collins",
+      "slug": "josh-collins"
+    },
+    "series": {
+      "_id": "series-walking-with-wisdom",
+      "title": "Walking With Wisdom",
+      "slug": "walking-with-wisdom",
+      "description": "A short series in Proverbs.",
+      "isStandalone": false,
+      "artwork": {
+        "url": "/dev/poster.svg",
+        "width": 1280,
+        "height": 720,
+        "alt": "Walking With Wisdom series artwork"
+      }
+    },
+    "book": "Proverbs",
+    "passage": "Proverbs 1:7",
+    "slug": "wisdom-begins-with-fear-2025-03-02",
+    "vimeoUrl": "https://vimeo.com/76979907"
+  },
+  {
+    "_id": "sermon-the-path-of-the-righteous-2025-02-23",
+    "title": "The Path of the Righteous",
+    "date": "2025-02-23",
+    "speaker": {
+      "_id": "speaker-josh-de-koning",
+      "name": "Josh de Koning",
+      "slug": "josh-de-koning",
+      "role": "Lead Pastor"
+    },
+    "series": {
+      "_id": "series-walking-with-wisdom",
+      "title": "Walking With Wisdom",
+      "slug": "walking-with-wisdom",
+      "description": "A short series in Proverbs.",
+      "isStandalone": false,
+      "artwork": {
+        "url": "/dev/poster.svg",
+        "width": 1280,
+        "height": 720,
+        "alt": "Walking With Wisdom series artwork"
+      }
+    },
+    "book": "Proverbs",
+    "passage": "Proverbs 4:18",
+    "slug": "the-path-of-the-righteous-2025-02-23",
+    "vimeoUrl": "https://vimeo.com/76979908"
+  },
+  {
+    "_id": "sermon-one-word-from-the-lord-2023-05-07",
+    "title": "One Word From the Lord",
+    "date": "2023-05-07",
+    "speaker": {
+      "_id": "speaker-scott-graham",
+      "name": "Scott Graham",
+      "slug": "scott-graham",
+      "role": "Guest Speaker"
+    },
+    "series": {
+      "_id": "series-a-lone-word",
+      "title": "A Lone Word",
+      "slug": "a-lone-word",
+      "isStandalone": false
+    },
+    "book": "Zephaniah",
+    "passage": "Zephaniah 3:17",
+    "slug": "one-word-from-the-lord-2023-05-07",
+    "vimeoUrl": "https://vimeo.com/76979909"
+  },
+  {
+    "_id": "sermon-incomprehensibilitiesandunfathomablemysteriesofdivinegraceandmercytowardsundeservingsinners-2012-03-04",
+    "title": "Incomprehensibilitiesandunfathomablemysteriesofdivinegraceandmercytowardsundeservingsinners",
+    "date": "2012-03-04",
+    "speaker": {
+      "_id": "speaker-josh-collins",
+      "name": "Josh Collins",
+      "slug": "josh-collins"
+    },
+    "series": {
+      "_id": "series-stand-alone-messages",
+      "title": "Stand Alone Messages",
+      "slug": "stand-alone-messages",
+      "isStandalone": true
+    },
+    "book": "Proverbs",
+    "passage": "Proverbs 3:5–6",
+    "slug": "incomprehensibilitiesandunfathomablemysteriesofdivinegraceandmercytowardsundeservingsinners-2012-03-04",
+    "vimeoUrl": "https://vimeo.com/76979910"
   }
 ]

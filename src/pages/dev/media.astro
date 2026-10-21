@@ -86,6 +86,19 @@ const fixtures = [
         <SermonMedia sermon={sermon} />
       </section>
     ))}
+    <section class="media-fixture__item" data-fixture="priority">
+      <h2>SermonMedia with a priority thumbnail</h2>
+      <SermonMedia
+        sermon={{
+          ...base,
+          slug: 'priority-2026-10-11',
+          title: 'Priority Sermon',
+          vimeoUrl: 'https://vimeo.com/76979871',
+        }}
+        thumb="/dev/poster.svg"
+        priority
+      />
+    </section>
     <section class="media-fixture__item" data-fixture="poster">
       <h2>Facade with a thumbnail</h2>
       <VimeoFacade

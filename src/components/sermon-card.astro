@@ -37,6 +37,7 @@ const meta = sermonMeta(sermon, [
   .sermon-card {
     position: relative;
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 0.35rem 2rem;
     padding-block: 1.5rem;
     border-top: 1px solid var(--rule);
@@ -54,6 +55,7 @@ const meta = sermonMeta(sermon, [
   .sermon-card__title {
     font-size: var(--step-h4);
     line-height: 1.2;
+    overflow-wrap: anywhere;
   }
 
   .sermon-card__title a {
@@ -75,6 +77,7 @@ const meta = sermonMeta(sermon, [
 
   .sermon-card__meta {
     margin: 0.4rem 0 0;
+    overflow-wrap: anywhere;
     color: var(--charcoal);
     font-size: 0.9375rem;
     line-height: 1.5;
@@ -82,7 +85,7 @@ const meta = sermonMeta(sermon, [
 
   @media (min-width: 48rem) {
     .sermon-card {
-      grid-template-columns: 11rem 1fr;
+      grid-template-columns: 11rem minmax(0, 1fr);
       align-items: baseline;
     }
   }
