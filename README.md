@@ -80,7 +80,7 @@ Troubleshooting a deploy that fails with `[build-guard] Refusing to build a prod
 
 1. Set `SANITY_PROJECT_ID` (and `SANITY_DATASET` if not `production`) for the Production environment in Vercel, then redeploy. Environment variable changes do not apply to existing deployments.
 2. `SANITY_FIXTURES=1` does not help; fixtures are ignored in production.
-3. To deploy an empty site deliberately (for example to check hosting before Sanity exists), set `ALLOW_EMPTY_CONTENT=1`. The build then only prints a warning. Remove it afterwards.
+3. To deploy an empty site deliberately (for example to check hosting before Sanity exists), set `ALLOW_EMPTY_CONTENT=1`. The build then only prints a warning. `vercel.json` currently sets it under `build.env` so the site deploys with no Sanity project. Once `SANITY_PROJECT_ID` is set in Vercel, delete the `build` block from `vercel.json` to turn the guard back on.
 
 Other missing sources stay warnings by design: Planning Center and Spreaker outages or missing credentials log `[events]` and `[audio]` lines and the site builds without them.
 
