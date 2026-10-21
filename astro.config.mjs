@@ -1,10 +1,17 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import vercel from '@astrojs/vercel';
+import { fileURLToPath } from 'node:url';
+import { loadProjectEnv } from './scripts/load-env.mjs';
 import { loadAstroRedirects } from './scripts/build-redirects.ts';
 import { pruneDevPages } from './scripts/prune-dev-pages.mjs';
 import { requireContent } from './scripts/require-content.mjs';
 import { getSermonsWithoutAudio } from './src/lib/sanity/queries.ts';
+
+loadProjectEnv({
+  root: fileURLToPath(new URL('.', import.meta.url)),
+  mode: process.argv.includes('dev') ? 'development' : 'production',
+});
 
 const isE2E = process.env.E2E === '1';
 

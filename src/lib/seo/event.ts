@@ -2,6 +2,15 @@ import { eventSpan, toChicagoIso } from '../dates';
 import type { ChurchEvent } from '../events/pco';
 import { site } from '../site';
 
+function absoluteImage(url: string | undefined, base: string) {
+  if (!url) return undefined;
+  try {
+    return new URL(url, base).href;
+  } catch {
+    return undefined;
+  }
+}
+
 export function eventJsonLd(event: ChurchEvent, origin: string): object {
   const base = `${origin.replace(/\/$/, '')}/`;
   const start = new Date(event.startsAt);
@@ -20,6 +29,8 @@ export function eventJsonLd(event: ChurchEvent, origin: string): object {
     endDate = end ? toChicagoIso(end) : undefined;
   }
 
+  const image = absoluteImage(event.imageUrl, base);
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Event',
@@ -32,7 +43,7 @@ export function eventJsonLd(event: ChurchEvent, origin: string): object {
       ? { location: { '@type': 'Place', name: event.location } }
       : {}),
     url: event.url,
-    ...(event.imageUrl ? { image: new URL(event.imageUrl, base).href } : {}),
+    ...(image ? { image } : {}),
     organizer: { '@type': 'Church', name: site.name, url: base },
   };
 }

@@ -5,7 +5,7 @@ export type TimePart = {
 
 const HAS_MERIDIEM = /\d\s*[ap]\.?m?\.?$/i;
 
-export function serviceTimeParts(times: string[]): TimePart[] {
+export function serviceTimeParts(times: readonly string[]): TimePart[] {
   const cleaned = times.map((time) => time.trim()).filter(Boolean);
   const parts: TimePart[] = [];
   cleaned.forEach((time, index) => {
@@ -27,7 +27,7 @@ export function formatServiceTimes(times: string[]): string {
     .join('');
 }
 
-export function formatFooterTimes(times: string[]): string {
+export function formatFooterTimes(times: readonly string[]): string {
   return serviceTimeParts(times)
     .map((part) => (part.kind === 'meridiem' ? 'a' : part.text))
     .join('');

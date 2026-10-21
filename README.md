@@ -6,7 +6,7 @@ Astro (static-first) site for crosswaysa.org, deployed on Vercel. Content lives 
 
 1. Clone the repo. Node 22 or newer.
 2. `npm install`
-3. `cp .env.example .env` and fill in what you have. Every variable is documented in [Environment variables](#environment-variables). With nothing set, a local build or `npm run dev` runs with empty content and default settings (it logs warnings).
+3. `cp .env.example .env` and fill in what you have. Every variable is documented in [Environment variables](#environment-variables). With nothing set, a local build or `npm run dev` runs with empty content and default settings (it logs warnings). `astro.config.mjs` reads the Sanity variables from `.env` too, so the legacy sermon redirects are built with the same project the pages use.
 4. `npm run dev` serves the site at http://localhost:4321. To work with bundled fixture content and no network access, start it with `SANITY_FIXTURES=1 npm run dev`.
 5. The Studio is a separate package: `cd studio`, `npm install`, `cp .env.example .env`, `npm run dev` (details in [studio/README.md](studio/README.md)).
 
@@ -113,6 +113,12 @@ Setup: set `CRON_SECRET` (any long random string) and `VERCEL_DEPLOY_HOOK_URL` i
 
 How the cron is wired: `@astrojs/vercel` writes `.vercel/output/config.json` without a `crons` key and does not read `crons` from `vercel.json`. Vercel's own build step merges `vercel.json` `crons` into the output config. This was checked by running `vercel build` locally on this repo: the resulting `config.json` contains the cron.
 
+### Build time, Vimeo thumbnails and the Sanity CDN
+
+- Build-time Sanity reads use the live API, not the API CDN (`useCdn: false` in `src/lib/sanity/client.ts`). A build starts seconds after an editor publishes through the webhook, and a CDN read can still return the previous copy. A build makes about six queries, so the CDN saves nothing.
+- The first production build with about 600 sermons may take several minutes because it fetches a Vimeo thumbnail for every sermon (Vimeo oEmbed, 4 second timeout, 4 at a time, `build.concurrency: 4`). Thumbnails are cached in `node_modules/.cache`, and Vercel restores that cache between builds, so later builds only look up new videos. Each video is looked up at most once per build.
+- If Vimeo is down or throttling, a circuit breaker stops the lookups after 5 failures in a row (network errors, timeouts, 429 or 5xx responses), logs one line, `Vimeo thumbnails unavailable; building without thumbnails`, and the build carries on without thumbnails. The most time Vimeo can cost a build is therefore about 5 x 4 seconds. Sermon pages then use the default social image and the video facade without a poster until the next build.
+
 ### Audio report
 
 After every `npm run build`, the `postbuild` script (`scripts/audio-report.ts`) prints the result of the last sermon-to-Spreaker matching run, read from `node_modules/.cache/crossway/audio-report.json`. It never fails the build.
@@ -128,6 +134,8 @@ No report is written when the Spreaker feed is empty or unavailable, when there 
 ### Outages at build time
 
 A Sanity or Spreaker outage during a build does not fail it. The affected source logs a warning and the site ships with empty or limited content (no sermons, no audio, default settings). The exception is a production build with no Sanity project configured at all, which fails ([Production build guard](#production-build-guard)); an outage with a configured project still degrades silently. Check the Vercel build log after each deploy for `[sanity]`, `[audio]` and `[events]` warnings, and redeploy if any appear.
+
+Unknown URLs get the branded 404 page (`src/pages/404.astro`): it is prerendered, the Vercel adapter serves it as a static `404.html` with a 404 status without invoking the server function, and it is `noindex` and left out of the sitemap. `/sermons/archive` redirects to `/sermons/archive/1`.
 
 Legacy sermon redirects (old Webflow `/sermons/{slug}` URLs to the new dated slugs) are computed at build time from Sanity. If Sanity is down during a build, those 301s are missing from that deployment. Redeploy once Sanity is back.
 
@@ -148,11 +156,11 @@ See [scripts/README-import.md](scripts/README-import.md) for the Webflow sermon 
 
 ## Quality gates
 
-| Command            | Checks                                                                                                                                                                                                                                                                                                                                                                          |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`         | Vitest unit tests: data transforms, Sanity and Planning Center parsing, forms, redirects, SEO output, the rebuild endpoint and the build guard. Includes hermetic temp-root production builds (redirects, SEO, guard) that take a few seconds each.                                                                                                                             |
-| `npm run test:e2e` | Builds the fixtures builds (including the announcement-bar variant), then Playwright on Chromium: navigation, every page, sermon media, events, the contact form, motion and reduced motion, axe accessibility, and the responsive gate (every route at 320, 390, 768, 1024, 1280 and 1600 px, plus enlarged text, with screenshots in `test-results/responsive/`). No retries. |
-| `npm run perf`     | Lighthouse CI, run `npm run build:e2e` first. Mobile emulation (slow 4G), 3 runs per URL, median. Asserts performance, accessibility, best practices and SEO at least 0.9, LCP at most 2500 ms, CLS at most 0.1, TBT at most 300 ms, on `/`, `/sermons`, one sermon detail, `/visit` and `/entrusted`. Thresholds are in `lighthouserc.json`.                                   |
+| Command            | Checks                                                                                                                                                                                                                                                                                                                                                                                            |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm test`         | Vitest unit tests: data transforms, Sanity and Planning Center parsing, forms, redirects, SEO output, the rebuild endpoint and the build guard. The whole suite takes about 7 seconds on a laptop (Vitest reports the duration). It includes a few hermetic temp-root production builds (redirects, SEO, guard) that run in parallel and take about 2 seconds each because they use fixture data. |
+| `npm run test:e2e` | Builds the fixtures builds (including the announcement-bar variant), then Playwright on Chromium: navigation, every page, sermon media, events, the contact form, motion and reduced motion, axe accessibility, and the responsive gate (every route at 320, 390, 768, 1024, 1280 and 1600 px, plus enlarged text, with screenshots in `test-results/responsive/`). No retries.                   |
+| `npm run perf`     | Lighthouse CI, run `npm run build:e2e` first. Mobile emulation (slow 4G), 3 runs per URL, median. Asserts performance, accessibility, best practices and SEO at least 0.9, LCP at most 2500 ms, CLS at most 0.1, TBT at most 300 ms, on `/`, `/sermons`, one sermon detail, `/visit` and `/entrusted`. Thresholds are in `lighthouserc.json`.                                                     |
 
 Run `npm test` and `npx astro check` before every commit. Run `npm run test:e2e` before a deploy. `npm run perf` binds ports 4410 and 4411.
 
@@ -225,6 +233,7 @@ These descriptions and names are summaries or inferences written during the buil
 - [ ] `/networks`: the live site shows only logos, so the link names are inferred: Southern Baptist Theological Seminary, 9Marks, The Gospel Coalition, Great Commission Collective (`src/content/pages/networks.md`).
 - [ ] `/entrusted`: the Gift Chart alt text and "Gift chart as text" table (checked against the image; the Totals column sums to $6,500,000), in `src/content/pages/entrusted.md`.
 - [ ] The Entrusted paragraph on the home page (`src/components/entrusted-feature.astro`).
+- [ ] Podcast: add the show's Spotify URL (not supplied) to `site.links`/podcast links if the church wants a Spotify button (the spec mentions Apple Podcasts / Spotify; the site currently links Apple Podcasts and Spreaker).
 - [ ] Naming: the site says "Students" (nav, `/visit`, page title "Crossway Students"). Confirm the church does not prefer "Student Ministry".
 
 ### 9. Known issue: Entrusted worksheet graphic

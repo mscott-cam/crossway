@@ -118,3 +118,25 @@ export function paragraphs(text: string): string[] {
     .map((part) => part.trim())
     .filter(Boolean);
 }
+
+export function uniqueBySlug(
+  sermons: Sermon[],
+  warn: (message: string) => void = console.warn,
+): Sermon[] {
+  const seen = new Set<string>();
+  const duplicates = new Set<string>();
+  const kept = sermons.filter((sermon) => {
+    if (seen.has(sermon.slug)) {
+      duplicates.add(sermon.slug);
+      return false;
+    }
+    seen.add(sermon.slug);
+    return true;
+  });
+  if (duplicates.size > 0) {
+    warn(
+      `[sermons] ${duplicates.size} slug(s) used by more than one sermon; keeping the first of each: ${[...duplicates].join(', ')}`,
+    );
+  }
+  return kept;
+}

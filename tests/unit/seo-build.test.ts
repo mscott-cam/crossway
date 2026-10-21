@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse } from 'node-html-parser';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { colors } from '../../src/lib/tokens';
 import { tempBuild, type TempBuild } from './helpers/temp-build';
 
 let prod: TempBuild;
@@ -104,6 +105,19 @@ describe('404 page in the production build', () => {
     ['e2e build', () => e2e],
   ])('stays out of the sitemap in the %s', (_label, get) => {
     expect(sitemapUrls(get()).some((u) => /\/404$/.test(u))).toBe(false);
+  });
+});
+
+describe('theme color', () => {
+  it('matches between the page meta and the web manifest, both navy', () => {
+    const manifest = JSON.parse(read(prod, 'site.webmanifest'));
+    for (const file of ['index.html', '404.html', 'visit/index.html']) {
+      const meta = parse(read(prod, file)).querySelector(
+        'meta[name="theme-color"]',
+      );
+      expect(meta?.getAttribute('content')).toBe(colors.navy);
+    }
+    expect(manifest.theme_color).toBe(colors.navy);
   });
 });
 

@@ -13,6 +13,7 @@ import { formatServiceTimes } from '../lib/format-times';
 import { churchJsonLd } from '../lib/seo/church';
 import { getSermons, getSiteSettings } from '../lib/sanity/queries';
 import { site } from '../lib/site';
+import { HERO_POSTER_AVIF } from '../lib/video/hero-poster';
 
 const [settings, sermons, events] = await Promise.all([
   getSiteSettings(),
@@ -34,7 +35,7 @@ const description = `Crossway Bible Church is a church family in San Antonio, Te
     slot="head"
     rel="preload"
     as="image"
-    href="/video/lobby-poster.avif"
+    href={HERO_POSTER_AVIF}
     type="image/avif"
     fetchpriority="high"
   />

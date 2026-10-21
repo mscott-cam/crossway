@@ -45,6 +45,7 @@ function init(section: HTMLElement) {
   let onToken: ((value: string) => void) | null = null;
 
   form.noValidate = true;
+  document.documentElement.classList.add('form-ready');
 
   const control = (name: string) =>
     form.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement;

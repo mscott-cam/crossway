@@ -10,17 +10,16 @@ import {
   paragraphs,
   sermonDescription,
   sermonPageTitle,
+  uniqueBySlug,
 } from '../../lib/sermon-groups';
 import { getVimeoThumb, parseVimeoId } from '../../lib/video/vimeo';
 
 export const getStaticPaths = (async () => {
-  const sermons = await getSermons();
-  const seen = new Set<string>();
-  return sermons.flatMap((sermon) => {
-    if (seen.has(sermon.slug)) return [];
-    seen.add(sermon.slug);
-    return [{ params: { slug: sermon.slug }, props: { sermon } }];
-  });
+  const sermons = uniqueBySlug(await getSermons());
+  return sermons.map((sermon) => ({
+    params: { slug: sermon.slug },
+    props: { sermon },
+  }));
 }) satisfies GetStaticPaths;
 
 const { sermon } = Astro.props;

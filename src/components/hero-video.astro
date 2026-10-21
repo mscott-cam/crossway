@@ -1,11 +1,10 @@
 ---
 interface Props {
   poster: string;
-  preloadPoster?: boolean;
   posterTime?: number;
 }
 
-const { poster, preloadPoster = false, posterTime = 3 } = Astro.props;
+const { poster, posterTime = 3 } = Astro.props;
 const base = poster.replace(/\/$/, '');
 const dir = base.slice(0, base.lastIndexOf('/'));
 
@@ -33,15 +32,6 @@ const sources = [
 ];
 ---
 
-{preloadPoster && (
-  <link
-    rel="preload"
-    as="image"
-    href={`${base}.avif`}
-    type="image/avif"
-    fetchpriority="high"
-  />
-)}
 <div class="hero-video" data-hero-video>
   <picture>
     <source srcset={`${base}.avif`} type="image/avif" />

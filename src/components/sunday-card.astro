@@ -1,5 +1,6 @@
 ---
 import { serviceTimeParts } from '../lib/format-times';
+import { safeHref } from '../lib/safe-href';
 import type { SiteSettings } from '../lib/sanity/types';
 
 interface Props {
@@ -8,10 +9,14 @@ interface Props {
 
 const { settings } = Astro.props;
 const parts = serviceTimeParts(settings.serviceTimes);
-const rows = settings.sundayCardRows.map((row) => ({
-  ...row,
-  external: Boolean(row.href && /^https?:\/\//i.test(row.href)),
-}));
+const rows = settings.sundayCardRows.map((row) => {
+  const href = safeHref(row.href);
+  return {
+    ...row,
+    href,
+    external: Boolean(href && /^https?:\/\//i.test(href)),
+  };
+});
 ---
 
 <aside

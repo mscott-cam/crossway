@@ -390,3 +390,41 @@ test.describe('without JavaScript', () => {
     await expect(note.locator('[data-placeholder]')).toBeVisible();
   });
 });
+
+test.describe('when the form script fails to load', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.route('**/_astro/**/*.js', (route) => route.abort());
+  });
+
+  test('a native submit still shows the visible thank-you', async ({
+    page,
+  }) => {
+    await page.goto('/sermons');
+    await expect(page.locator('html')).toHaveClass(/\bjs\b/);
+    await expect(page.locator('html')).not.toHaveClass(/form-ready/);
+    await fillForm(page);
+    await send(page).click();
+    await expect(page).toHaveURL(/\/sermons#questions-sent$/);
+    const sent = page.locator('#questions-sent');
+    await expect(sent).toBeVisible();
+    await expect(sent).toHaveText(SUCCESS);
+  });
+
+  test('a native rejection still shows the visible failure copy', async ({
+    page,
+  }) => {
+    await page.goto('/events');
+    await fillForm(page, { Email: 'ada@localhost' });
+    await send(page).click();
+    await expect(page).toHaveURL(/\/events#questions-error$/);
+    await expect(page.locator('#questions-error')).toBeVisible();
+    await expect(page.locator('#questions-error')).toContainText(FAILURE);
+  });
+});
+
+test('the form marks the page ready once its script has taken over', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveClass(/form-ready/);
+});

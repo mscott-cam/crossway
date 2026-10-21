@@ -192,6 +192,15 @@ describe('eventJsonLd', () => {
     );
     expect(ld(base)).not.toHaveProperty('image');
   });
+
+  it.each(['http://', 'https://[bad', 'http://exa mple.com/x.jpg'])(
+    'drops a malformed image URL (%s) instead of throwing',
+    (imageUrl) => {
+      const out = ld({ ...base, imageUrl });
+      expect(out).not.toHaveProperty('image');
+      expect(out.name).toBe(base.name);
+    },
+  );
 });
 
 describe('eventsJsonLd', () => {

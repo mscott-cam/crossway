@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   groupBooks,
   groupSeries,
@@ -8,6 +8,7 @@ import {
   sermonMeta,
   sermonPageTitle,
   paragraphs,
+  uniqueBySlug,
 } from '../../src/lib/sermon-groups';
 import { sanityImageUrl } from '../../src/lib/image-url';
 import type { Sermon } from '../../src/lib/sanity/types';
@@ -228,5 +229,34 @@ describe('sanityImageUrl', () => {
     expect(sanityImageUrl('https://example.com/a.jpg', 640)).toBe(
       'https://example.com/a.jpg',
     );
+  });
+});
+
+describe('uniqueBySlug', () => {
+  it('keeps the first sermon for a slug and warns once listing duplicates', () => {
+    const warn = vi.fn();
+    const first = make({ slug: 'a-2026-01-01', _id: 'one' });
+    const out = uniqueBySlug(
+      [
+        first,
+        make({ slug: 'b-2026-01-08' }),
+        make({ slug: 'a-2026-01-01', _id: 'two' }),
+        make({ slug: 'a-2026-01-01', _id: 'three' }),
+        make({ slug: 'b-2026-01-08', _id: 'four' }),
+      ],
+      warn,
+    );
+    expect(out).toHaveLength(2);
+    expect(out[0]).toBe(first);
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0]![0]).toContain('a-2026-01-01');
+    expect(warn.mock.calls[0]![0]).toContain('b-2026-01-08');
+  });
+
+  it('stays quiet when every slug is unique', () => {
+    const warn = vi.fn();
+    const sermons = [make({ slug: 'x' }), make({ slug: 'y' })];
+    expect(uniqueBySlug(sermons, warn)).toEqual(sermons);
+    expect(warn).not.toHaveBeenCalled();
   });
 });

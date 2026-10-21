@@ -1,12 +1,13 @@
 ---
 import HeroVideo from './hero-video.astro';
+import { HERO_POSTER } from '../lib/video/hero-poster';
 ---
 
 <div class="hero-stage">
   <div class="hero-stage__inner">
     <section class="hero" data-hero aria-labelledby="home-title">
       <div class="hero__media">
-        <HeroVideo poster="/video/lobby-poster" />
+        <HeroVideo poster={HERO_POSTER} />
       </div>
       <div class="hero__wash" aria-hidden="true"></div>
       <div class="container hero__inner">
