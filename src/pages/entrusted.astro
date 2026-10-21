@@ -1,0 +1,113 @@
+---
+import { getEntry, render } from 'astro:content';
+import ProseLayout from '../layouts/prose-layout.astro';
+import FaqList from '../components/faq-list.astro';
+import { entrustedExtrasSchema } from '../lib/entrusted-schema';
+import { renderInlineMarkdown } from '../lib/inline-markdown';
+
+const entry = await getEntry('pages', 'entrusted');
+if (!entry) throw new Error('Missing content entry: pages/entrusted');
+const { Content } = await render(entry);
+const { title, description, eyebrow } = entry.data;
+const { faqHeading, faq } = entrustedExtrasSchema.parse(entry.data);
+const items = faq.map((item) => ({
+  id: item.id,
+  question: item.question,
+  answer: renderInlineMarkdown(item.answer),
+}));
+const jumps = [
+  { href: '#understanding-entrusted', label: 'Understanding Entrusted' },
+  { href: '#aim-1', label: 'Aims' },
+  { href: '#making-a-commitment', label: 'Making a Commitment' },
+  { href: '#faqs', label: faqHeading },
+];
+---
+
+<ProseLayout
+  title={title}
+  description={description}
+  eyebrow={eyebrow}
+  reveal={false}
+>
+  <nav class="entrusted-jumps" aria-label="On this page">
+    <ol>
+      {jumps.map((jump) => (
+        <li>
+          <a href={jump.href}>{jump.label}</a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+
+  <div class="prose entrusted-body">
+    <Content />
+  </div>
+
+  <section class="entrusted-faq" data-reveal="fade" aria-labelledby="faqs">
+    <h2 id="faqs">{faqHeading}</h2>
+    <FaqList items={items} />
+  </section>
+</ProseLayout>
+
+<style>
+  .entrusted-jumps ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.75rem;
+    margin: 0 0 clamp(2rem, 5vw, 3rem);
+    padding: 0;
+    list-style: none;
+  }
+
+  .entrusted-jumps li {
+    margin: 0;
+  }
+
+  .entrusted-jumps a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    color: var(--navy);
+    font-family: var(--font-ui);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-decoration-color: var(--amber-ink);
+    text-decoration-thickness: 2px;
+  }
+
+  .entrusted-body {
+    max-width: none;
+  }
+
+  .entrusted-body :global(h2),
+  .entrusted-faq h2 {
+    scroll-margin-top: 5rem;
+  }
+
+  .entrusted-body :global(.entrusted-figure) {
+    margin: 0;
+    color: var(--navy);
+    font-family: var(--font-display);
+    font-size: var(--step-h2);
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+  }
+
+  .entrusted-body :global(.entrusted-image) {
+    display: block;
+    width: 100%;
+    max-width: 34rem;
+    height: auto;
+    margin-block: 1.5rem;
+  }
+
+  .entrusted-faq {
+    margin-top: clamp(3rem, 7vw, 5rem);
+  }
+
+  .entrusted-faq h2 {
+    margin: 0 0 1.25rem;
+    font-size: var(--step-h3);
+    line-height: 1.12;
+  }
+</style>
