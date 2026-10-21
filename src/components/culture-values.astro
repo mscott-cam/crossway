@@ -1,0 +1,66 @@
+---
+interface Value {
+  title: string;
+  verse: string;
+}
+
+interface Props {
+  values: readonly Value[];
+}
+
+const { values } = Astro.props;
+---
+
+<ol class="culture-values" data-culture-values>
+  {values.map((value) => (
+    <li class="culture-value" data-culture-value>
+      <h3 class="culture-value__title">{value.title}</h3>
+      <p class="culture-value__verse verse-cite" data-culture-verse>
+        {value.verse}
+      </p>
+    </li>
+  ))}
+</ol>
+
+<style>
+  .culture-values {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: value;
+    border-top: 1px solid var(--rule);
+  }
+
+  .culture-value {
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    column-gap: clamp(0.75rem, 3vw, 1.75rem);
+    align-items: baseline;
+    margin: 0;
+    padding-block: clamp(1.25rem, 3vw, 1.875rem);
+    border-bottom: 1px solid var(--rule);
+    counter-increment: value;
+  }
+
+  .culture-value::before {
+    content: counter(value);
+    grid-row: 1 / span 2;
+    color: var(--amber-ink);
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    line-height: 1.1;
+  }
+
+  .culture-values :global(.culture-value__title) {
+    margin: 0;
+    font-size: var(--step-h3);
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+  }
+
+  .culture-value__verse {
+    margin: 0.5rem 0 0;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+  }
+</style>

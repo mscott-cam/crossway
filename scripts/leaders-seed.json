@@ -1,0 +1,154 @@
+[
+  {
+    "_id": "leader-josh-de-koning",
+    "_type": "leader",
+    "name": "Josh de Koning",
+    "role": "Senior Pastor | Elder",
+    "group": "Elders",
+    "order": 1
+  },
+  {
+    "_id": "leader-nate-de-koning",
+    "_type": "leader",
+    "name": "Nate de Koning",
+    "role": "Associate Pastor | Elder",
+    "group": "Elders",
+    "order": 2
+  },
+  {
+    "_id": "leader-seth-kempf",
+    "_type": "leader",
+    "name": "Seth Kempf",
+    "role": "Associate Pastor | Elder",
+    "group": "Elders",
+    "order": 3
+  },
+  {
+    "_id": "leader-trebes-sasser",
+    "_type": "leader",
+    "name": "Trebes Sasser",
+    "role": "Pastor | Elder Chair",
+    "group": "Elders",
+    "order": 4
+  },
+  {
+    "_id": "leader-ruthanna-prislovsky",
+    "_type": "leader",
+    "name": "Ruthanna Prislovsky",
+    "role": "Children’s Ministry Director",
+    "group": "Staff",
+    "order": 1
+  },
+  {
+    "_id": "leader-aaron-orozco",
+    "_type": "leader",
+    "name": "Aaron Orozco",
+    "role": "Worship & Production Director",
+    "group": "Staff",
+    "order": 2
+  },
+  {
+    "_id": "leader-scott-barns",
+    "_type": "leader",
+    "name": "Scott Barns",
+    "role": "Church Operations Manager",
+    "group": "Staff",
+    "order": 3
+  },
+  {
+    "_id": "leader-scott-graham",
+    "_type": "leader",
+    "name": "Scott Graham",
+    "role": "Student Minister",
+    "group": "Staff",
+    "order": 4
+  },
+  {
+    "_id": "leader-richard-cobb",
+    "_type": "leader",
+    "name": "Richard Cobb",
+    "role": "Minister of Connections",
+    "group": "Staff",
+    "order": 5
+  },
+  {
+    "_id": "leader-campbell-sasser",
+    "_type": "leader",
+    "name": "Campbell Sasser",
+    "role": "Hospitality Team",
+    "group": "Deacons",
+    "order": 1
+  },
+  {
+    "_id": "leader-dave-ashley-pflug",
+    "_type": "leader",
+    "name": "Dave & Ashley Pflug",
+    "role": "Benevolence",
+    "group": "Deacons",
+    "order": 2
+  },
+  {
+    "_id": "leader-hope-carl-dufner",
+    "_type": "leader",
+    "name": "Hope & Carl Dufner",
+    "role": "Assimilation Team",
+    "group": "Deacons",
+    "order": 3
+  },
+  {
+    "_id": "leader-john-heather-boyle",
+    "_type": "leader",
+    "name": "John & Heather Boyle",
+    "role": "Director of Crossway Students",
+    "group": "Deacons",
+    "order": 4
+  },
+  {
+    "_id": "leader-liz-cobb",
+    "_type": "leader",
+    "name": "Liz Cobb",
+    "role": "Usher Team",
+    "group": "Deacons",
+    "order": 5
+  },
+  {
+    "_id": "leader-randy-standridge",
+    "_type": "leader",
+    "name": "Randy Standridge",
+    "role": "Band Leader",
+    "group": "Deacons",
+    "order": 6
+  },
+  {
+    "_id": "leader-richard-cobb-deacons",
+    "_type": "leader",
+    "name": "Richard Cobb",
+    "role": "Connections",
+    "group": "Deacons",
+    "order": 7
+  },
+  {
+    "_id": "leader-rob-angie-beggs",
+    "_type": "leader",
+    "name": "Rob & Angie Beggs",
+    "role": "Small Group Coaches",
+    "group": "Deacons",
+    "order": 8
+  },
+  {
+    "_id": "leader-terese-christy",
+    "_type": "leader",
+    "name": "Terese Christy",
+    "role": "Crossway Kids",
+    "group": "Deacons",
+    "order": 9
+  },
+  {
+    "_id": "leader-zack-kristen-clark",
+    "_type": "leader",
+    "name": "Zack & Kristen Clark",
+    "role": "Small Group Coaches",
+    "group": "Deacons",
+    "order": 10
+  }
+]

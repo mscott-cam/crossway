@@ -1,0 +1,23 @@
+---
+import { getEntry } from 'astro:content';
+import { z } from 'astro/zod';
+import ProseLayout from '../layouts/prose-layout.astro';
+import LeaderGrid from '../components/leader-grid.astro';
+import { resolveLeaders, rosterSchema } from '../lib/leaders';
+import { getLeaders } from '../lib/sanity/queries';
+
+const entry = await getEntry('pages', 'who-we-are');
+if (!entry) throw new Error('Missing content entry: pages/who-we-are');
+const { title, description, eyebrow } = entry.data;
+const { roster } = z.object({ roster: rosterSchema }).parse(entry.data);
+const leaders = resolveLeaders(await getLeaders(), roster);
+---
+
+<ProseLayout
+  title={title}
+  description={description}
+  eyebrow={eyebrow}
+  reveal={false}
+>
+  <LeaderGrid leaders={leaders} />
+</ProseLayout>

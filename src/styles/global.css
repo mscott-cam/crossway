@@ -329,20 +329,45 @@ html.js:not(.reduced):not(.motion-ready) [data-draw] {
 
 .prose {
   max-width: var(--measure);
+  font-size: 1.1875rem;
+  line-height: 1.7;
 }
 
 .prose > * + * {
   margin-top: 1.25em;
 }
 
+.prose > :first-child {
+  margin-top: 0;
+}
+
+.prose p {
+  margin-bottom: 0;
+}
+
 .prose h2 {
-  margin-top: 2.25em;
+  margin-top: 2.5em;
   font-size: var(--step-h3);
+  line-height: 1.12;
 }
 
 .prose h3 {
-  margin-top: 1.75em;
+  margin-top: 2em;
   font-size: var(--step-h4);
+  line-height: 1.2;
+}
+
+.prose h4 {
+  margin-top: 1.75em;
+  font-family: var(--font-ui);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.35;
+}
+
+.prose :is(h2, h3, h4) + * {
+  margin-top: 0.75em;
 }
 
 .prose ul,
@@ -359,11 +384,34 @@ html.js:not(.reduced):not(.motion-ready) [data-draw] {
   padding-left: 1.25rem;
   border-left: 2px solid var(--amber);
   font-family: var(--font-text);
+  font-size: 1.1875rem;
   font-style: italic;
+  line-height: 1.65;
+}
+
+.prose blockquote > * + * {
+  margin-top: 1em;
+}
+
+.prose hr {
+  margin-block: 2.5em;
+  border: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.prose .verse-refs {
+  margin-top: 0.75em;
+  color: var(--amber-ink);
+  font-size: 1rem;
+  font-variant-caps: all-small-caps;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  line-height: 1.5;
 }
 
 .prose a {
   color: var(--navy);
   text-decoration-color: var(--amber-ink);
   text-decoration-thickness: 2px;
+  overflow-wrap: anywhere;
 }

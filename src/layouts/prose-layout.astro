@@ -6,9 +6,10 @@ interface Props {
   title: string;
   description: string;
   eyebrow?: string;
+  reveal?: boolean;
 }
 
-const { title, description, eyebrow } = Astro.props;
+const { title, description, eyebrow, reveal = true } = Astro.props;
 ---
 
 <BaseLayout title={title} description={description}>
@@ -17,7 +18,7 @@ const { title, description, eyebrow } = Astro.props;
       {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
       <h1>{title}</h1>
     </header>
-    <div class="prose">
+    <div class="prose" data-reveal={reveal ? 'fade' : undefined}>
       <slot />
     </div>
   </article>

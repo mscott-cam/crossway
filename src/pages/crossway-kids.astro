@@ -1,0 +1,66 @@
+---
+import { getEntry, render } from 'astro:content';
+import { z } from 'astro/zod';
+import ProseLayout from '../layouts/prose-layout.astro';
+import { ageGroups } from '../lib/kids';
+
+const entry = await getEntry('pages', 'crossway-kids');
+if (!entry) throw new Error('Missing content entry: pages/crossway-kids');
+const { Content } = await render(entry);
+const { title, description, eyebrow } = entry.data;
+const { classesLabel, childSafetyLabel } = z
+  .object({ classesLabel: z.string(), childSafetyLabel: z.string() })
+  .parse(entry.data);
+---
+
+<ProseLayout
+  title={title}
+  description={description}
+  eyebrow={eyebrow}
+  reveal={false}
+>
+  <div data-reveal="fade">
+    <Content />
+  </div>
+  <section data-reveal="fade">
+    <p id="kids-classes" class="kids-classes">
+      {classesLabel}
+    </p>
+    <ul class="kids-ages" data-kids-ages aria-labelledby="kids-classes">
+      {ageGroups.map((group) => (
+        <li data-age-group>{group}</li>
+      ))}
+    </ul>
+    <p>
+      <a href="/child-safety">{childSafetyLabel}</a>
+    </p>
+  </section>
+</ProseLayout>
+
+<style>
+  .kids-classes {
+    margin: 0 0 0.75rem;
+    color: var(--navy);
+    font-weight: 600;
+  }
+
+  .kids-ages {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    margin: 0 0 1.5rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .kids-ages li {
+    margin: 0;
+    padding: 0.55rem 1rem;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    color: var(--navy);
+    font-family: var(--font-display);
+    font-size: 1.1875rem;
+    line-height: 1.2;
+  }
+</style>

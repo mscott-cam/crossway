@@ -58,3 +58,14 @@ describe('a site with no upcoming events', () => {
     expect(page).not.toContain('data-event');
   });
 });
+
+describe('a site with no leaders in Sanity', () => {
+  it('/who-we-are falls back to the roster in the page frontmatter', () => {
+    const page = html('who-we-are');
+    expect(page).toContain('Pastor | Elders');
+    expect(page).toContain('Josh de Koning');
+    expect(page).toContain('Senior Pastor | Elder');
+    expect(page).toContain('Kristen Clark');
+    expect(page.match(/data-leader(?=[\s>])/g)).toHaveLength(19);
+  });
+});
