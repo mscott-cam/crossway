@@ -1,0 +1,729 @@
+[
+  {
+    "_id": "sermon-entrusted-with-resources-putting-money-in-its-place-2026-10-18",
+    "title": "Entrusted With Resources - Putting Money In its Place",
+    "date": "2026-10-18",
+    "speaker": {
+      "_id": "speaker-josh-de-koning",
+      "name": "Josh de Koning",
+      "slug": "josh-de-koning",
+      "role": "Lead Pastor"
+    },
+    "series": {
+      "_id": "series-entrusted",
+      "title": "Entrusted",
+      "slug": "entrusted",
+      "description": "What it looks like to steward everything God has given us.",
+      "isStandalone": false
+    },
+    "book": "1 Timothy",
+    "passage": "1 Timothy 6:6–19",
+    "vimeoUrl": "https://vimeo.com/76979871",
+    "slug": "entrusted-with-resources-putting-money-in-its-place-2026-10-18",
+    "description": "A short description used in fixtures."
+  },
+  {
+    "_id": "sermon-entrusted-a-way-of-life-2026-10-11",
+    "title": "Entrusted - A Way of Life",
+    "date": "2026-10-11",
+    "speaker": {
+      "_id": "speaker-josh-de-koning",
+      "name": "Josh de Koning",
+      "slug": "josh-de-koning",
+      "role": "Lead Pastor"
+    },
+    "series": {
+      "_id": "series-entrusted",
+      "title": "Entrusted",
+      "slug": "entrusted",
+      "description": "What it looks like to steward everything God has given us.",
+      "isStandalone": false
+    },
+    "book": "Luke",
+    "passage": "Luke 12:13–21",
+    "vimeoUrl": "https://vimeo.com/76979872",
+    "slug": "entrusted-a-way-of-life-2026-10-11"
+  },
+  {
+    "_id": "sermon-faith-that-doesnt-unravel-2026-09-06",
+    "title": "Faith That Doesn’t Unravel",
+    "date": "2026-09-06",
+    "speaker": {
+      "_id": "speaker-josh-collins",
+      "name": "Josh Collins",
+      "slug": "josh-collins"
+    },
+    "series": {
+      "_id": "series-faith-that-doesnt-unravel",
+      "title": "Faith That Doesn’t Unravel",
+      "slug": "faith-that-doesnt-unravel",
+      "description": "A walk through the book of James.",
+      "isStandalone": false
+    },
+    "book": "James",
+    "passage": "James 1:1–12",
+    "vimeoUrl": "https://vimeo.com/76979873",
+    "slug": "faith-that-doesnt-unravel-2026-09-06"
+  },
+  {
+    "_id": "sermon-doers-of-the-word-2026-08-30",
+    "title": "Doers of the Word",
+    "date": "2026-08-30",
+    "speaker": {
+      "_id": "speaker-josh-collins",
+      "name": "Josh Collins",
+      "slug": "josh-collins"
+    },
+    "series": {
+      "_id": "series-faith-that-doesnt-unravel",
+      "title": "Faith That Doesn’t Unravel",
+      "slug": "faith-that-doesnt-unravel",
+      "description": "A walk through the book of James.",
+      "isStandalone": false
+    },
+    "book": "James",
+    "passage": "James 1:19–27",
+    "vimeoUrl": "https://vimeo.com/76979874",
+    "slug": "doers-of-the-word-2026-08-30"
+  },
+  {
+    "_id": "sermon-faith-and-favoritism-2026-08-23",
+    "title": "Faith and Favoritism",
+    "date": "2026-08-23",
+    "speaker": {
+      "_id": "speaker-scott-graham",
+      "name": "Scott Graham",
+      "slug": "scott-graham",
+      "role": "Guest Speaker"
+    },
+    "series": {
+      "_id": "series-faith-that-doesnt-unravel",
+      "title": "Faith That Doesn’t Unravel",
+      "slug": "faith-that-doesnt-unravel",
+      "description": "A walk through the book of James.",
+      "isStandalone": false
+    },
+    "book": "James",
+    "passage": "James 2:1–13",
+    "vimeoUrl": "https://vimeo.com/76979875",
+    "slug": "faith-and-favoritism-2026-08-23",
+    "description": "A short description used in fixtures."
+  },
+  {
+    "_id": "sermon-faith-that-works-2026-08-16",
+    "title": "Faith That Works",
+    "date": "2026-08-16",
+    "speaker": {
+      "_id": "speaker-josh-de-koning",
+      "name": "Josh de Koning",
+      "slug": "josh-de-koning",
+      "role": "Lead Pastor"
+    },
+    "series": {
+      "_id": "series-faith-that-doesnt-unravel",
+      "title": "Faith That Doesn’t Unravel",
+      "slug": "faith-that-doesnt-unravel",
+      "description": "A walk through the book of James.",
+      "isStandalone": false
+    },
+    "book": "James",
+    "passage": "James 2:14–26",
+    "vimeoUrl": "https://vimeo.com/76979876",
+    "slug": "faith-that-works-2026-08-16"
+  },
+  {
+    "_id": "sermon-the-lord-is-my-shepherd-2026-07-26",
+    "title": "The Lord Is My Shepherd",
+    "date": "2026-07-26",
+    "speaker": {
+      "_id": "speaker-josh-de-koning",
+      "name": "Josh de Koning",
+      "slug": "josh-de-koning",
+      "role": "Lead Pastor"
+    },
+    "series": {
+      "_id": "series-songs-for-the-journey",
+      "title": "Songs for the Journey",
+      "slug": "songs-for-the-journey",
+      "isStandalone": false
+    },
+    "book": "Psalms",
+    "passage": "Psalm 23",
+    "vimeoUrl": "https://vimeo.com/76979877",
+    "slug": "the-lord-is-my-shepherd-2026-07-26"
+  },
+  {
+    "_id": "sermon-blessed-is-the-one-2026-07-19",
+    "title": "Blessed Is the One",
+    "date": "2026-07-19",
+    "speaker": {
+      "_id": "speaker-josh-collins",
+      "name": "Josh Collins",
+      "slug": "josh-collins"
+    },
+    "series": {
+      "_id": "series-songs-for-the-journey",
+      "title": "Songs for the Journey",
+      "slug": "songs-for-the-journey",
+      "isStandalone": false
+    },
+    "book": "Psalms",
+    "passage": "Psalm 1",
+    "vimeoUrl": "https://vimeo.com/76979878",
+    "slug": "blessed-is-the-one-2026-07-19"
+  },
+  {
+    "_id": "sermon-create-in-me-a-clean-heart-2026-07-12",
+    "title": "Create in Me a Clean Heart",
+    "date": "2026-07-12",
+    "speaker": {
+      "_id": "speaker-josh-de-koning",
+      "name": "Josh de Koning",
+      "slug": "josh-de-koning",
+      "role": "Lead Pastor"
+    },
+    "series": {
+      "_id": "series-songs-for-the-journey",
+      "title": "Songs for the Journey",
+      "slug": "songs-for-the-journey",
+      "isStandalone": false
+    },
+    "book": "Psalms",
+    "passage": "Psalm 51",
+    "vimeoUrl": "https://vimeo.com/76979879",
+    "slug": "create-in-me-a-clean-heart-2026-07-12",
+    "description": "A short description used in fixtures."
+  },
+  {
+    "_id": "sermon-i-lift-up-my-eyes-2026-07-05",
+    "title": "I Lift Up My Eyes",
+    "date": "2026-07-05",
+    "speaker": {
+      "_id": "speaker-scott-graham",
+      "name": "Scott Graham",
+      "slug": "scott-graham",
+      "role": "Guest Speaker"
+    },
+    "series": {
+      "_id": "series-songs-for-the-journey",
+      "title": "Songs for the Journey",
+      "slug": "songs-for-the-journey",
+      "isStandalone": false
+    },
+    "book": "Psalms",
+    "passage": "Psalm 121",
+    "vimeoUrl": "https://vimeo.com/76979880",
+    "slug": "i-lift-up-my-eyes-2026-07-05"
+  },
+  {
+    "_id": "sermon-search-me-o-god-2026-06-28",
+    "title": "Search Me, O God",
+    "date": "2026-06-28",
+    "speaker": {
+      "_id": "speaker-josh-collins",
+      "name": "Josh Collins",
+      "slug": "josh-collins"
+    },
+    "series": {
+      "_id": "series-songs-for-the-journey",
+      "title": "Songs for the Journey",
+      "slug": "songs-for-the-journey",
+      "isStandalone": false
+    },
+    "book": "Psalms",
+    "passage": "Psalm 139",
+    "vimeoUrl": "https://vimeo.com/76979881",
+    "slug": "search-me-o-god-2026-06-28"
+  },
+  {
+    "_id": "sermon-hope-in-the-waiting-2026-06-14",
+    "title": "Hope in the Waiting",
+    "date": "2026-06-14",
+    "speaker": {
+      "_id": "speaker-josh-de-koning",
+      "name": "Josh de Koning",
+      "slug": "josh-de-koning",
+      "role": "Lead Pastor"
+    },
+    "series": {
+      "_id": "series-stand-alone-messages",
+      "title": "Stand Alone Messages",
+      "slug": "stand-alone-messages",
+      "isStandalone": true
+    },
+    "book": "Lamentations",
+    "passage": "Lamentations 3:19–26",
+    "slug": "hope-in-the-waiting-2026-06-14"
+  },
+  {
+    "_id": "sermon-rooted-in-christ-2026-06-07",
+    "title": "Rooted in Christ",
+    "date": "2026-06-07",
+    "speaker": {
+      "_id": "speaker-josh-collins",
+      "name": "Josh Collins",
+      "slug": "josh-collins"
+    },
+    "series": {
+      "_id": "series-stand-alone-messages",
+      "title": "Stand Alone Messages",
+      "slug": "stand-alone-messages",
+      "isStandalone": true
+    },
+    "book": "Colossians",
+    "passage": "Colossians 2:6–7",
+    "vimeoUrl": "not a vimeo link",
+    "slug": "rooted-in-christ-2026-06-07",
+    "description": "A short description used in fixtures."
+  },
+  {
+    "_id": "sermon-in-the-beginning-2026-05-31",
+    "title": "In the Beginning",
+    "date": "2026-05-31",
+    "speaker": {
+      "_id": "speaker-josh-de-koning",
+      "name": "Josh de Koning",
+      "slug": "josh-de-koning",
+      "role": "Lead Pastor"
+    },
+    "series": {
+      "_id": "series-the-gospel-of-john",
+      "title": "The Gospel of John",
+      "slug": "the-gospel-of-john",
+      "description": "Seeing Jesus through John’s eyes.",
+      "isStandalone": false
+    },
+    "book": "John",
+    "passage": "John 1:1–18",
+    "vimeoUrl": "https://vimeo.com/76979884",
+    "slug": "in-the-beginning-2026-05-31"
+  },
+  {
+    "_id": "sermon-come-and-see-2026-05-24",
+    "title": "Come and See",
+    "date": "2026-05-24",
+    "speaker": {
+      "_id": "speaker-josh-collins",
+      "name": "Josh Collins",
+      "slug": "josh-collins"
+    },
+    "series": {
+      "_id": "series-the-gospel-of-john",
+      "title": "The Gospel of John",
+      "slug": "the-gospel-of-john",
+      "description": "Seeing Jesus through John’s eyes.",
+      "isStandalone": false
+    },
+    "book": "John",
+    "passage": "John 1:35–51",
+    "vimeoUrl": "https://vimeo.com/76979885",
+    "slug": "come-and-see-2026-05-24"
+  },
+  {
+    "_id": "sermon-born-again-2026-05-17",
+    "title": "Born Again",
+    "date": "2026-05-17",
+    "speaker": {
+      "_id": "speaker-scott-graham",
+      "name": "Scott Graham",
+      "slug": "scott-graham",
+      "role": "Guest Speaker"
+    },
+    "series": {
+      "_id": "series-the-gospel-of-john",
+      "title": "The Gospel of John",
+      "slug": "the-gospel-of-john",
+      "description": "Seeing Jesus through John’s eyes.",
+      "isStandalone": false
+    },
+    "book": "John",
+    "passage": "John 3:1–21",
+    "vimeoUrl": "https://vimeo.com/76979886",
+    "slug": "born-again-2026-05-17"
+  },
+  {
+    "_id": "sermon-living-water-2026-05-10",
+    "title": "Living Water",
+    "date": "2026-05-10",
+    "speaker": {
+      "_id": "speaker-josh-de-koning",
+      "name": "Josh de Koning",
+      "slug": "josh-de-koning",
+      "role": "Lead Pastor"
+    },
+    "series": {
+      "_id": "series-the-gospel-of-john",
+      "title": "The Gospel of John",
+      "slug": "the-gospel-of-john",
+      "description": "Seeing Jesus through John’s eyes.",
+      "isStandalone": false
+    },
+    "book": "John",
+    "passage": "John 4:1–26",
+    "vimeoUrl": "https://vimeo.com/76979887",
+    "slug": "living-water-2026-05-10",
+    "description": "A short description used in fixtures."
+  },
+  {
+    "_id": "sermon-the-bread-of-life-2026-05-03",
+    "title": "The Bread of Life",
+    "date": "2026-05-03",
+    "speaker": {
+      "_id": "speaker-josh-collins",
+      "name": "Josh Collins",
+      "slug": "josh-collins"
+    },
+    "series": {
+      "_id": "series-the-gospel-of-john",
+      "title": "The Gospel of John",
+      "slug": "the-gospel-of-john",
+      "description": "Seeing Jesus through John’s eyes.",
+      "isStandalone": false
+    },
+    "book": "John",
+    "passage": "John 6:25–40",
+    "vimeoUrl": "https://vimeo.com/76979888",
+    "slug": "the-bread-of-life-2026-05-03"
+  },
+  {
+    "_id": "sermon-the-good-shepherd-2026-04-26",
+    "title": "The Good Shepherd",
+    "date": "2026-04-26",
+    "speaker": {
+      "_id": "speaker-scott-graham",
+      "name": "Scott Graham",
+      "slug": "scott-graham",
+      "role": "Guest Speaker"
+    },
+    "series": {
+      "_id": "series-the-gospel-of-john",
+      "title": "The Gospel of John",
+      "slug": "the-gospel-of-john",
+      "description": "Seeing Jesus through John’s eyes.",
+      "isStandalone": false
+    },
+    "book": "John",
+    "passage": "John 10:1–18",
+    "vimeoUrl": "https://vimeo.com/76979889",
+    "slug": "the-good-shepherd-2026-04-26"
+  },
+  {
+    "_id": "sermon-lazarus-come-out-2026-04-19",
+    "title": "Lazarus, Come Out",
+    "date": "2026-04-19",
+    "speaker": {
+      "_id": "speaker-josh-de-koning",
+      "name": "Josh de Koning",
+      "slug": "josh-de-koning",
+      "role": "Lead Pastor"
+    },
+    "series": {
+      "_id": "series-the-gospel-of-john",
+      "title": "The Gospel of John",
+      "slug": "the-gospel-of-john",
+      "description": "Seeing Jesus through John’s eyes.",
+      "isStandalone": false
+    },
+    "book": "John",
+    "passage": "John 11:17–44",
+    "vimeoUrl": "https://vimeo.com/76979890",
+    "slug": "lazarus-come-out-2026-04-19"
+  },
+  {
+    "_id": "sermon-the-true-vine-2026-04-12",
+    "title": "The True Vine",
+    "date": "2026-04-12",
+    "speaker": {
+      "_id": "speaker-josh-collins",
+      "name": "Josh Collins",
+      "slug": "josh-collins"
+    },
+    "series": {
+      "_id": "series-the-gospel-of-john",
+      "title": "The Gospel of John",
+      "slug": "the-gospel-of-john",
+      "description": "Seeing Jesus through John’s eyes.",
+      "isStandalone": false
+    },
+    "book": "John",
+    "passage": "John 15:1–11",
+    "vimeoUrl": "https://vimeo.com/76979891",
+    "slug": "the-true-vine-2026-04-12",
+    "description": "A short description used in fixtures."
+  },
+  {
+    "_id": "sermon-it-is-finished-2026-04-05",
+    "title": "It Is Finished",
+    "date": "2026-04-05",
+    "speaker": {
+      "_id": "speaker-scott-graham",
+      "name": "Scott Graham",
+      "slug": "scott-graham",
+      "role": "Guest Speaker"
+    },
+    "series": {
+      "_id": "series-the-gospel-of-john",
+      "title": "The Gospel of John",
+      "slug": "the-gospel-of-john",
+      "description": "Seeing Jesus through John’s eyes.",
+      "isStandalone": false
+    },
+    "book": "John",
+    "passage": "John 19:28–37",
+    "vimeoUrl": "https://vimeo.com/76979892",
+    "slug": "it-is-finished-2026-04-05"
+  },
+  {
+    "_id": "sermon-peace-be-with-you-2026-03-29",
+    "title": "Peace Be with You",
+    "date": "2026-03-29",
+    "speaker": {
+      "_id": "speaker-josh-de-koning",
+      "name": "Josh de Koning",
+      "slug": "josh-de-koning",
+      "role": "Lead Pastor"
+    },
+    "series": {
+      "_id": "series-the-gospel-of-john",
+      "title": "The Gospel of John",
+      "slug": "the-gospel-of-john",
+      "description": "Seeing Jesus through John’s eyes.",
+      "isStandalone": false
+    },
+    "book": "John",
+    "passage": "John 20:19–31",
+    "vimeoUrl": "https://vimeo.com/76979893",
+    "slug": "peace-be-with-you-2026-03-29"
+  },
+  {
+    "_id": "sermon-justified-by-faith-2026-03-01",
+    "title": "Justified by Faith",
+    "date": "2026-03-01",
+    "speaker": {
+      "_id": "speaker-josh-de-koning",
+      "name": "Josh de Koning",
+      "slug": "josh-de-koning",
+      "role": "Lead Pastor"
+    },
+    "series": {
+      "_id": "series-stand-alone-messages",
+      "title": "Stand Alone Messages",
+      "slug": "stand-alone-messages",
+      "isStandalone": true
+    },
+    "book": "Romans",
+    "passage": "Romans 5:1–11",
+    "vimeoUrl": "https://vimeo.com/76979894",
+    "slug": "justified-by-faith-2026-03-01"
+  },
+  {
+    "_id": "sermon-walk-worthy-2026-02-08",
+    "title": "Walk Worthy",
+    "date": "2026-02-08",
+    "speaker": {
+      "_id": "speaker-josh-collins",
+      "name": "Josh Collins",
+      "slug": "josh-collins"
+    },
+    "series": {
+      "_id": "series-stand-alone-messages",
+      "title": "Stand Alone Messages",
+      "slug": "stand-alone-messages",
+      "isStandalone": true
+    },
+    "book": "Ephesians",
+    "passage": "Ephesians 4:1–16",
+    "vimeoUrl": "https://vimeo.com/76979895",
+    "slug": "walk-worthy-2026-02-08",
+    "description": "A short description used in fixtures."
+  },
+  {
+    "_id": "sermon-where-were-you-2026-01-11",
+    "title": "Where Were You?",
+    "date": "2026-01-11",
+    "speaker": {
+      "_id": "speaker-scott-graham",
+      "name": "Scott Graham",
+      "slug": "scott-graham",
+      "role": "Guest Speaker"
+    },
+    "series": {
+      "_id": "series-stand-alone-messages",
+      "title": "Stand Alone Messages",
+      "slug": "stand-alone-messages",
+      "isStandalone": true
+    },
+    "book": "Job",
+    "passage": "Job 38:1–18",
+    "vimeoUrl": "https://vimeo.com/76979896",
+    "slug": "where-were-you-2026-01-11"
+  },
+  {
+    "_id": "sermon-count-it-all-joy-2025-12-07",
+    "title": "Count It All Joy",
+    "date": "2025-12-07",
+    "speaker": {
+      "_id": "speaker-josh-de-koning",
+      "name": "Josh de Koning",
+      "slug": "josh-de-koning",
+      "role": "Lead Pastor"
+    },
+    "series": {
+      "_id": "series-stand-alone-messages",
+      "title": "Stand Alone Messages",
+      "slug": "stand-alone-messages",
+      "isStandalone": true
+    },
+    "book": "Philippians",
+    "passage": "Philippians 3:7–14",
+    "vimeoUrl": "https://vimeo.com/76979897",
+    "slug": "count-it-all-joy-2025-12-07"
+  },
+  {
+    "_id": "sermon-let-the-little-children-2025-11-02",
+    "title": "Let the Little Children",
+    "date": "2025-11-02",
+    "speaker": {
+      "_id": "speaker-josh-collins",
+      "name": "Josh Collins",
+      "slug": "josh-collins"
+    },
+    "series": {
+      "_id": "series-stand-alone-messages",
+      "title": "Stand Alone Messages",
+      "slug": "stand-alone-messages",
+      "isStandalone": true
+    },
+    "book": "Mark",
+    "passage": "Mark 10:13–16",
+    "vimeoUrl": "https://vimeo.com/76979898",
+    "slug": "let-the-little-children-2025-11-02"
+  },
+  {
+    "_id": "sermon-a-faith-that-endures-2025-09-28",
+    "title": "A Faith That Endures",
+    "date": "2025-09-28",
+    "speaker": {
+      "_id": "speaker-josh-de-koning",
+      "name": "Josh de Koning",
+      "slug": "josh-de-koning",
+      "role": "Lead Pastor"
+    },
+    "series": {
+      "_id": "series-stand-alone-messages",
+      "title": "Stand Alone Messages",
+      "slug": "stand-alone-messages",
+      "isStandalone": true
+    },
+    "book": "Hebrews",
+    "passage": "Hebrews 11:1–16",
+    "vimeoUrl": "https://vimeo.com/76979899",
+    "slug": "a-faith-that-endures-2025-09-28",
+    "description": "A short description used in fixtures."
+  },
+  {
+    "_id": "sermon-spirit-and-power-2025-08-17",
+    "title": "Spirit and Power",
+    "date": "2025-08-17",
+    "speaker": {
+      "_id": "speaker-scott-graham",
+      "name": "Scott Graham",
+      "slug": "scott-graham",
+      "role": "Guest Speaker"
+    },
+    "series": {
+      "_id": "series-stand-alone-messages",
+      "title": "Stand Alone Messages",
+      "slug": "stand-alone-messages",
+      "isStandalone": true
+    },
+    "book": "Acts",
+    "passage": "Acts 2:1–21",
+    "vimeoUrl": "https://vimeo.com/76979900",
+    "slug": "spirit-and-power-2025-08-17"
+  },
+  {
+    "_id": "sermon-comfort-my-people-2025-06-29",
+    "title": "Comfort My People",
+    "date": "2025-06-29",
+    "speaker": {
+      "_id": "speaker-josh-de-koning",
+      "name": "Josh de Koning",
+      "slug": "josh-de-koning",
+      "role": "Lead Pastor"
+    },
+    "series": {
+      "_id": "series-stand-alone-messages",
+      "title": "Stand Alone Messages",
+      "slug": "stand-alone-messages",
+      "isStandalone": true
+    },
+    "book": "Isaiah",
+    "passage": "Isaiah 40:1–11",
+    "vimeoUrl": "https://vimeo.com/76979901",
+    "slug": "comfort-my-people-2025-06-29"
+  },
+  {
+    "_id": "sermon-the-lord-will-provide-2025-01-26",
+    "title": "The Lord Will Provide",
+    "date": "2025-01-26",
+    "speaker": {
+      "_id": "speaker-josh-collins",
+      "name": "Josh Collins",
+      "slug": "josh-collins"
+    },
+    "series": {
+      "_id": "series-stand-alone-messages",
+      "title": "Stand Alone Messages",
+      "slug": "stand-alone-messages",
+      "isStandalone": true
+    },
+    "book": "Genesis",
+    "passage": "Genesis 22:1–14",
+    "vimeoUrl": "https://vimeo.com/76979902",
+    "slug": "the-lord-will-provide-2025-01-26"
+  },
+  {
+    "_id": "sermon-worthy-is-the-lamb-2024-11-03",
+    "title": "Worthy Is the Lamb",
+    "date": "2024-11-03",
+    "speaker": {
+      "_id": "speaker-josh-de-koning",
+      "name": "Josh de Koning",
+      "slug": "josh-de-koning",
+      "role": "Lead Pastor"
+    },
+    "series": {
+      "_id": "series-stand-alone-messages",
+      "title": "Stand Alone Messages",
+      "slug": "stand-alone-messages",
+      "isStandalone": true
+    },
+    "book": "Revelation",
+    "passage": "Revelation 5:1–14",
+    "vimeoUrl": "https://vimeo.com/76979903",
+    "slug": "worthy-is-the-lamb-2024-11-03",
+    "description": "A short description used in fixtures."
+  },
+  {
+    "_id": "sermon-remember-the-old-paths-2019-01-06",
+    "title": "Remember the Old Paths",
+    "date": "2019-01-06",
+    "speaker": {
+      "_id": "speaker-josh-de-koning",
+      "name": "Josh de Koning",
+      "slug": "josh-de-koning",
+      "role": "Lead Pastor"
+    },
+    "series": {
+      "_id": "series-stand-alone-messages",
+      "title": "Stand Alone Messages",
+      "slug": "stand-alone-messages",
+      "isStandalone": true
+    },
+    "book": "Jeremiah",
+    "passage": "Jeremiah 6:16",
+    "vimeoUrl": "https://vimeo.com/76979904",
+    "slug": "remember-the-old-paths-2019-01-06"
+  }
+]

@@ -1,0 +1,72 @@
+[
+  {
+    "_id": "leader-josh-de-koning",
+    "name": "Josh de Koning",
+    "role": "Lead Pastor",
+    "group": "Staff",
+    "order": 1
+  },
+  {
+    "_id": "leader-josh-collins",
+    "name": "Josh Collins",
+    "role": "Pastor",
+    "group": "Staff",
+    "order": 2
+  },
+  {
+    "_id": "leader-scott-graham",
+    "name": "Scott Graham",
+    "role": "Director of Operations",
+    "group": "Staff",
+    "order": 3
+  },
+  {
+    "_id": "leader-daniel-ortega",
+    "name": "Daniel Ortega",
+    "role": "Elder",
+    "group": "Elders",
+    "order": 1
+  },
+  {
+    "_id": "leader-marcus-bell",
+    "name": "Marcus Bell",
+    "role": "Elder",
+    "group": "Elders",
+    "order": 2
+  },
+  {
+    "_id": "leader-peter-nguyen",
+    "name": "Peter Nguyen",
+    "role": "Elder",
+    "group": "Elders",
+    "order": 3
+  },
+  {
+    "_id": "leader-andrew-whitfield",
+    "name": "Andrew Whitfield",
+    "role": "Deacon",
+    "group": "Deacons",
+    "order": 1
+  },
+  {
+    "_id": "leader-luis-hernandez",
+    "name": "Luis Hernandez",
+    "role": "Deacon",
+    "group": "Deacons",
+    "order": 2
+  },
+  {
+    "_id": "leader-rachel-collins",
+    "name": "Rachel Collins",
+    "role": "Kids Ministry Director",
+    "group": "Ministry Leaders",
+    "order": 1
+  },
+  {
+    "_id": "leader-grace-ortega",
+    "name": "Grace Ortega",
+    "role": "Women’s Ministry Leader",
+    "group": "Ministry Leaders",
+    "order": 2
+  }
+]

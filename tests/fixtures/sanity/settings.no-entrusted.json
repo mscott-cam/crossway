@@ -1,0 +1,23 @@
+{
+  "serviceTimes": ["9:00", "10:45"],
+  "sundayCardRows": [
+    {
+      "label": "Kids & Students",
+      "value": "Both services"
+    },
+    {
+      "label": "Address",
+      "value": "15759 San Pedro Ave, San Antonio, TX 78232",
+      "href": "https://maps.app.goo.gl/o7uWJUWy6KxYDraX7"
+    },
+    {
+      "label": "Can’t make it?",
+      "value": "Watch live",
+      "href": "https://live.crosswaysa.org/"
+    }
+  ],
+  "announcement": {
+    "enabled": false
+  },
+  "showEntrustedOnHome": false
+}

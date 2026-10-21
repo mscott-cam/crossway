@@ -1,0 +1,19 @@
+[
+  {
+    "_id": "speaker-josh-de-koning",
+    "name": "Josh de Koning",
+    "slug": "josh-de-koning",
+    "role": "Lead Pastor"
+  },
+  {
+    "_id": "speaker-josh-collins",
+    "name": "Josh Collins",
+    "slug": "josh-collins"
+  },
+  {
+    "_id": "speaker-scott-graham",
+    "name": "Scott Graham",
+    "slug": "scott-graham",
+    "role": "Guest Speaker"
+  }
+]

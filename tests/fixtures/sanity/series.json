@@ -1,0 +1,35 @@
+[
+  {
+    "_id": "series-entrusted",
+    "title": "Entrusted",
+    "slug": "entrusted",
+    "description": "What it looks like to steward everything God has given us.",
+    "isStandalone": false
+  },
+  {
+    "_id": "series-faith-that-doesnt-unravel",
+    "title": "Faith That Doesn’t Unravel",
+    "slug": "faith-that-doesnt-unravel",
+    "description": "A walk through the book of James.",
+    "isStandalone": false
+  },
+  {
+    "_id": "series-songs-for-the-journey",
+    "title": "Songs for the Journey",
+    "slug": "songs-for-the-journey",
+    "isStandalone": false
+  },
+  {
+    "_id": "series-the-gospel-of-john",
+    "title": "The Gospel of John",
+    "slug": "the-gospel-of-john",
+    "description": "Seeing Jesus through John’s eyes.",
+    "isStandalone": false
+  },
+  {
+    "_id": "series-stand-alone-messages",
+    "title": "Stand Alone Messages",
+    "slug": "stand-alone-messages",
+    "isStandalone": true
+  }
+]

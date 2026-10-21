@@ -1,3 +1,5 @@
+import { sermonSlug } from '../../src/lib/slug';
+
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export function defaultSermonDate(now: Date = new Date()): string {
@@ -18,12 +20,5 @@ export function defaultSermonDate(now: Date = new Date()): string {
 }
 
 export function sermonSlugSource(title: string, date?: string): string {
-  const slugTitle = title
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/['‘’]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-  return [slugTitle, date].filter(Boolean).join('-');
+  return sermonSlug(title, date ?? '');
 }
