@@ -33,7 +33,7 @@ Set these in Vercel under Project, Settings, Environment Variables. BUILD variab
 "Required" means required for a working production site. Most variables degrade rather than crash, but a few do not:
 
 - Production builds fail without `SANITY_PROJECT_ID` ([build guard](#production-build-guard)).
-- In production the contact form answers 503 unless `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL` and `TURNSTILE_SECRET_KEY` are all set.
+- The contact form answers 503 in any environment unless `RESEND_API_KEY` and `CONTACT_TO_EMAIL` are set. In production it also answers 503 unless `CONTACT_FROM_EMAIL` and `TURNSTILE_SECRET_KEY` are set.
 - The cron endpoint answers 503 unless `CRON_SECRET` and `VERCEL_DEPLOY_HOOK_URL` are set.
 
 | Variable                   | When    | Required in production                     | Used by                                                                                                                                      |
@@ -92,8 +92,8 @@ Pages are generated at build time. Content only changes on the live site after a
 
 Editors' changes go live when Sanity calls a Vercel Deploy Hook.
 
-1. Vercel: Project, Settings, Git, Deploy Hooks. Create a hook named "Sanity publish" for the production branch and copy its URL.
-2. sanity.io/manage: the project, API, Webhooks, Create webhook.
+1. Vercel: in the project settings, look for Git and Deploy Hooks (wording may have changed). Create a hook named "Sanity publish" for the production branch and copy its URL.
+2. sanity.io/manage: in the project, look for API and Webhooks and create a webhook.
    - Dataset: `production`
    - Trigger on: create, update and delete
    - Filter (document types): `_type in ["sermon", "series", "speaker", "leader", "siteSettings"]`
@@ -109,7 +109,7 @@ On Vercel's Hobby plan a cron fires anywhere within the scheduled hour (precisio
 
 The endpoint checks `Authorization: Bearer $CRON_SECRET` (Vercel Cron sends this header automatically when `CRON_SECRET` is set), then POSTs `VERCEL_DEPLOY_HOOK_URL`. It fails closed: it answers 503 if either variable is unset or if the hook URL is not an `https://api.vercel.com/v1/integrations/deploy/...` URL, and 401 for a missing or wrong token. It never logs the secret or the hook URL.
 
-Setup: set `CRON_SECRET` (any long random string) and `VERCEL_DEPLOY_HOOK_URL` in the Vercel Production environment, then redeploy. The cron runs on production deployments only. To check it, open Project, Settings, Cron Jobs, and press Run.
+Setup: set `CRON_SECRET` (any long random string) and `VERCEL_DEPLOY_HOOK_URL` in the Vercel Production environment, then redeploy. The cron runs on production deployments only. To check it, look for Cron Jobs in the project settings and use its run button (wording may have changed).
 
 How the cron is wired: `@astrojs/vercel` writes `.vercel/output/config.json` without a `crons` key and does not read `crons` from `vercel.json`. Vercel's own build step merges `vercel.json` `crons` into the output config. This was checked by running `vercel build` locally on this repo: the resulting `config.json` contains the cron.
 
@@ -133,7 +133,7 @@ Legacy sermon redirects (old Webflow `/sermons/{slug}` URLs to the new dated slu
 
 ### Seeding leaders
 
-`scripts/leaders-seed.json` holds the 19 leader documents (regenerate with `npx tsx scripts/make-leaders-seed.ts`). Sanity's importer wants NDJSON, so convert and import into the `production` dataset:
+`scripts/leaders-seed.json` holds the 19 leader documents (regenerate with `npx tsx scripts/make-leaders-seed.ts`). This is a developer-level step (command line, needs `jq`): ask whoever maintains the site to run it. Sanity's importer wants NDJSON, so convert and import into the `production` dataset:
 
 ```
 jq -c '.[]' scripts/leaders-seed.json > /tmp/leaders.ndjson
@@ -156,7 +156,7 @@ See [scripts/README-import.md](scripts/README-import.md) for the Webflow sermon 
 
 Run `npm test` and `npx astro check` before every commit. Run `npm run test:e2e` before a deploy. `npm run perf` binds ports 4410 and 4411.
 
-Last measured (Task 21 part A): `npm test` and `npm run test:e2e` all green; Lighthouse mobile median across the five URLs: performance 98 to 99, accessibility 100, best practices 100, SEO 100; worst LCP about 2.1 s (limit 2.5 s), CLS 0, TBT 0.
+Last measured: `npm test` and `npm run test:e2e` all green; Lighthouse mobile median across the five URLs: performance 98 to 99, accessibility 100, best practices 100, SEO 100; worst LCP about 2.1 s (limit 2.5 s), CLS 0, TBT 0.
 
 What that measurement is: the fixtures build served locally with `scripts/lhci-server.mjs`, which fronts the Node adapter with brotli so text transfer matches Vercel (the Node adapter alone serves uncompressed, which overstated LCP at 3.0 to 3.3 s). Real Sanity, Planning Center, Vimeo and Spreaker traffic is not included. A Lighthouse run against the first Vercel preview URL is a launch step (see the checklist).
 
@@ -169,29 +169,32 @@ Owner-dependent steps, in order. Nothing here has been done yet. Tick items as t
 - [ ] Sanity (owner): create a project at sanity.io/manage with a `production` dataset (or run `npx sanity init` inside `studio/`). Note the project ID.
 - [ ] Put the ID in `studio/.env` as `SANITY_STUDIO_PROJECT_ID`, run `npm --prefix studio run dev`, create one test sermon with the six required fields, then delete it.
 - [ ] Deploy the Studio: `npm --prefix studio run deploy` (run `npx sanity login` in `studio/` first if needed).
-- [ ] Invite the sermon editor: sanity.io/manage, the project, Members, Invite, Editor role.
+- [ ] Invite the sermon editor: in the project's settings at sanity.io/manage, look for the members or invite section and give them the Editor role. (Menu wording may have changed.)
 
 ### 2. Import content
 
 - [ ] In Webflow, export the CMS collections "Sermons" and "Series" as CSV into `scripts/data/` (gitignored).
 - [ ] `npx tsx scripts/import-webflow.ts --sermons scripts/data/sermons.csv --series scripts/data/series.csv --dry-run`. Read every line under `problems`: unknown books (add aliases, see [scripts/README-import.md](scripts/README-import.md)), sermons with no speaker, series that did not resolve, column headers that were not matched (use `--map`). The real Webflow column names have never been seen; expect to adjust.
-- [ ] Create a Sanity Editor token (sanity.io/manage, API, Tokens). Run the import for real (default mode never overwrites existing documents): `SANITY_PROJECT_ID=... SANITY_API_WRITE_TOKEN=... npx tsx scripts/import-webflow.ts --sermons ... --series ...`. Open a few sermons in the Studio.
-- [ ] Seed the leaders (commands in [Seeding leaders](#seeding-leaders)).
+- [ ] Create a Sanity token with Editor access (look for API and Tokens in the project settings at sanity.io/manage; wording may have changed). Run the import for real (default mode never overwrites existing documents): `SANITY_PROJECT_ID=... SANITY_API_WRITE_TOKEN=... npx tsx scripts/import-webflow.ts --sermons ... --series ...`. Open a few sermons in the Studio.
+- [ ] Seed the leaders. This is a developer-level step (command line): ask whoever maintains the site to run the commands in [Seeding leaders](#seeding-leaders).
 
 ### 3. Contact form email (Resend)
 
+Steps 3 to 5 produce values (keys, tokens). Collect them now and enter them in Vercel once step 6 has created the project.
+
 - [ ] Create a Resend account and add the sending domain crosswaysa.org.
-- [ ] Add the SPF and DKIM DNS records Resend shows. This is needed before the DNS cutover, not at it. Wait for Resend to show the domain as verified.
+- [ ] Add the SPF and DKIM DNS records Resend shows, at the place the domain's DNS is managed now. Do this before the DNS cutover, not at it. Wait for Resend to show the domain as verified.
+- [ ] **A domain can have only one SPF record** (a TXT record starting with `v=spf1`). If one already exists (for example for the church's email), do not add a second one: edit the existing record and merge in the `include:` part Resend gives you. Two SPF records break email delivery.
 - [ ] Set `RESEND_API_KEY`, `CONTACT_TO_EMAIL` (the church inbox) and `CONTACT_FROM_EMAIL` (an address on the verified domain) in Vercel.
 
 ### 4. Spam protection (Cloudflare Turnstile)
 
 - [ ] Create a Turnstile widget. Restrict it to the production hostnames (and the preview hostname while testing).
-- [ ] Set `TURNSTILE_SITE_KEY` (BUILD) and `TURNSTILE_SECRET_KEY` (RUNTIME) in Vercel, then redeploy so the site key is baked in.
+- [ ] Set `TURNSTILE_SITE_KEY` (BUILD) and `TURNSTILE_SECRET_KEY` (RUNTIME) in Vercel (once step 6 exists), then redeploy so the site key is baked in.
 
 ### 5. Events (Planning Center)
 
-- [ ] Create a personal access token in Planning Center (Calendar) and set `PCO_APP_ID` and `PCO_SECRET` in Vercel.
+- [ ] Create a personal access token in Planning Center (the Calendar product's API or personal access token settings; wording may have changed) and set `PCO_APP_ID` and `PCO_SECRET` in Vercel once step 6 exists.
 - [ ] Confirm each event the church wants listed is marked visible in Church Center.
 - [ ] After the first build, check `/events`. The live API response shape and pagination were never verified against a real account. A `[events]` warning in the build log means the page fell back to a Church Center link.
 
@@ -199,12 +202,13 @@ Owner-dependent steps, in order. Nothing here has been done yet. Tick items as t
 
 - [ ] Create the project on the Kordial team (Pro plan; Hobby is for non-commercial use and limits crons). Framework preset Astro, Node 22.
 - [ ] Leave the Build Command and Output Directory at the framework defaults (no override), so `npm run build` runs and prints the audio report.
+- [ ] Keep "Automatically expose System Environment Variables" enabled (look for it under the project's Environment Variables settings). The production build guard relies on `VERCEL_ENV`; without it the guard silently does nothing.
 - [ ] Set every [environment variable](#environment-variables) for Production, and the content ones (Sanity, PCO, Turnstile site key, Resend) for Preview too.
 - [ ] Create the Deploy Hook and set `VERCEL_DEPLOY_HOOK_URL` and `CRON_SECRET` ([Content freshness](#content-freshness-and-rebuilds)). Create the Sanity webhook and publish a test edit.
 - [ ] First preview deploy. Read the build log: warnings from `[sanity]`, `[audio]`, `[events]`; the redirects warnings for unusual Webflow slugs; and the audio report line.
 - [ ] Check that `/culture`, `/who-we-are`, `/what-we-believe` and the other no-slash pages load on Vercel. With `trailingSlash: 'never'` Vercel serves `x/index.html`; that was only verified locally.
 - [ ] Run Lighthouse (mobile) on the preview URL for `/`, `/sermons`, one sermon, `/visit` and `/entrusted`. Targets: all four categories at least 90, LCP under 2.5 s, CLS under 0.1. If Deployment Protection blocks PageSpeed Insights, use Chrome DevTools.
-- [ ] Production deploy from the production branch. Confirm the guard did not fire and the cron shows under Settings, Cron Jobs.
+- [ ] Production deploy from the production branch. Confirm the guard did not fire and the cron is listed (look for Cron Jobs in the project settings).
 
 ### 7. Content the church must supply
 
@@ -215,7 +219,7 @@ Owner-dependent steps, in order. Nothing here has been done yet. Tick items as t
 
 ### 8. Owner review of wording
 
-I wrote these as summaries or inferences; none should state anything the live site does not, but they deserve a read.
+These descriptions and names are summaries or inferences written during the build. None should state anything the live site does not, but they need an owner glance.
 
 - [ ] Page titles and descriptions: `description` in every file in `src/content/pages/*.md`, and the descriptions in `src/pages/index.astro`, `src/pages/events.astro`, `src/pages/sermons/index.astro` and `src/pages/series/index.astro`.
 - [ ] `/networks`: the live site shows only logos, so the link names are inferred: Southern Baptist Theological Seminary, 9Marks, The Gospel Coalition, Great Commission Collective (`src/content/pages/networks.md`).
@@ -229,11 +233,19 @@ I wrote these as summaries or inferences; none should state anything the live si
 
 ### 10. DNS cutover
 
-- [ ] A day or more ahead, lower the TTL on the crosswaysa.org records.
-- [ ] Add crosswaysa.org (and www) to the Vercel project and switch the records to what Vercel shows. Keep Webflow running until everything below is verified.
+**WARNING: the website and the church's email share the same domain settings. Change only the records that point the website. Deleting or replacing the wrong record can stop the church's email from working, and the contact form's email too.**
+
+- [ ] A day or more ahead, lower the TTL on the crosswaysa.org records (a short TTL makes a mistake quick to undo).
+- [ ] Write down or screenshot every existing DNS record before touching anything.
+- [ ] Change only the website records: the A record or CNAME for `crosswaysa.org` (the bare domain) and for `www`, to the values Vercel shows. **Never delete or replace MX records (they receive email) or TXT records (SPF, DKIM, DMARC, and the verification records for Google Workspace or Microsoft 365), and leave the Resend records alone.**
+- [ ] Do not move the domain's nameservers to Vercel. It is safer to keep DNS where it is and edit only the A/CNAME records. If nameservers are moved anyway, first recreate every existing record (MX, TXT, CNAME, all of them) at Vercel, and compare against the list from the step above before switching.
+- [ ] Pick one main address. The site treats `crosswaysa.org` (no `www`) as the main one (its canonical tags and sitemap use it). Add both `crosswaysa.org` and `www.crosswaysa.org` in the Vercel project and set `www` to redirect to the bare domain there.
+- [ ] Keep Webflow running until everything below is verified.
+- [ ] Confirm the church's email still sends and receives after the switch (send one message each way).
 - [ ] Confirm the Español link (`crossway-espanol.webflow.io`) still works after the cutover.
 - [ ] Spot-check 10 old sermon URLs. The legacy-slug 301s only exist for sermons whose slug differs from the Webflow path; the rest keep the same path.
 - [ ] Open every preserved path: `/culture`, `/who-we-are`, `/what-we-believe`, `/child-safety`, `/networks`, `/small-groups`, `/students`, `/crossway-kids`, `/biblical-counseling`, `/christian-stewardship`, `/entrusted`, `/sermons`, and a few `/series/...`.
+- [ ] Send a real test message through the production contact form and confirm it reaches the church inbox.
 
 ### 11. After launch
 
