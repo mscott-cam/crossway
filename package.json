@@ -1,0 +1,35 @@
+{
+  "name": "crossway",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "test": "vitest run",
+    "test:e2e": "SANITY_FIXTURES=1 E2E=1 astro build && SANITY_FIXTURES=1 E2E=1 playwright test",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@astrojs/vercel": "^11.0.16",
+    "@fontsource/hanken-grotesk": "^5.3.0",
+    "@fontsource/libre-caslon-display": "^5.3.0",
+    "@fontsource/libre-caslon-text": "^5.3.0",
+    "astro": "^7.4.1",
+    "gsap": "^3.15.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.11",
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^22.20.5",
+    "prettier": "^3.9.10",
+    "prettier-plugin-astro": "^1.1.1",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.5"
+  }
+}
