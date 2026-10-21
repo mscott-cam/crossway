@@ -62,10 +62,13 @@ test.describe('/entrusted', () => {
     page,
   }) => {
     await page.goto('/entrusted');
-    await expect(page.locator('summary')).toHaveCount(FAQ_COUNT);
-    await expect(page.locator('details')).toHaveCount(FAQ_COUNT);
+    await expect(page.locator('[data-faq-item] > summary')).toHaveCount(
+      FAQ_COUNT,
+    );
+    await expect(page.locator('[data-faq-item]')).toHaveCount(FAQ_COUNT);
+    await expect(page.locator('details')).toHaveCount(FAQ_COUNT + 1);
     const names = await page
-      .locator('summary')
+      .locator('[data-faq-item] > summary')
       .evaluateAll((els) => els.map((el) => el.textContent?.trim()));
     expect(names[0]).toBe('In brief, what exactly is it that we’re doing?');
     expect(names.at(-1)).toBe('How long is my commitment?');
@@ -90,7 +93,7 @@ test.describe('/entrusted', () => {
     page,
   }) => {
     await page.goto('/entrusted');
-    const first = page.locator('details').first();
+    const first = page.locator('[data-faq-item]').first();
     await expect(first).not.toHaveAttribute('open', '');
     await first.locator('summary').click();
     await expect(first).toHaveAttribute('open', '');
@@ -101,7 +104,7 @@ test.describe('/entrusted', () => {
 
   test('FAQ summaries are keyboard operable', async ({ page }) => {
     await page.goto('/entrusted');
-    const second = page.locator('details').nth(1);
+    const second = page.locator('[data-faq-item]').nth(1);
     await second.locator('summary').focus();
     await page.keyboard.press('Enter');
     await expect(second).toHaveAttribute('open', '');
@@ -113,7 +116,7 @@ test.describe('/entrusted', () => {
     page,
   }) => {
     await page.goto('/entrusted');
-    const summary = page.locator('summary').first();
+    const summary = page.locator('[data-faq-item] > summary').first();
     await summary.focus();
     const outline = await summary.evaluate((el) => {
       const style = getComputedStyle(el);
@@ -157,6 +160,7 @@ test.describe('/entrusted', () => {
       '#aim-1',
       '#making-a-commitment',
       '#faqs',
+      '/documents/entrusted-gift-chart.svg',
       'mailto:Scott@CrosswaySA.org?subject=Questions%20about%20ENTRUSTED',
     ]);
     await expect(
@@ -192,6 +196,85 @@ test.describe('/entrusted', () => {
     ).toHaveCount(0);
   });
 
+  test('the gift chart is also available as a real table in a closed details', async ({
+    page,
+  }) => {
+    await page.goto('/entrusted');
+    const details = page.locator('details.chart-text');
+    await expect(details).toHaveCount(1);
+    await expect(details).not.toHaveAttribute('open', '');
+    const summary = details.locator('summary');
+    expect((await summary.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    await summary.focus();
+    await page.keyboard.press('Enter');
+    await expect(details).toHaveAttribute('open', '');
+    const table = details.getByRole('table', { name: /Gift Chart/ });
+    await expect(table).toBeVisible();
+    await expect(table.getByRole('columnheader')).toHaveText([
+      'Gifts needed',
+      '2-year gift',
+      'Monthly gift',
+      'Totals',
+    ]);
+    await expect(table.getByRole('row')).toHaveCount(15);
+    await expect(
+      table.getByRole('row', { name: /Total target/ }),
+    ).toContainText('$6,500,000');
+    await expect(
+      table.getByRole('row', { name: /^4 \$144,000/ }),
+    ).toContainText('$576,000');
+    await page.keyboard.press('Space');
+    await expect(details).not.toHaveAttribute('open', '');
+  });
+
+  test('the full-size chart link opens the bundled SVG in a new tab', async ({
+    page,
+  }) => {
+    await page.goto('/entrusted');
+    const link = page.getByRole('link', { name: /View full-size chart/ });
+    await expect(link).toHaveAttribute(
+      'href',
+      '/documents/entrusted-gift-chart.svg',
+    );
+    await expect(link).toHaveAttribute('target', '_blank');
+    await expect(link).toHaveAccessibleName(
+      'View full-size chart (opens in a new tab)',
+    );
+  });
+
+  test('the gift chart table stays inside the viewport at 320px', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 640 });
+    await page.goto('/entrusted');
+    await page.locator('details.chart-text summary').click();
+    expect(await noOverflow(page)).toBe(true);
+    const right = await page
+      .locator('details.chart-text [role="region"]')
+      .evaluate((el) => el.getBoundingClientRect().right);
+    expect(right).toBeLessThanOrEqual(320);
+  });
+
+  test('gift chart amounts never break across lines at 390px', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/entrusted');
+    await page.locator('details.chart-text summary').click();
+    const tall = await page
+      .locator('details.chart-text tbody td')
+      .evaluateAll((cells) =>
+        cells
+          .filter((cell) => cell.getBoundingClientRect().height > 48)
+          .map((cell) => cell.textContent),
+      );
+    expect(tall).toEqual([]);
+    const scrolls = await page
+      .locator('details.chart-text [role="region"]')
+      .evaluate((el) => el.scrollWidth > el.clientWidth);
+    expect(scrolls).toBe(false);
+  });
+
   test('the home page Entrusted link reaches the page', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('link', { name: /Learn about Entrusted/ }).click();
@@ -212,7 +295,8 @@ test.describe('/entrusted', () => {
       const wcag = ['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'];
       let results = await new AxeBuilder({ page }).withTags(wcag).analyze();
       expect(results.violations).toEqual([]);
-      await page.locator('details').first().locator('summary').click();
+      await page.locator('details.chart-text summary').click();
+      await page.locator('[data-faq-item]').nth(1).locator('summary').click();
       await page
         .locator('details#ways-besides-cash')
         .locator('summary')
@@ -253,7 +337,11 @@ test.describe('/entrusted', () => {
     const outside = await page.evaluate(() => {
       const width = document.documentElement.clientWidth;
       return Array.from(document.querySelectorAll('main *, footer *'))
-        .filter((el) => el.getBoundingClientRect().right > width + 1)
+        .filter(
+          (el) =>
+            !el.closest('[role="region"]') &&
+            el.getBoundingClientRect().right > width + 1,
+        )
         .map((el) => `${el.tagName}.${el.className}`);
     });
     expect(outside).toEqual([]);
@@ -284,8 +372,11 @@ test.describe('/entrusted', () => {
         .map((el) => el.className),
     );
     expect(hidden).toEqual([]);
-    await page.locator('details').first().locator('summary').click();
-    await expect(page.locator('details').first()).toHaveAttribute('open', '');
+    await page.locator('[data-faq-item]').first().locator('summary').click();
+    await expect(page.locator('[data-faq-item]').first()).toHaveAttribute(
+      'open',
+      '',
+    );
     await context.close();
   });
 });

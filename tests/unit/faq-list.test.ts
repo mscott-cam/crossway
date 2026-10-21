@@ -6,14 +6,18 @@ const items = [
   {
     id: 'first',
     question: 'Why one fund?',
-    answer: '<p>Because <em>one</em>.</p>',
+    answerHtml: '<p>Because <em>one</em>.</p>',
   },
   {
     id: 'second',
     question: 'What <b>if</b> & more?',
-    answer: '<p>Then <strong>this</strong>.</p>',
+    answerHtml: '<p>Then <strong>this</strong>.</p>',
   },
-  { id: 'third', question: 'Third question?', answer: '<p>Third answer.</p>' },
+  {
+    id: 'third',
+    question: 'Third question?',
+    answerHtml: '<p>Third answer.</p>',
+  },
 ];
 
 let html = '';

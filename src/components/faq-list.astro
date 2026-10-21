@@ -2,7 +2,7 @@
 interface Item {
   id?: string;
   question: string;
-  answer: string;
+  answerHtml: string;
 }
 
 interface Props {
@@ -20,7 +20,7 @@ const { items } = Astro.props;
           <span class="faq-question__text">{item.question}</span>
           <span class="faq-question__mark" aria-hidden="true" />
         </summary>
-        <div class="faq-answer prose" set:html={item.answer} />
+        <div class="faq-answer prose" set:html={item.answerHtml} />
       </details>
     ))}
   </div>

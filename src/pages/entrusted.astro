@@ -13,7 +13,7 @@ const { faqHeading, faq } = entrustedExtrasSchema.parse(entry.data);
 const items = faq.map((item) => ({
   id: item.id,
   question: item.question,
-  answer: renderInlineMarkdown(item.answer),
+  answerHtml: renderInlineMarkdown(item.answer),
 }));
 const jumps = [
   { href: '#understanding-entrusted', label: 'Understanding Entrusted' },
@@ -99,6 +99,109 @@ const jumps = [
     max-width: 34rem;
     height: auto;
     margin-block: 1.5rem;
+  }
+
+  .entrusted-body :global(.chart-full-link) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+  }
+
+  .entrusted-body :global(.chart-text) {
+    max-width: 34rem;
+    border-block: 1px solid var(--rule);
+  }
+
+  .entrusted-body :global(.chart-text > summary) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    min-height: 3.5rem;
+    padding-block: 1rem;
+    color: var(--navy);
+    font-family: var(--font-text);
+    font-size: clamp(1.125rem, 1.03rem + 0.45vw, 1.375rem);
+    line-height: 1.3;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .entrusted-body :global(.chart-text > summary::-webkit-details-marker) {
+    display: none;
+  }
+
+  .entrusted-body :global(.chart-text > summary::after) {
+    content: '';
+    flex: none;
+    width: 0.875rem;
+    height: 0.875rem;
+    color: var(--amber-ink);
+    background:
+      linear-gradient(currentColor, currentColor) center / 100% 2px no-repeat,
+      linear-gradient(currentColor, currentColor) center / 2px 100% no-repeat;
+  }
+
+  .entrusted-body :global(.chart-text[open] > summary::after) {
+    background: linear-gradient(currentColor, currentColor) center / 100% 2px
+      no-repeat;
+  }
+
+  .entrusted-body :global(.chart-text > summary:focus-visible) {
+    outline: 2px solid var(--navy);
+    outline-offset: 2px;
+  }
+
+  .entrusted-body :global(.chart-text__scroll) {
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+  }
+
+  .entrusted-body :global(.chart-text table) {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.4;
+  }
+
+  .entrusted-body :global(.chart-text caption) {
+    padding-bottom: 0.75rem;
+    color: var(--navy);
+    font-family: var(--font-text);
+    font-size: 1rem;
+    font-style: italic;
+    text-align: left;
+  }
+
+  .entrusted-body :global(.chart-text :is(th, td)) {
+    padding: 0.625rem 0.375rem;
+    border-top: 1px solid var(--rule);
+    text-align: right;
+  }
+
+  .entrusted-body :global(.chart-text :is(thead th, tbody th, tfoot th)) {
+    color: var(--navy);
+    font-weight: 600;
+  }
+
+  .entrusted-body :global(.chart-text :is(td, tbody th)) {
+    white-space: nowrap;
+  }
+
+  .entrusted-body :global(.chart-text thead th) {
+    font-size: 0.8125rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .entrusted-body :global(.chart-text :is(thead th:first-child, tbody th)) {
+    text-align: left;
+  }
+
+  .entrusted-body :global(.chart-text tfoot :is(th, td)) {
+    border-top: 2px solid var(--navy);
+    font-weight: 700;
   }
 
   .entrusted-faq {
