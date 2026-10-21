@@ -1,0 +1,172 @@
+---
+import CrossMark from './cross-mark.astro';
+import { sermonMeta } from '../lib/sermon-groups';
+import type { Sermon } from '../lib/sanity/types';
+import { getVimeoThumb, parseVimeoId } from '../lib/video/vimeo';
+
+interface Props {
+  sermon: Sermon;
+}
+
+const { sermon } = Astro.props;
+const videoId = sermon.vimeoUrl ? parseVimeoId(sermon.vimeoUrl) : null;
+const thumb = videoId ? await getVimeoThumb(videoId) : null;
+const meta = sermonMeta(sermon, ['speaker', 'passage', 'date']);
+const caption = sermon.passage ?? sermon.series.title;
+---
+
+<section class="latest" data-latest-sermon aria-labelledby="latest-title">
+  <div class="container">
+    <article class="latest__card" data-reveal="fade">
+      <div class="latest__media">
+        {thumb ? (
+          <img
+            class="latest__thumb"
+            src={thumb}
+            alt=""
+            width="1280"
+            height="720"
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <div class="latest__placeholder" aria-hidden="true">
+            <CrossMark size={34} />
+            {caption && <span class="latest__caption">{caption}</span>}
+          </div>
+        )}
+      </div>
+      <div class="latest__text">
+        <h2 class="eyebrow" id="latest-title">
+          Latest message
+        </h2>
+        <h3 class="latest__title">
+          <a class="latest__link" href={`/sermons/${sermon.slug}`}>
+            {sermon.title}
+          </a>
+        </h3>
+        {meta.length > 0 && <p class="latest__meta">{meta.join(' · ')}</p>}
+        <p class="latest__more">
+          <a class="latest__all" href="/sermons">
+            All messages <span aria-hidden="true">→</span>
+          </a>
+        </p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<style>
+  .latest {
+    padding-block: clamp(3rem, 6vw, 5rem);
+    border-top: 1px solid var(--rule);
+  }
+
+  .latest__card {
+    position: relative;
+    display: grid;
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+    align-items: center;
+  }
+
+  .latest__media {
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    border-radius: 22px;
+    background: var(--navy);
+  }
+
+  .latest__thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+  }
+
+  .latest__card:hover .latest__thumb {
+    transform: scale(1.03);
+  }
+
+  .latest__placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    width: 100%;
+    height: 100%;
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .latest__caption {
+    color: var(--mist);
+    font-family: var(--font-text);
+    font-size: clamp(1.125rem, 1rem + 0.6vw, 1.5rem);
+    font-style: italic;
+    overflow-wrap: anywhere;
+  }
+
+  .latest__title {
+    margin-top: 1.25rem;
+    font-size: var(--step-h2);
+    line-height: 1.06;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+
+  .latest__link {
+    text-decoration: none;
+  }
+
+  .latest__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .latest__link:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--amber-ink);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.12em;
+  }
+
+  .latest__link:focus-visible {
+    outline: none;
+  }
+
+  .latest__link:focus-visible::after {
+    outline: 2px solid var(--navy);
+    outline-offset: 6px;
+    border-radius: 22px;
+  }
+
+  .latest__meta {
+    margin: 1.1rem 0 0;
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+  }
+
+  .latest__more {
+    margin: 1.75rem 0 0;
+  }
+
+  .latest__all {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    min-height: 44px;
+    color: var(--navy);
+    font-weight: 600;
+    text-decoration-color: var(--amber-ink);
+    text-decoration-thickness: 2px;
+  }
+
+  @media (min-width: 60rem) {
+    .latest__card {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    }
+  }
+</style>

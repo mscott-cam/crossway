@@ -1,10 +1,123 @@
 ---
 import BaseLayout from '../layouts/base-layout.astro';
+import HomeHero from '../components/home-hero.astro';
+import SundayCard from '../components/sunday-card.astro';
+import MissionBand from '../components/mission-band.astro';
+import EventList from '../components/event-list.astro';
+import LatestSermonFeature from '../components/latest-sermon-feature.astro';
+import ConnectSteps from '../components/connect-steps.astro';
+import EntrustedFeature from '../components/entrusted-feature.astro';
+import { fetchUpcomingEvents } from '../lib/events/pco';
+import { formatServiceTimes } from '../lib/format-times';
+import { getSermons, getSiteSettings } from '../lib/sanity/queries';
+import { site } from '../lib/site';
+
+const [settings, sermons, events] = await Promise.all([
+  getSiteSettings(),
+  getSermons(),
+  fetchUpcomingEvents(4),
+]);
+const latest = sermons[0];
+const times = formatServiceTimes(settings.serviceTimes);
+const description = `Crossway Bible Church is a church family in San Antonio, Texas.${times ? ` Join us Sundays at ${times}` : ' Join us on Sundays'} at ${site.address.street}.`;
 ---
 
 <BaseLayout
-  title="Crossway Bible Church"
-  description="Crossway Bible Church in San Antonio, Texas."
+  title="Crossway Bible Church in San Antonio, Texas"
+  description={description}
+  overHero
 >
-  <h1>Crossway Bible Church</h1>
+  <link
+    slot="head"
+    rel="preload"
+    as="image"
+    href="/video/lobby-poster.avif"
+    type="image/avif"
+    fetchpriority="high"
+  />
+
+  <HomeHero>
+    <SundayCard settings={settings} />
+  </HomeHero>
+
+  <MissionBand />
+
+  <section
+    class="home-events"
+    data-home-events
+    aria-labelledby="home-events-title"
+  >
+    <div class="container home-events__inner">
+      <div class="home-events__head" data-reveal="fade">
+        <p class="eyebrow">What’s coming up</p>
+        <h2 id="home-events-title">Upcoming events</h2>
+      </div>
+      <div class="home-events__list" data-reveal="fade" data-reveal-delay="0.1">
+        <EventList events={events} limit={4} variant="home" />
+      </div>
+      <p class="home-events__more" data-reveal="fade">
+        <a href="/events">
+          See all events <span aria-hidden="true">→</span>
+        </a>
+      </p>
+    </div>
+  </section>
+
+  {latest && <LatestSermonFeature sermon={latest} />}
+
+  <ConnectSteps />
+
+  {settings.showEntrustedOnHome && <EntrustedFeature />}
 </BaseLayout>
+
+<style>
+  .home-events {
+    padding-block: clamp(3.5rem, 7vw, 6rem) clamp(3rem, 6vw, 5rem);
+  }
+
+  .home-events__inner {
+    display: grid;
+    gap: 1.75rem clamp(2rem, 6vw, 5rem);
+  }
+
+  .home-events__head h2 {
+    margin-top: 1.25rem;
+  }
+
+  .home-events__more {
+    margin: 0;
+  }
+
+  .home-events__more a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    min-height: 44px;
+    color: var(--navy);
+    font-weight: 600;
+    text-decoration-color: var(--amber-ink);
+    text-decoration-thickness: 2px;
+  }
+
+  @media (min-width: 60rem) {
+    .home-events__inner {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      grid-template-areas:
+        'head list'
+        'more list';
+      align-items: start;
+    }
+
+    .home-events__head {
+      grid-area: head;
+    }
+
+    .home-events__list {
+      grid-area: list;
+    }
+
+    .home-events__more {
+      grid-area: more;
+    }
+  }
+</style>

@@ -1,0 +1,45 @@
+<section class="mission on-navy" data-mission aria-labelledby="mission-title">
+  <div class="container mission__inner" data-reveal="fade">
+    <h2 class="eyebrow mission__label" id="mission-title">
+      Why we gather
+    </h2>
+    <p class="mission__text">
+      We exist to glorify God through the fulfillment of the{' '}
+      <em>Great Commission.</em>
+    </p>
+  </div>
+</section>
+
+<style>
+  .mission {
+    padding-block: clamp(4.5rem, 9vw, 7rem);
+    text-align: center;
+  }
+
+  .mission__label {
+    justify-content: center;
+  }
+
+  .mission__label::after {
+    content: '';
+    flex: none;
+    width: 40px;
+    height: 1px;
+    background: currentColor;
+  }
+
+  .mission__text {
+    max-width: 22ch;
+    margin: 1.75rem auto 0;
+    color: var(--paper);
+    font-family: var(--font-display);
+    font-size: clamp(2.25rem, 1.5rem + 3.4vw, 4rem);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  .mission__text em {
+    font-family: var(--font-text);
+  }
+</style>

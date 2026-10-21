@@ -1,0 +1,71 @@
+<section
+  class="entrusted"
+  data-entrusted-feature
+  aria-labelledby="entrusted-title"
+>
+  <div class="container entrusted__inner" data-reveal="fade">
+    <div class="entrusted__head">
+      <p class="eyebrow">Entrusted</p>
+      <h2 class="entrusted__title" id="entrusted-title">
+        With much, <em>for more.</em>
+      </h2>
+    </div>
+    <div class="entrusted__body">
+      <p>
+        Entrusted is a one-fund, two-year initiative, running from December 2026
+        to December 2028, that funds existing, expanding and extending
+        disciple-making at Crossway.
+      </p>
+      <p class="entrusted__more">
+        <a class="entrusted__link" href="/entrusted">
+          Learn about Entrusted <span aria-hidden="true">→</span>
+        </a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .entrusted {
+    padding-block: clamp(3.5rem, 7vw, 6rem);
+    border-top: 1px solid var(--rule);
+  }
+
+  .entrusted__inner {
+    display: grid;
+    gap: 1.75rem clamp(2rem, 6vw, 5rem);
+    align-items: end;
+  }
+
+  .entrusted__title {
+    margin-top: 1.25rem;
+    font-size: var(--step-h2);
+    text-wrap: balance;
+  }
+
+  .entrusted__body p:first-child {
+    max-width: 38ch;
+    margin: 0;
+  }
+
+  .entrusted__more {
+    margin: 1.25rem 0 0;
+  }
+
+  .entrusted__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    min-height: 44px;
+    color: var(--navy);
+    font-weight: 600;
+    text-decoration-color: var(--amber-ink);
+    text-decoration-thickness: 2px;
+  }
+
+  @media (min-width: 60rem) {
+    .entrusted__inner {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    }
+  }
+</style>

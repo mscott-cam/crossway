@@ -1,0 +1,138 @@
+---
+import { site } from '../lib/site';
+
+const steps = [
+  {
+    title: 'Connect',
+    copy: 'We want to meet you!',
+    label: 'Let’s connect',
+    href: '/visit',
+    external: false,
+  },
+  {
+    title: 'Consider',
+    copy: 'Learn more about us.',
+    label: 'Tell me more',
+    href: '/culture',
+    external: false,
+  },
+  {
+    title: 'Commit',
+    copy: 'Join our church!',
+    label: 'I’m ready',
+    href: site.links.churchCenter,
+    external: true,
+  },
+];
+---
+
+<section class="steps on-navy" data-steps aria-labelledby="steps-title">
+  <div class="container">
+    <h2 class="eyebrow steps__label" id="steps-title" data-reveal="fade">
+      Take your next step
+    </h2>
+    <ol class="steps__list">
+      {steps.map((step, index) => (
+        <li
+          class="step"
+          data-step
+          data-reveal="fade"
+          data-reveal-delay={String(index * 0.12)}
+        >
+          <span class="step__number" aria-hidden="true">
+            {String(index + 1).padStart(2, '0')}
+          </span>
+          <h3 class="step__title">{step.title}</h3>
+          <p class="step__copy">{step.copy}</p>
+          <a
+            class="step__link"
+            href={step.href}
+            target={step.external ? '_blank' : undefined}
+            rel={step.external ? 'noopener noreferrer' : undefined}
+          >
+            {step.label}
+            <span aria-hidden="true">→</span>
+            {step.external && (
+              <span class="sr-only"> (opens in a new tab)</span>
+            )}
+          </a>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>
+
+<style>
+  .steps {
+    padding-block: clamp(4rem, 8vw, 6.5rem);
+  }
+
+  .steps__list {
+    display: grid;
+    gap: 0;
+    margin: clamp(2rem, 5vw, 3.5rem) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-block: 2rem;
+    border-top: 1px solid rgb(243 240 232 / 0.18);
+  }
+
+  .step__number {
+    color: var(--amber);
+    font-family: var(--font-text);
+    font-size: 1rem;
+    font-style: italic;
+    line-height: 1;
+  }
+
+  .step__title {
+    margin-top: 1.25rem;
+    font-size: var(--step-h2);
+  }
+
+  .step__copy {
+    margin: 0.75rem 0 0;
+    color: var(--mist);
+    font-size: 1.125rem;
+  }
+
+  .step__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    margin-top: 1.75rem;
+    padding: 0.8rem 1.4rem;
+    border: 1px solid rgb(243 240 232 / 0.35);
+    border-radius: 999px;
+    color: var(--paper);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease,
+      color 0.2s ease;
+  }
+
+  .step__link:hover {
+    border-color: var(--amber);
+    background: var(--amber);
+    color: var(--navy);
+  }
+
+  @media (min-width: 60rem) {
+    .steps__list {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: clamp(2rem, 4vw, 4rem);
+    }
+  }
+</style>

@@ -1,0 +1,165 @@
+---
+import HeroVideo from './hero-video.astro';
+---
+
+<div class="hero-stage">
+  <section class="hero" data-hero aria-labelledby="home-title">
+    <div class="hero__media">
+      <HeroVideo poster="/video/lobby-poster" />
+    </div>
+    <div class="hero__wash" aria-hidden="true"></div>
+    <div class="container hero__inner">
+      <p class="eyebrow" data-reveal="fade" data-reveal-delay="0.7">
+        Crossway Bible Church · San Antonio
+      </p>
+      <h1 class="display-hero hero__title" id="home-title" data-reveal="lines">
+        <span class="hero__line">You are</span>{' '}
+        <span class="hero__line">
+          <em>loved.</em>
+        </span>
+      </h1>
+      <p class="hero__verse" data-reveal="fade" data-reveal-delay="0.95">
+        “We love because he first loved us.”
+        <span class="verse-cite">1 John 4:19</span>
+      </p>
+    </div>
+  </section>
+  <div class="hero-stage__card">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .hero-stage {
+    position: relative;
+  }
+
+  .hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    min-height: clamp(34rem, 86svh, 47rem);
+    padding-block: 8rem clamp(3rem, 6vw, 4.5rem);
+    overflow-x: clip;
+    background: var(--paper);
+  }
+
+  .hero__media {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__media {
+      animation: hero-settle 2.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+  }
+
+  @keyframes hero-settle {
+    from {
+      transform: scale(1.08);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+
+  .hero__wash {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--paper) 97%, transparent) 0%,
+        color-mix(in srgb, var(--paper) 92%, transparent) 32%,
+        color-mix(in srgb, var(--paper) 55%, transparent) 52%,
+        color-mix(in srgb, var(--paper) 0%, transparent) 74%
+      ),
+      linear-gradient(
+        0deg,
+        color-mix(in srgb, var(--paper) 60%, transparent) 0%,
+        color-mix(in srgb, var(--paper) 0%, transparent) 30%
+      );
+  }
+
+  .hero__inner {
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero__title {
+    margin-top: 1.5rem;
+  }
+
+  .hero__line {
+    display: block;
+    padding-bottom: 0.08em;
+  }
+
+  .hero__verse {
+    max-width: 30ch;
+    margin: 2rem 0 0;
+    color: #3a4a5c;
+    font-family: var(--font-text);
+    font-size: clamp(1.125rem, 1rem + 0.5vw, 1.3125rem);
+    font-style: italic;
+    line-height: 1.45;
+  }
+
+  .hero__verse .verse-cite {
+    display: block;
+    margin-top: 0.6rem;
+    font-style: normal;
+  }
+
+  .hero-stage__card {
+    padding: 1.5rem var(--gutter) 3rem;
+  }
+
+  @media (max-width: 40rem) {
+    .hero__title {
+      font-size: clamp(4rem, 29vw, 8rem);
+    }
+
+    .hero .eyebrow {
+      gap: 0.75rem;
+      letter-spacing: 0.18em;
+    }
+
+    .hero .eyebrow::before {
+      width: 24px;
+    }
+
+    .hero__wash {
+      background:
+        linear-gradient(
+          90deg,
+          color-mix(in srgb, var(--paper) 94%, transparent) 0%,
+          color-mix(in srgb, var(--paper) 84%, transparent) 60%,
+          color-mix(in srgb, var(--paper) 52%, transparent) 100%
+        ),
+        linear-gradient(
+          0deg,
+          color-mix(in srgb, var(--paper) 70%, transparent) 0%,
+          color-mix(in srgb, var(--paper) 0%, transparent) 35%
+        );
+    }
+  }
+
+  @media (min-width: 1100px) {
+    .hero-stage {
+      margin-bottom: 6rem;
+    }
+
+    .hero-stage__card {
+      position: absolute;
+      z-index: 3;
+      right: calc(max(0px, (100% - var(--container)) / 2) + var(--gutter));
+      bottom: -64px;
+      width: 25rem;
+      padding: 0;
+    }
+  }
+</style>

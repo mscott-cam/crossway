@@ -1,0 +1,234 @@
+---
+import { serviceTimeParts } from '../lib/format-times';
+import type { SiteSettings } from '../lib/sanity/types';
+
+interface Props {
+  settings: Pick<SiteSettings, 'serviceTimes' | 'sundayCardRows'>;
+}
+
+const { settings } = Astro.props;
+const parts = serviceTimeParts(settings.serviceTimes);
+const rows = settings.sundayCardRows.map((row) => ({
+  ...row,
+  external: Boolean(row.href && /^https?:\/\//i.test(row.href)),
+}));
+---
+
+<aside
+  class="sunday-card on-navy"
+  data-sunday-card
+  data-reveal="up"
+  data-reveal-delay="0.5"
+  aria-labelledby="sunday-card-title"
+>
+  <div class="sunday-card__head">
+    <h2 class="eyebrow sunday-card__label" id="sunday-card-title">
+      <span class="sunday-card__dot" aria-hidden="true"></span>This Sunday
+    </h2>
+    {parts.length > 0 && (
+      <p class="sunday-card__times" data-sunday-times>
+        {parts.map((part) =>
+          part.kind === 'separator' ? (
+            <span class="sunday-card__sep">{part.text}</span>
+          ) : part.kind === 'meridiem' ? (
+            <span class="sunday-card__meridiem">{part.text}</span>
+          ) : (
+            <span class="sunday-card__time">{part.text}</span>
+          ),
+        )}
+      </p>
+    )}
+  </div>
+  {rows.length > 0 && (
+    <dl class="sunday-card__rows">
+      {rows.map((row) => (
+        <div class="sunday-card__row">
+          <dt>{row.label}</dt>
+          <dd>
+            {row.href ? (
+              <a
+                href={row.href}
+                target={row.external ? '_blank' : undefined}
+                rel={row.external ? 'noopener noreferrer' : undefined}
+              >
+                {row.value}
+                <span class="sunday-card__arrow" aria-hidden="true">
+                  →
+                </span>
+                {row.external && (
+                  <span class="sr-only"> (opens in a new tab)</span>
+                )}
+              </a>
+            ) : (
+              row.value
+            )}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  )}
+  <a class="sunday-card__go" href="/visit">
+    Plan your visit <span aria-hidden="true">→</span>
+  </a>
+</aside>
+
+<style>
+  .sunday-card {
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+    padding: 1.875rem 2rem 1.75rem;
+    border-radius: 22px;
+    box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.45);
+  }
+
+  .sunday-card__label {
+    gap: 0.6rem;
+  }
+
+  .sunday-card__label::before {
+    display: none;
+  }
+
+  .sunday-card__dot {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--amber);
+  }
+
+  .sunday-card__times {
+    margin: 1rem 0 0;
+    color: var(--paper);
+    font-family: var(--font-display);
+    font-size: clamp(2.75rem, 2.1rem + 2.6vw, 4rem);
+    line-height: 1.02;
+    letter-spacing: -0.01em;
+  }
+
+  .sunday-card__time {
+    white-space: nowrap;
+  }
+
+  .sunday-card__sep {
+    color: var(--mist);
+    font-family: var(--font-text);
+    font-size: 0.42em;
+    font-style: italic;
+    letter-spacing: 0;
+  }
+
+  .sunday-card__meridiem {
+    color: var(--mist);
+    font-family: var(--font-ui);
+    font-size: 0.2em;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+
+  .sunday-card__rows {
+    margin: 1.25rem 0 0;
+    border-top: 1px solid rgb(243 240 232 / 0.15);
+  }
+
+  .sunday-card__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.15rem 1rem;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid rgb(243 240 232 / 0.15);
+    font-size: 0.9375rem;
+    line-height: 1.45;
+  }
+
+  .sunday-card__row dt {
+    color: var(--paper);
+    font-weight: 600;
+  }
+
+  .sunday-card__row dd {
+    margin: 0;
+    margin-left: auto;
+    color: #dfe5ec;
+    text-align: right;
+  }
+
+  .sunday-card__row dd a {
+    color: var(--amber);
+    text-decoration: none;
+  }
+
+  .sunday-card__row dd a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  .sunday-card__arrow {
+    margin-left: 0.35em;
+  }
+
+  .sunday-card__go {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1.25rem;
+    padding: 0.95rem 1.4rem;
+    border-radius: 999px;
+    background: var(--amber);
+    color: var(--navy);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: background-color 0.2s ease;
+  }
+
+  .sunday-card__go:hover {
+    background: color-mix(in srgb, var(--amber) 88%, white);
+  }
+
+  .sunday-card__go:focus-visible {
+    outline-color: var(--paper);
+  }
+
+  @media (min-width: 40rem) and (max-width: 1099.98px) {
+    .sunday-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas:
+        'head rows'
+        'go rows';
+      gap: 1.5rem 3rem;
+      align-items: start;
+      padding: 2.25rem 2.5rem;
+    }
+
+    .sunday-card__head {
+      grid-area: head;
+    }
+
+    .sunday-card__rows {
+      grid-area: rows;
+      align-self: end;
+      margin-top: 0;
+    }
+
+    .sunday-card__go {
+      grid-area: go;
+      align-self: end;
+      margin-top: 0;
+    }
+  }
+
+  @media (min-width: 1100px) {
+    .sunday-card {
+      width: 100%;
+    }
+  }
+</style>
