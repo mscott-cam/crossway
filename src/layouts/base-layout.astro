@@ -59,11 +59,13 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).href : undefined;
     {ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
     <style is:inline set:html={tokensToCss()}></style>
     <script is:inline>
-      var root = document.documentElement;
-      root.classList.add('js');
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        root.classList.add('reduced');
-      }
+      (function () {
+        var root = document.documentElement;
+        root.classList.add('js');
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          root.classList.add('reduced');
+        }
+      })();
     </script>
   </head>
   <body class={bodyClass} data-over-hero={overHero ? '' : undefined}>

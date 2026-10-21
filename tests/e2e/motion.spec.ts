@@ -26,6 +26,19 @@ test.describe('reduced motion', () => {
       expect(state.transform).toBe('none');
     }
     await expect(page.locator('html')).toHaveClass(/reduced/);
+    expect(
+      await page.$$eval('[data-draw]', (els) =>
+        els.map((el) => getComputedStyle(el).clipPath),
+      ),
+    ).not.toHaveLength(0);
+    for (const clip of await page.$$eval('[data-draw]', (els) =>
+      els.map((el) => getComputedStyle(el).clipPath),
+    ))
+      expect(clip).toBe('none');
+    for (const transform of await page.$$eval('[data-parallax]', (els) =>
+      els.map((el) => getComputedStyle(el).transform),
+    ))
+      expect(transform).toBe('none');
   });
 });
 
@@ -76,5 +89,43 @@ test.describe('motion allowed', () => {
     await page.waitForTimeout(500);
     const last = page.locator(reveal).last();
     await expect(last).toHaveCSS('opacity', '0');
+  });
+});
+
+const bundles = '**/_astro/**/*.js';
+
+test.describe('script blocked', () => {
+  test('every reveal and draw target is visible once the failsafe fires', async ({
+    page,
+  }) => {
+    await page.route(bundles, (route) => route.abort());
+    await page.goto('/dev/motion');
+    await page.waitForTimeout(3500);
+    const states = await revealStates(page);
+    expect(states.length).toBeGreaterThan(0);
+    for (const state of states) expect(state.opacity).toBe('1');
+    const clips = await page.$$eval('[data-draw]', (els) =>
+      els.map((el) => getComputedStyle(el).clipPath),
+    );
+    expect(clips.length).toBeGreaterThan(0);
+    for (const clip of clips) expect(clip).toBe('none');
+  });
+});
+
+test.describe('slow script', () => {
+  test('first-viewport targets are hidden before the script runs and end visible', async ({
+    page,
+  }) => {
+    await page.route(bundles, async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await route.continue();
+    });
+    await page.goto('/dev/motion', { waitUntil: 'commit' });
+    const fade = page.locator('[data-reveal="fade"]').first();
+    const heading = page.locator('h1[data-reveal="lines"]');
+    await expect(fade).toHaveCSS('opacity', '0');
+    await expect(heading).toHaveCSS('opacity', '0');
+    await expect(fade).toHaveCSS('opacity', '1', { timeout: 8000 });
+    await expect(heading).toHaveCSS('opacity', '1', { timeout: 8000 });
   });
 });

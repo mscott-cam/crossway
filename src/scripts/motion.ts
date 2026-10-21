@@ -3,7 +3,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
 
 const START = 'top 85%';
-const FONT_WAIT_MS = 2500;
+const FONT_DEADLINE_MS = 2500;
 
 type Play = () => void;
 
@@ -124,17 +124,17 @@ function parallax(el: HTMLElement) {
 }
 
 function fontsReady() {
+  const remaining = Math.max(0, FONT_DEADLINE_MS - performance.now());
   return Promise.race([
     document.fonts.ready,
-    new Promise((resolve) => setTimeout(resolve, FONT_WAIT_MS)),
+    new Promise((resolve) => setTimeout(resolve, remaining)),
   ]);
 }
 
 export async function initMotion() {
   const root = document.documentElement;
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduced) root.classList.add('reduced');
-  if (reduced || !root.classList.contains('js')) return;
+  if (!root.classList.contains('js') || root.classList.contains('reduced'))
+    return;
 
   const reveals = Array.from(
     document.querySelectorAll<HTMLElement>('[data-reveal]'),
@@ -147,13 +147,13 @@ export async function initMotion() {
   );
   if (!reveals.length && !marks.length && !drifts.length) return;
 
-  gsap.registerPlugin(ScrollTrigger, SplitText);
-  ScrollTrigger.config({ ignoreMobileResize: true });
-
   const lines = reveals.filter((el) => el.dataset.reveal === 'lines');
   const rest = reveals.filter((el) => el.dataset.reveal !== 'lines');
 
   try {
+    gsap.registerPlugin(ScrollTrigger, SplitText);
+    ScrollTrigger.config({ ignoreMobileResize: true });
+
     for (const el of lines) gsap.set(el, { opacity: 0 });
     for (const el of rest) {
       if (el.dataset.reveal === 'up') revealUp(el);
@@ -161,6 +161,7 @@ export async function initMotion() {
     }
     for (const el of marks) drawMark(el);
     for (const el of drifts) parallax(el);
+    root.classList.add('motion-ready');
 
     if (lines.length) {
       await fontsReady();
@@ -168,6 +169,7 @@ export async function initMotion() {
     }
   } catch {
     gsap.set([...reveals, ...marks, ...drifts], { clearProps: 'all' });
+    root.classList.add('motion-ready');
   }
 }
 
