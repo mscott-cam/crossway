@@ -1,6 +1,8 @@
 import { defineConfig } from 'astro/config';
+import sitemap from '@astrojs/sitemap';
 import vercel from '@astrojs/vercel';
 import { loadAstroRedirects } from './scripts/build-redirects.ts';
+import { pruneDevPages } from './scripts/prune-dev-pages.mjs';
 import { getSermonsWithoutAudio } from './src/lib/sanity/queries.ts';
 
 const isE2E = process.env.E2E === '1';
@@ -17,5 +19,11 @@ export default defineConfig({
   site: 'https://crosswaysa.org',
   trailingSlash: 'never',
   redirects,
+  integrations: [
+    sitemap({
+      filter: (page) => !/^\/(dev|api)(\/|$)/.test(new URL(page).pathname),
+    }),
+    ...(isE2E ? [] : [pruneDevPages()]),
+  ],
   vite: { define: { __E2E__: JSON.stringify(isE2E) } },
 });

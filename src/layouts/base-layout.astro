@@ -7,7 +7,7 @@ import '@fontsource/hanken-grotesk/latin-500.css';
 import '@fontsource/hanken-grotesk/latin-600.css';
 import '@fontsource/hanken-grotesk/latin-700.css';
 import '../styles/global.css';
-import { tokensToCss } from '../lib/tokens';
+import { colors, tokensToCss } from '../lib/tokens';
 import SiteHeader from '../components/site-header.astro';
 import SiteFooter from '../components/site-footer.astro';
 import QuestionsForm from '../components/questions-form.astro';
@@ -38,7 +38,8 @@ const settings = await getSiteSettings();
 const siteName = 'Crossway Bible Church';
 const fullTitle = title.includes(siteName) ? title : `${title} | ${siteName}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
-const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).href : undefined;
+const ogImageUrl = new URL(ogImage ?? '/og/default.jpg', Astro.site).href;
+const ogImageIsDefault = !ogImage;
 ---
 
 <!doctype html>
@@ -48,21 +49,26 @@ const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).href : undefined;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#F3F0E8" />
+    <meta name="theme-color" content={colors.paper} />
     {noindex && <meta name="robots" content="noindex" />}
     <link rel="canonical" href={canonical.href} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta property="og:site_name" content={siteName} />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical.href} />
-    {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
+    <meta property="og:image" content={ogImageUrl} />
+    {ogImageIsDefault && <meta property="og:image:width" content="1200" />}
+    {ogImageIsDefault && <meta property="og:image:height" content="630" />}
     <meta
-      name="twitter:card"
-      content={ogImageUrl ? 'summary_large_image' : 'summary'}
+      property="og:image:alt"
+      content={ogImageIsDefault ? siteName : title}
     />
-    {ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={ogImageUrl} />
     <slot name="head" />
     <style is:inline set:html={tokensToCss()}></style>
     <script is:inline>

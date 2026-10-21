@@ -72,16 +72,44 @@ export function sermonPageTitle(sermon: Sermon): string {
 }
 
 const DESCRIPTION_LIMIT = 160;
+const DESCRIPTION_MIN = 50;
+
+function clipTo(text: string, limit: number): string {
+  if (text.length <= limit) return text;
+  const cut = text.slice(0, limit - 1);
+  const atWord = cut.slice(0, cut.lastIndexOf(' '));
+  return `${atWord || cut}…`;
+}
+
+const clip = (text: string) => clipTo(text, DESCRIPTION_LIMIT);
+
+function sermonContext(sermon: Sermon): string {
+  const by = sermon.speaker ? ` by ${sermon.speaker.name}` : '';
+  const place = sermon.series.isStandalone
+    ? ', at Crossway Bible Church'
+    : `, from the ${sermon.series.title} series at Crossway Bible Church`;
+  return `${sermon.title}${by}${place} on ${formatSermonDate(sermon.date)}.`;
+}
 
 export function sermonDescription(sermon: Sermon): string {
   const text = sermon.description?.replace(/\s+/g, ' ').trim();
-  if (!text) {
-    return `${sermon.series.title} · ${formatSermonDate(sermon.date)}`;
-  }
-  if (text.length <= DESCRIPTION_LIMIT) return text;
-  const cut = text.slice(0, DESCRIPTION_LIMIT - 1);
-  const atWord = cut.slice(0, cut.lastIndexOf(' '));
-  return `${atWord || cut}…`;
+  return clip(text || sermonContext(sermon));
+}
+
+export function seriesDescription(
+  intro: string | undefined,
+  total: number,
+  range = '',
+): string {
+  const tail = `${total} ${total === 1 ? 'message' : 'messages'}, newest first.${range}`;
+  const base = intro?.replace(/\s+/g, ' ').trim() ?? '';
+  const lead =
+    base.length < DESCRIPTION_MIN - tail.length
+      ? `${base} A sermon series at Crossway Bible Church.`.trim()
+      : base;
+  const room = DESCRIPTION_LIMIT - tail.length - 1;
+  const clipped = lead.length > room ? clipTo(lead, room) : lead;
+  return `${clipped} ${tail}`;
 }
 
 export function paragraphs(text: string): string[] {

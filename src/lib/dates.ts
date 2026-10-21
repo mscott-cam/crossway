@@ -15,6 +15,26 @@ export function toChicagoDate(d: Date | string): string {
   return `${get('year')}-${get('month')}-${get('day')}`;
 }
 
+const chicagoOffset = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'America/Chicago',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hourCycle: 'h23',
+  timeZoneName: 'longOffset',
+});
+
+export function toChicagoIso(d: Date | string): string {
+  const date = typeof d === 'string' ? new Date(d) : d;
+  const parts = chicagoOffset.formatToParts(date);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
+  const offset = get('timeZoneName').replace('GMT', '').replace('\u2212', '-');
+  return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}:${get('second')}${offset}`;
+}
+
 const long = new Intl.DateTimeFormat('en-US', {
   timeZone: 'UTC',
   year: 'numeric',

@@ -6,6 +6,7 @@ import {
   formatEventTime,
   formatSermonDate,
   toChicagoDate,
+  toChicagoIso,
 } from '../../src/lib/dates';
 
 describe('toChicagoDate', () => {
@@ -286,5 +287,40 @@ describe('eventSpan', () => {
         allDay: false,
       }),
     ).toEqual({ first: '2026-10-25', last: '2026-10-25' });
+  });
+});
+
+describe('toChicagoIso', () => {
+  it('writes the CDT offset in summer', () => {
+    expect(toChicagoIso('2026-10-26T00:00:00Z')).toBe(
+      '2026-10-25T19:00:00-05:00',
+    );
+  });
+
+  it('writes the CST offset in winter', () => {
+    expect(toChicagoIso('2026-12-13T23:00:00Z')).toBe(
+      '2026-12-13T17:00:00-06:00',
+    );
+  });
+
+  it('keeps the seconds', () => {
+    expect(toChicagoIso('2026-07-04T17:00:09Z')).toBe(
+      '2026-07-04T12:00:09-05:00',
+    );
+  });
+
+  it('distinguishes the two 1:30 AM hours on fall-back day', () => {
+    expect(toChicagoIso('2026-11-01T06:30:00Z')).toBe(
+      '2026-11-01T01:30:00-05:00',
+    );
+    expect(toChicagoIso('2026-11-01T07:30:00Z')).toBe(
+      '2026-11-01T01:30:00-06:00',
+    );
+  });
+
+  it('writes midnight as 00 rather than 24', () => {
+    expect(toChicagoIso('2026-10-31T05:00:00Z')).toBe(
+      '2026-10-31T00:00:00-05:00',
+    );
   });
 });

@@ -16,6 +16,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@astrojs/sitemap": "3.7.4",
     "@astrojs/vercel": "^11.0.16",
     "@fontsource/hanken-grotesk": "^5.3.0",
     "@fontsource/libre-caslon-display": "^5.3.0",

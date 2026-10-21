@@ -3,8 +3,10 @@ import { getEntry, render } from 'astro:content';
 import { z } from 'astro/zod';
 import BaseLayout from '../layouts/base-layout.astro';
 import Eyebrow from '../components/eyebrow.astro';
+import SeoJsonld from '../components/seo-jsonld.astro';
 import Placeholder from '../components/placeholder.astro';
 import { serviceTimeParts } from '../lib/format-times';
+import { churchJsonLd } from '../lib/seo/church';
 import { getSiteSettings } from '../lib/sanity/queries';
 import { site } from '../lib/site';
 import { ageGroups } from '../lib/kids';
@@ -21,6 +23,7 @@ const { street, city, region, postalCode } = site.address;
 ---
 
 <BaseLayout title={title} description={description}>
+  <SeoJsonld slot="head" data={churchJsonLd(Astro.site!.origin)} />
   <section class="visit-intro container" aria-labelledby="visit-title">
     {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
     <h1 id="visit-title" data-reveal="lines">

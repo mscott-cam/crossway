@@ -4,6 +4,7 @@ import {
   groupSeries,
   groupSpeakers,
   sermonDescription,
+  seriesDescription,
   sermonMeta,
   sermonPageTitle,
   paragraphs,
@@ -127,9 +128,82 @@ describe('sermonPageTitle and sermonDescription', () => {
     expect(text).not.toMatch(/wor…$/);
   });
 
-  it('falls back to series and date', () => {
-    const s = make({ slug: 'a', date: '2026-10-18' });
-    expect(sermonDescription(s)).toBe('A · October 18, 2026');
+  it('falls back to a sentence naming the sermon, speaker, series and date', () => {
+    const s = make({
+      slug: 'a',
+      title: 'Grace',
+      date: '2026-10-18',
+      speaker: speaker('s', 'Pat'),
+    });
+    expect(sermonDescription(s)).toBe(
+      'Grace by Pat, from the A series at Crossway Bible Church on October 18, 2026.',
+    );
+  });
+
+  it('leaves out the series for a standalone message and the speaker when unknown', () => {
+    const s = make({
+      slug: 'a',
+      title: 'Grace',
+      date: '2026-10-18',
+      series: series('a', true),
+    });
+    expect(sermonDescription(s)).toBe(
+      'Grace, at Crossway Bible Church on October 18, 2026.',
+    );
+  });
+
+  it('keeps a short description as written', () => {
+    const s = make({ slug: 'a', description: 'A short one.' });
+    expect(sermonDescription(s)).toBe('A short one.');
+  });
+
+  it('keeps a description that is long enough as written', () => {
+    const own = 'A walk through the book of James, one chapter at a time.';
+    const s = make({ slug: 'a', description: own });
+    expect(sermonDescription(s)).toBe(own);
+  });
+
+  it('never exceeds the limit even with a long title', () => {
+    const s = make({ slug: 'a', title: 'Long title '.repeat(30) });
+    expect(sermonDescription(s).length).toBeLessThanOrEqual(160);
+  });
+});
+
+describe('seriesDescription', () => {
+  it('joins the intro and the message count', () => {
+    expect(
+      seriesDescription(
+        'A walk through the book of James, chapter by chapter.',
+        12,
+      ),
+    ).toBe(
+      'A walk through the book of James, chapter by chapter. 12 messages, newest first.',
+    );
+  });
+
+  it('singularizes one message and appends the page range', () => {
+    expect(seriesDescription(undefined, 1, ' Page 1 of 1.')).toBe(
+      'A sermon series at Crossway Bible Church. 1 message, newest first. Page 1 of 1.',
+    );
+  });
+
+  it('pads a very short intro so the description is long enough', () => {
+    const text = seriesDescription('Faith.', 3);
+    expect(text.length).toBeGreaterThanOrEqual(50);
+    expect(text.startsWith('Faith. A sermon series')).toBe(true);
+  });
+
+  it('clips a long intro so the whole description stays within 160', () => {
+    const text = seriesDescription(
+      'word '.repeat(100).trim(),
+      120,
+      ' Page 2 of 3.',
+    );
+    expect(text.length).toBeLessThanOrEqual(160);
+    expect(text).toContain('…');
+    expect(text.endsWith('120 messages, newest first. Page 2 of 3.')).toBe(
+      true,
+    );
   });
 });
 

@@ -378,7 +378,7 @@ test.describe('sermon detail', () => {
     await page.goto(`/sermons/${noMedia.slug}`);
     await expect(page.locator('meta[name="description"]')).toHaveAttribute(
       'content',
-      'Stand Alone Messages · June 14, 2026',
+      'Hope in the Waiting by Josh de Koning, at Crossway Bible Church on June 14, 2026.',
     );
   });
 });

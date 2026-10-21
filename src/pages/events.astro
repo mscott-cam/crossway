@@ -1,17 +1,21 @@
 ---
 import BaseLayout from '../layouts/base-layout.astro';
 import Eyebrow from '../components/eyebrow.astro';
+import SeoJsonld from '../components/seo-jsonld.astro';
 import EventList from '../components/event-list.astro';
 import { fetchUpcomingEvents } from '../lib/events/pco';
+import { eventsJsonLd } from '../lib/seo/event';
 import { site } from '../lib/site';
 
 const events = await fetchUpcomingEvents();
+const jsonLd = eventsJsonLd(events, Astro.site!.origin);
 ---
 
 <BaseLayout
   title="Events"
   description="Upcoming events at Crossway Bible Church in San Antonio. Open any event on Church Center for details and sign-up."
 >
+  {jsonLd && <SeoJsonld slot="head" data={jsonLd} />}
   <div class="container section events-page">
     <header class="events-page__head">
       <Eyebrow>What’s coming up</Eyebrow>

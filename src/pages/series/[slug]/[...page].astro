@@ -3,7 +3,7 @@ import type { GetStaticPaths } from 'astro';
 import SermonListLayout from '../../../layouts/sermon-list-layout.astro';
 import { getSermons } from '../../../lib/sanity/queries';
 import { PAGE_SIZE } from '../../../lib/pagination';
-import { groupSeries } from '../../../lib/sermon-groups';
+import { groupSeries, seriesDescription } from '../../../lib/sermon-groups';
 import { sanityImageUrl } from '../../../lib/image-url';
 
 export const getStaticPaths = (async ({ paginate }) => {
@@ -23,12 +23,11 @@ const range =
 const intro =
   series.description ??
   (series.isStandalone ? 'Messages that stand on their own.' : undefined);
-const count = `${page.total} ${page.total === 1 ? 'message' : 'messages'}`;
 ---
 
 <SermonListLayout
   title={`${series.title} – Sermon Series${suffix}`}
-  description={`${intro ?? `A sermon series at Crossway Bible Church.`} ${count}, newest first.${range}`}
+  description={seriesDescription(intro, page.total, range)}
   eyebrow="Series"
   heading={series.title}
   intro={intro}
