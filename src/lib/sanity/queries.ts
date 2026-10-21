@@ -298,16 +298,18 @@ async function withAudio(sermons: Sermon[]): Promise<Sermon[]> {
   }
 }
 
-export const getSermons = memoize(async () =>
-  withAudio(
-    await load(
-      'getSermons',
-      () => 'sermons.json',
-      SERMONS_QUERY,
-      (raw) => sortSermons(list('getSermons', normalizeSermon)(raw)),
-      [],
-    ),
+export const getSermonsWithoutAudio = memoize(() =>
+  load(
+    'getSermons',
+    () => 'sermons.json',
+    SERMONS_QUERY,
+    (raw) => sortSermons(list('getSermons', normalizeSermon)(raw)),
+    [],
   ),
+);
+
+export const getSermons = memoize(async () =>
+  withAudio(await getSermonsWithoutAudio()),
 );
 
 export const getSeriesList = memoize(() =>
