@@ -1,0 +1,114 @@
+---
+import BaseLayout from '../../layouts/base-layout.astro';
+import SermonMedia from '../../components/sermon-media.astro';
+import VimeoFacade from '../../components/vimeo-facade.astro';
+
+const base = {
+  speaker: undefined,
+  date: '2026-10-11',
+};
+
+const fixtures = [
+  {
+    name: 'both',
+    label: 'Video and audio',
+    sermon: {
+      ...base,
+      slug: 'both-media-2026-10-11',
+      title: 'Both Media Sermon',
+      vimeoUrl: 'https://vimeo.com/76979871/abc123def4',
+      audio: { url: '/dev/silence.mp3?a', source: 'override' as const },
+    },
+  },
+  {
+    name: 'video',
+    label: 'Video only',
+    sermon: {
+      ...base,
+      slug: 'video-only-2026-10-11',
+      title: 'Video Only Sermon',
+      vimeoUrl: 'https://vimeo.com/76979871',
+    },
+  },
+  {
+    name: 'audio',
+    label: 'Audio only',
+    sermon: {
+      ...base,
+      slug: 'audio-only-2026-10-11',
+      title: 'Audio Only Sermon',
+      audio: { url: '/dev/silence.mp3?b', source: 'override' as const },
+    },
+  },
+  {
+    name: 'none',
+    label: 'No media',
+    sermon: {
+      ...base,
+      slug: 'no-media-2026-10-11',
+      title: 'No Media Sermon',
+    },
+  },
+  {
+    name: 'invalid',
+    label: 'Invalid Vimeo URL with audio',
+    sermon: {
+      ...base,
+      slug: 'invalid-vimeo-2026-10-11',
+      title: 'Invalid Vimeo Sermon',
+      vimeoUrl: 'https://example.com/not-a-vimeo-link',
+      audio: { url: '/dev/silence.mp3?c', source: 'override' as const },
+    },
+  },
+];
+---
+
+<BaseLayout
+  title="Media fixture"
+  description="Internal fixture page for sermon media."
+  noindex
+>
+  <div class="container media-fixture">
+    <h1>Media fixtures</h1>
+    {fixtures.map(({ name, label, sermon }) => (
+      <section class="media-fixture__item" data-fixture={name}>
+        <h2>{label}</h2>
+        <SermonMedia sermon={sermon} />
+      </section>
+    ))}
+    <section class="media-fixture__item" data-fixture="poster">
+      <h2>Facade with a thumbnail</h2>
+      <VimeoFacade
+        id="76979871"
+        title="Poster Sermon"
+        thumb="/dev/poster.svg"
+      />
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .media-fixture {
+    max-width: 52rem;
+    padding-block: 4rem;
+  }
+
+  .media-fixture h1 {
+    font-size: var(--step-h2);
+  }
+
+  .media-fixture__item {
+    display: grid;
+    gap: 1rem;
+    margin-top: 3rem;
+  }
+
+  .media-fixture__item h2 {
+    font-family: var(--font-ui);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--amber-ink);
+  }
+</style>

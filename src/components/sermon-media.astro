@@ -1,0 +1,139 @@
+---
+import type { Sermon } from '../lib/sanity/types';
+import { getVimeoThumb, parseVimeoId } from '../lib/video/vimeo';
+import AudioPlayer from './audio-player.astro';
+import VimeoFacade from './vimeo-facade.astro';
+
+interface Props {
+  sermon: Pick<Sermon, 'slug' | 'title' | 'vimeoUrl' | 'audio'>;
+}
+
+const { sermon } = Astro.props;
+const videoId = sermon.vimeoUrl ? parseVimeoId(sermon.vimeoUrl) : null;
+const audioUrl = sermon.audio?.url || null;
+const thumb = videoId ? await getVimeoThumb(videoId) : null;
+const both = Boolean(videoId && audioUrl);
+const uid = sermon.slug.replace(/[^a-z0-9_-]/gi, '-');
+---
+
+{(videoId || audioUrl) && (
+  <div
+    class:list={['sermon-media', { 'sermon-media--tabs': both }]}
+    data-sermon-media
+  >
+    {both && (
+      <div
+        class="sermon-media__tabs"
+        role="tablist"
+        aria-label="Watch or listen"
+      >
+        <button
+          type="button"
+          role="tab"
+          id={`media-tab-watch-${uid}`}
+          aria-controls={`media-panel-watch-${uid}`}
+          aria-selected="true"
+          data-tab="watch"
+        >
+          Watch
+        </button>
+        <button
+          type="button"
+          role="tab"
+          id={`media-tab-listen-${uid}`}
+          aria-controls={`media-panel-listen-${uid}`}
+          aria-selected="false"
+          tabindex="-1"
+          data-tab="listen"
+        >
+          Listen
+        </button>
+      </div>
+    )}
+    {videoId && (
+      <div
+        class="sermon-media__panel is-active"
+        id={`media-panel-watch-${uid}`}
+        role={both ? 'tabpanel' : undefined}
+        aria-labelledby={both ? `media-tab-watch-${uid}` : undefined}
+        data-panel="watch"
+      >
+        <VimeoFacade id={videoId} title={sermon.title} thumb={thumb} />
+      </div>
+    )}
+    {audioUrl && (
+      <div
+        class="sermon-media__panel"
+        id={`media-panel-listen-${uid}`}
+        role={both ? 'tabpanel' : undefined}
+        aria-labelledby={both ? `media-tab-listen-${uid}` : undefined}
+        data-panel="listen"
+      >
+        <AudioPlayer src={audioUrl} title={sermon.title} />
+      </div>
+    )}
+  </div>
+)}
+
+<script>
+  import '../scripts/sermon-media';
+</script>
+
+<style is:global>
+  .sermon-media {
+    display: grid;
+    gap: 1.25rem;
+    width: 100%;
+  }
+
+  .sermon-media__tabs {
+    display: inline-flex;
+    justify-self: start;
+    padding: 4px;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    background: var(--paper);
+  }
+
+  html:not(.js) .sermon-media__tabs {
+    display: none;
+  }
+
+  .sermon-media__tabs [role='tab'] {
+    min-width: 6.5rem;
+    min-height: 44px;
+    padding: 0 1.5rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--navy);
+    font-family: var(--font-ui);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
+  }
+
+  .sermon-media__tabs [role='tab'][aria-selected='true'] {
+    background: var(--navy);
+    color: var(--paper);
+  }
+
+  .sermon-media__tabs [role='tab'][aria-selected='false']:hover {
+    background: color-mix(in srgb, var(--navy) 8%, transparent);
+  }
+
+  .sermon-media__tabs [role='tab']:focus-visible {
+    outline: 2px solid var(--navy);
+    outline-offset: 3px;
+    box-shadow: inset 0 0 0 2px var(--amber);
+  }
+
+  html.js .sermon-media--tabs .sermon-media__panel:not(.is-active) {
+    display: none;
+  }
+</style>

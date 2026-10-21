@@ -1,0 +1,156 @@
+---
+import CrossMark from './cross-mark.astro';
+
+interface Props {
+  id: string;
+  title: string;
+  thumb: string | null;
+}
+
+const { id, title, thumb } = Astro.props;
+const [videoId, hash] = id.split('?h=');
+const pageUrl = hash
+  ? `https://vimeo.com/${videoId}/${hash}`
+  : `https://vimeo.com/${videoId}`;
+---
+
+<div
+  class="vimeo-facade"
+  data-vimeo-facade
+  data-vimeo-id={videoId}
+  data-vimeo-hash={hash}
+  data-title={title}
+>
+  {thumb ? (
+    <img
+      class="vimeo-facade__poster"
+      src={thumb}
+      alt=""
+      width="1280"
+      height="720"
+      loading="lazy"
+      decoding="async"
+    />
+  ) : (
+    <div class="vimeo-facade__placeholder" aria-hidden="true">
+      <CrossMark size={36} />
+    </div>
+  )}
+  <button
+    type="button"
+    class="vimeo-facade__play"
+    aria-label={`Play video: ${title}`}
+  >
+    <svg
+      viewBox="0 0 24 24"
+      width="28"
+      height="28"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M8 5.5v13l11-6.5z" fill="currentColor"></path>
+    </svg>
+  </button>
+  <a class="vimeo-facade__fallback" href={pageUrl} rel="noopener">
+    Watch on Vimeo<span class="sr-only">: {title}</span>
+  </a>
+</div>
+
+<script>
+  import '../scripts/vimeo-facade';
+</script>
+
+<style is:global>
+  .vimeo-facade {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 6px;
+    background: var(--navy);
+  }
+
+  .vimeo-facade__poster,
+  .vimeo-facade__placeholder,
+  .vimeo-facade iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .vimeo-facade__poster {
+    object-fit: cover;
+  }
+
+  .vimeo-facade__placeholder {
+    display: grid;
+    place-items: end start;
+    padding: 1.25rem 1.5rem;
+    background: var(--navy);
+  }
+
+  .vimeo-facade__play {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--navy);
+    cursor: pointer;
+  }
+
+  .vimeo-facade__play svg {
+    box-sizing: content-box;
+    width: 28px;
+    height: 28px;
+    padding: 22px 20px 22px 24px;
+    border-radius: 50%;
+    background: var(--paper);
+    transition: background-color 0.2s ease;
+  }
+
+  .vimeo-facade__play:hover svg {
+    background: var(--amber);
+  }
+
+  .vimeo-facade__play:focus-visible {
+    outline: none;
+  }
+
+  .vimeo-facade__play:focus-visible svg {
+    outline: 3px solid var(--amber);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 2px var(--navy);
+  }
+
+  .vimeo-facade__fallback {
+    display: none;
+  }
+
+  html:not(.js) .vimeo-facade__play {
+    display: none;
+  }
+
+  html:not(.js) .vimeo-facade__fallback {
+    position: absolute;
+    inset: auto 1rem 1rem auto;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 1.25rem;
+    border-radius: 999px;
+    background: var(--paper);
+    color: var(--navy);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+</style>

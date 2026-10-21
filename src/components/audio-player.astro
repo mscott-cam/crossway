@@ -1,0 +1,132 @@
+---
+interface Props {
+  src: string;
+  title: string;
+}
+
+const { src, title } = Astro.props;
+---
+
+<div class="audio-player" data-audio-player data-src={src} data-title={title}>
+  <audio controls preload="none" src={src} aria-label={title}></audio>
+</div>
+
+<script>
+  import '../scripts/audio-player';
+</script>
+
+<style is:global>
+  .audio-player {
+    min-height: 8.5rem;
+    padding: 1.25rem;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    background: var(--paper);
+    color: var(--navy);
+    font-family: var(--font-ui);
+  }
+
+  .audio-player:not(.is-ready) {
+    display: grid;
+    align-items: center;
+  }
+
+  .audio-player:not(.is-ready) audio {
+    width: 100%;
+  }
+
+  .audio-player.is-ready audio {
+    display: none;
+  }
+
+  .audio-player__controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .audio-player__spacer {
+    flex: 1 1 0;
+  }
+
+  .audio-player__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 0.875rem;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--navy);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .audio-player__button:hover {
+    background: color-mix(in srgb, var(--navy) 8%, transparent);
+  }
+
+  .audio-player__button--play {
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    border-color: var(--navy);
+    background: var(--navy);
+    color: var(--paper);
+  }
+
+  .audio-player__button--play:hover {
+    background: color-mix(in srgb, var(--navy) 82%, black);
+  }
+
+  .audio-player__button svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .audio-player__timeline {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+  }
+
+  .audio-player__time {
+    min-width: 3.5ch;
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--charcoal);
+  }
+
+  .audio-player__scrubber {
+    width: 100%;
+    min-height: 44px;
+    margin: 0;
+    accent-color: var(--navy);
+    cursor: pointer;
+  }
+
+  .audio-player__scrubber:disabled {
+    cursor: default;
+    opacity: 0.55;
+  }
+
+  .audio-player__message {
+    margin: 0.5rem 0 0;
+    color: var(--charcoal);
+    font-size: 0.875rem;
+  }
+
+  .audio-player__message:empty {
+    display: none;
+  }
+</style>
