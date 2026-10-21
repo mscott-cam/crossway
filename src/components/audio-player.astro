@@ -9,6 +9,52 @@ const { src, title } = Astro.props;
 
 <div class="audio-player" data-audio-player data-src={src} data-title={title}>
   <audio controls preload="none" src={src} aria-label={title}></audio>
+  <div class="audio-player__ui">
+    <div class="audio-player__controls">
+      <button
+        type="button"
+        class="audio-player__button audio-player__button--play"
+        data-play
+        aria-label="Play"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M8 5.5v13l11-6.5z" fill="currentColor" />
+        </svg>
+      </button>
+      <button type="button" class="audio-player__button" data-back>
+        −15<span class="sr-only"> seconds, back</span>
+      </button>
+      <button type="button" class="audio-player__button" data-forward>
+        +15<span class="sr-only"> seconds, forward</span>
+      </button>
+      <span class="audio-player__spacer"></span>
+      <button type="button" class="audio-player__button" data-speed>
+        <span class="sr-only">Playback speed </span>
+        <span data-speed-value>1×</span>
+      </button>
+    </div>
+    <div class="audio-player__timeline">
+      <span class="audio-player__time" data-elapsed>
+        0:00
+      </span>
+      <input
+        class="audio-player__scrubber"
+        type="range"
+        min="0"
+        max="0"
+        step="1"
+        value="0"
+        disabled
+        data-scrubber
+        aria-label={`Seek: ${title}`}
+      />
+      <span class="audio-player__time" data-total>
+        –:––
+      </span>
+    </div>
+    <p class="audio-player__message" role="status"></p>
+    <span class="sr-only" role="status" aria-live="polite" data-announce></span>
+  </div>
 </div>
 
 <script>
@@ -18,7 +64,6 @@ const { src, title } = Astro.props;
 <style is:global>
   .audio-player {
     position: relative;
-    min-height: 9.625rem;
     padding: 1.25rem;
     border: 1px solid var(--rule);
     border-radius: 6px;
@@ -27,13 +72,16 @@ const { src, title } = Astro.props;
     font-family: var(--font-ui);
   }
 
-  .audio-player:not(.is-ready) {
-    display: grid;
-    align-items: center;
+  .audio-player:not(.is-ready) .audio-player__ui {
+    visibility: hidden;
   }
 
   .audio-player:not(.is-ready) audio {
-    width: 100%;
+    position: absolute;
+    top: 50%;
+    left: 1.25rem;
+    width: calc(100% - 2.5rem);
+    transform: translateY(-50%);
   }
 
   .audio-player.is-ready audio {
@@ -134,5 +182,28 @@ const { src, title } = Astro.props;
     margin: -1px;
     overflow: hidden;
     clip-path: inset(50%);
+  }
+
+  @media (max-width: 30rem) {
+    .audio-player {
+      padding: 0.875rem;
+    }
+
+    .audio-player:not(.is-ready) audio {
+      left: 0.875rem;
+      width: calc(100% - 1.75rem);
+    }
+
+    .audio-player__controls {
+      gap: 0.375rem;
+    }
+
+    .audio-player__button {
+      padding: 0 0.625rem;
+    }
+
+    .audio-player__timeline {
+      gap: 0.5rem;
+    }
   }
 </style>

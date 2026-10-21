@@ -6,7 +6,6 @@ import {
 
 const SAVE_INTERVAL_MS = 5000;
 const SKIP_SECONDS = 15;
-const UNKNOWN_TOTAL = '–:––';
 
 const playIcon =
   '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>';
@@ -46,29 +45,8 @@ function setup(root: HTMLElement) {
   audio.removeAttribute('controls');
   audio.preload = 'none';
 
-  const ui = document.createElement('div');
-  ui.className = 'audio-player__ui';
-  ui.innerHTML = `
-    <div class="audio-player__controls">
-      <button type="button" class="audio-player__button audio-player__button--play" data-play aria-label="Play">${playIcon}</button>
-      <button type="button" class="audio-player__button" data-back>−15<span class="sr-only"> seconds, back</span></button>
-      <button type="button" class="audio-player__button" data-forward>+15<span class="sr-only"> seconds, forward</span></button>
-      <span class="audio-player__spacer"></span>
-      <button type="button" class="audio-player__button" data-speed><span class="sr-only">Playback speed </span><span data-speed-value></span></button>
-    </div>
-    <div class="audio-player__timeline">
-      <span class="audio-player__time" data-elapsed>0:00</span>
-      <input class="audio-player__scrubber" type="range" min="0" max="0" step="1" value="0" disabled data-scrubber />
-      <span class="audio-player__time" data-total>${UNKNOWN_TOTAL}</span>
-    </div>
-    <p class="audio-player__message" role="status"></p>
-    <span class="sr-only" role="status" aria-live="polite" data-announce></span>
-  `;
-  root.append(ui);
-  ui.querySelector('[data-scrubber]')?.setAttribute(
-    'aria-label',
-    `Seek: ${root.dataset.title ?? 'audio'}`,
-  );
+  const ui = root.querySelector<HTMLElement>('.audio-player__ui');
+  if (!ui) return;
 
   const $ = <T extends HTMLElement>(selector: string) =>
     ui.querySelector(selector) as T;

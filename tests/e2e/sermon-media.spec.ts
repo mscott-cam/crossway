@@ -393,16 +393,36 @@ test.describe('audio player', () => {
     await expect(live).toHaveText('Playback speed 1.25×');
   });
 
-  test('reserves the enhanced height so hydration does not shift the page', async ({
-    page,
-    browser,
-  }) => {
-    for (const width of [1000, 375]) {
+  const hydrationCases = [
+    { name: '1000px', width: 1000, rootFont: 100 },
+    { name: '375px', width: 375, rootFont: 100 },
+    { name: '320px', width: 320, rootFont: 100 },
+    { name: '375px at 200% root font size', width: 375, rootFont: 200 },
+  ];
+
+  const scaleRootFont = async (page: Page, percent: number) => {
+    if (percent === 100) return;
+    await page.route('**/dev/media', async (route) => {
+      const response = await route.fetch();
+      const body = (await response.text()).replace(
+        '</head>',
+        `<style>html{font-size:${percent}%}</style></head>`,
+      );
+      await route.fulfill({ response, body });
+    });
+  };
+
+  for (const { name, width, rootFont } of hydrationCases) {
+    test(`reserves the enhanced height so hydration does not shift the page at ${name}`, async ({
+      page,
+      browser,
+    }) => {
       const plain = await browser.newContext({
         javaScriptEnabled: false,
         viewport: { width, height: 900 },
       });
       const plainPage = await plain.newPage();
+      await scaleRootFont(plainPage, rootFont);
       await open(plainPage);
       const before = (await fixture(plainPage, 'audio')
         .locator('[data-audio-player]')
@@ -410,13 +430,85 @@ test.describe('audio player', () => {
       await plain.close();
 
       await page.setViewportSize({ width, height: 900 });
+      await scaleRootFont(page, rootFont);
       await open(page);
       const player = fixture(page, 'audio').locator('[data-audio-player]');
       await expect(player).toHaveClass(/is-ready/);
       const after = (await player.boundingBox())!.height;
       expect(Math.abs(after - before)).toBeLessThanOrEqual(1);
+    });
+  }
+
+  test('does not shift between the script-less render and hydration with JavaScript on', async ({
+    page,
+  }) => {
+    for (const width of [320, 375]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.route('**/dev/media', async (route) => {
+        const response = await route.fetch();
+        const body = (await response.text()).replace(
+          /<script type="module"[\s\S]*?<\/script>/g,
+          '',
+        );
+        await route.fulfill({ response, body });
+      });
+      await page.goto('/dev/media');
+      const player = fixture(page, 'audio').locator('[data-audio-player]');
+      await expect(player).not.toHaveClass(/is-ready/);
+      await expect(page.locator('html')).toHaveClass(/js/);
+      const before = (await player.boundingBox())!.height;
+      await page.unroute('**/dev/media');
+      await open(page);
+      await expect(player).toHaveClass(/is-ready/);
+      const after = (await player.boundingBox())!.height;
+      expect(Math.abs(after - before), `${width}px`).toBeLessThanOrEqual(1);
     }
   });
+
+  test('keeps the controls on one line at 320px', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 900 });
+    await open(page);
+    const audio = fixture(page, 'audio');
+    const centers = await audio
+      .locator('.audio-player__controls .audio-player__button')
+      .evaluateAll((els) =>
+        els.map((el) => {
+          const box = el.getBoundingClientRect();
+          return box.top + box.height / 2;
+        }),
+      );
+    expect(centers).toHaveLength(4);
+    expect(Math.max(...centers) - Math.min(...centers)).toBeLessThanOrEqual(2);
+  });
+
+  for (const width of [320, 375]) {
+    test(`has no horizontal overflow at ${width}px with and without JavaScript`, async ({
+      page,
+      browser,
+    }) => {
+      const overflow = (target: Page) =>
+        target.evaluate(
+          () =>
+            document.documentElement.scrollWidth -
+            document.documentElement.clientWidth,
+        );
+      const plain = await browser.newContext({
+        javaScriptEnabled: false,
+        viewport: { width, height: 900 },
+      });
+      const plainPage = await plain.newPage();
+      await open(plainPage);
+      expect(await overflow(plainPage)).toBeLessThanOrEqual(0);
+      await plain.close();
+
+      await page.setViewportSize({ width, height: 900 });
+      await open(page);
+      await expect(
+        fixture(page, 'audio').locator('[data-audio-player]'),
+      ).toHaveClass(/is-ready/);
+      expect(await overflow(page)).toBeLessThanOrEqual(0);
+    });
+  }
 
   test('shows an error and retries the load when playback fails', async ({
     page,

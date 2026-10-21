@@ -371,6 +371,28 @@ const pathname = Astro.url.pathname;
     }
   }
 
+  @media (max-width: 25rem) {
+    .site-header {
+      --header-gutter: 0.5rem;
+    }
+
+    .site-header__bar {
+      gap: 0.5rem;
+      padding-left: 1rem;
+    }
+
+    .site-header .site-header__logo .logo-lockup {
+      height: 0.9375rem;
+    }
+
+    .menu-button,
+    .menu-fallback {
+      gap: 0.5rem;
+      padding-inline: 0.875rem;
+      letter-spacing: 0.1em;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .nav-link,
     .dropdown-link,
