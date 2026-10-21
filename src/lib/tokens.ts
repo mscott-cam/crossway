@@ -5,6 +5,7 @@ export const colors = {
   amberInk: '#8F6000',
   mist: '#A9B7C8',
   charcoal: '#333333',
+  error: '#9B2C1C',
 } as const;
 
 export type ColorName = keyof typeof colors;

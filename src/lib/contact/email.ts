@@ -24,6 +24,15 @@ export type EmailClient = {
 
 type SendDeps = { client?: EmailClient; env?: Env };
 
+export class ContactSendError extends Error {
+  constructor(
+    readonly code: string,
+    readonly status?: number,
+  ) {
+    super('Resend rejected the message');
+  }
+}
+
 const TEST_SENDER = 'Crossway Website <onboarding@resend.dev>';
 const SUBJECT_NAME_MAX = 60;
 
@@ -120,5 +129,14 @@ export async function sendContactEmail(
     text,
     replyTo: v.email,
   });
-  if (result?.error) throw new Error('Resend rejected the message');
+  if (result?.error) {
+    const { name, statusCode } = result.error as {
+      name?: unknown;
+      statusCode?: unknown;
+    };
+    throw new ContactSendError(
+      typeof name === 'string' ? name : 'unknown',
+      typeof statusCode === 'number' ? statusCode : undefined,
+    );
+  }
 }

@@ -3,7 +3,8 @@ export type ContactInput = {
   email: string;
   heardFrom?: string;
   message: string;
-  company?: string;
+  // Honeypot: named to dodge browser autofill heuristics, which a name like "company" invites.
+  contact_extra_note?: string;
   turnstileToken: string;
 };
 
@@ -23,6 +24,10 @@ export const LIMITS = {
 const EMAIL =
   /^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]{1,64}@[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)+$/;
 
+export function isValidEmail(value: string): boolean {
+  return value.length <= LIMITS.email && EMAIL.test(value);
+}
+
 function text(value: unknown): string {
   return typeof value === 'string' ? value.trim() : '';
 }
@@ -36,7 +41,10 @@ export function validateContact(input: unknown): ContactResult {
   const email = text(raw.email);
   const heardFrom = text(raw.heardFrom);
   const message = text(raw.message);
-  const company = typeof raw.company === 'string' ? raw.company.trim() : '';
+  const contactExtraNote =
+    typeof raw.contact_extra_note === 'string'
+      ? raw.contact_extra_note.trim()
+      : '';
   const token =
     typeof raw.turnstileToken === 'string' ? raw.turnstileToken : '';
   const errors: ContactErrors = {};
@@ -45,7 +53,7 @@ export function validateContact(input: unknown): ContactResult {
   else if (name.length > LIMITS.name)
     errors.name = 'Please keep your name under 100 characters.';
 
-  if (!email || email.length > LIMITS.email || !EMAIL.test(email))
+  if (!isValidEmail(email))
     errors.email = 'Please enter a valid email address.';
 
   if (heardFrom.length > LIMITS.heardFrom)
@@ -64,7 +72,7 @@ export function validateContact(input: unknown): ContactResult {
       email,
       ...(heardFrom ? { heardFrom } : {}),
       message,
-      ...(company ? { company } : {}),
+      ...(contactExtraNote ? { contact_extra_note: contactExtraNote } : {}),
       turnstileToken: token.slice(0, LIMITS.token),
     },
   };

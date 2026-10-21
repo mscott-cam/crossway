@@ -28,10 +28,17 @@ describe('color tokens', () => {
     expect(contrastRatio(colors.amber, colors.paper)).toBeLessThan(3);
   });
 
+  it('error text on paper passes AA', () => {
+    expect(contrastRatio(colors.error, colors.paper)).toBeGreaterThanOrEqual(
+      4.5,
+    );
+  });
+
   it('emits css custom properties', () => {
     const css = tokensToCss();
     expect(css).toContain('--amber-ink:#8F6000');
     expect(css).toContain('--paper:#F3F0E8');
+    expect(css).toContain('--error:#9B2C1C');
     expect(css.startsWith(':root{')).toBe(true);
   });
 });

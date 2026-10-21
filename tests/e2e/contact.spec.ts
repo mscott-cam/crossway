@@ -89,7 +89,9 @@ test.describe('questions form fields', () => {
       [...el.querySelectorAll('input:not([type=hidden]), textarea')]
         .filter((control) => {
           const field = control as HTMLInputElement;
-          return field.name !== 'company' && field.labels?.length === 0;
+          return (
+            field.name !== 'contact_extra_note' && field.labels?.length === 0
+          );
         })
         .map((control) => (control as HTMLInputElement).name),
     );
@@ -121,11 +123,15 @@ test.describe('questions form fields', () => {
     page,
   }) => {
     await page.goto('/');
-    const honeypot = page.locator('#questions input[name="company"]');
+    const honeypot = page.locator(
+      '#questions input[name="contact_extra_note"]',
+    );
     await expect(honeypot).toHaveAttribute('tabindex', '-1');
     await expect(honeypot).toHaveAttribute('autocomplete', 'off');
     await expect(
-      page.locator('#questions [aria-hidden="true"] input[name="company"]'),
+      page.locator(
+        '#questions [aria-hidden="true"] input[name="contact_extra_note"]',
+      ),
     ).toHaveCount(1);
   });
 });
@@ -146,9 +152,7 @@ test.describe('questions form submission', () => {
     await page.goto('/');
     await fillForm(page);
     await send(page).click();
-    await expect(page.locator('#questions [role="status"]')).toHaveText(
-      SUCCESS,
-    );
+    await expect(page.locator('#questions [data-status]')).toHaveText(SUCCESS);
     expect(body).toMatchObject({
       name: 'Ada Lovelace',
       email: 'ada@example.com',
@@ -168,7 +172,7 @@ test.describe('questions form submission', () => {
     await page.goto('/');
     await fillForm(page);
     await send(page).click();
-    await expect(page.locator('#questions [role="status"]')).toHaveText(
+    await expect(page.locator('#questions [data-status]')).toContainText(
       FAILURE,
     );
     await expect(
@@ -186,7 +190,7 @@ test.describe('questions form submission', () => {
     await page.goto('/');
     await fillForm(page);
     await send(page).click();
-    await expect(page.locator('#questions [role="status"]')).toHaveText(
+    await expect(page.locator('#questions [data-status]')).toContainText(
       FAILURE,
     );
   });
@@ -230,7 +234,23 @@ test.describe('questions form submission', () => {
     );
   });
 
-  test('does not shift the layout when the message appears', async ({
+  test('does not shift the layout when the thank-you appears', async ({
+    page,
+  }) => {
+    await page.route('**/api/contact', (route) =>
+      route.fulfill({ status: 200, json: { ok: true } }),
+    );
+    await page.goto('/');
+    await fillForm(page);
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    const before = await page.evaluate(() => document.body.scrollHeight);
+    await send(page).click();
+    await expect(page.locator('#questions [data-status]')).toHaveText(SUCCESS);
+    const after = await page.evaluate(() => document.body.scrollHeight);
+    expect(after).toBe(before);
+  });
+
+  test('the failure message includes the contact fallback placeholder', async ({
     page,
   }) => {
     await page.route('**/api/contact', (route) =>
@@ -238,32 +258,42 @@ test.describe('questions form submission', () => {
     );
     await page.goto('/');
     await fillForm(page);
-    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-    const before = await page.evaluate(() => document.body.scrollHeight);
     await send(page).click();
-    await expect(page.locator('#questions [role="status"]')).toHaveText(
-      FAILURE,
-    );
-    const after = await page.evaluate(() => document.body.scrollHeight);
-    expect(after).toBe(before);
+    await expect(
+      page.locator('#questions [data-status] [data-placeholder]'),
+    ).toContainText('public contact email');
   });
 
-  test('shows the thank-you after a no-JS redirect and cleans the URL', async ({
+  test('shows the thank-you after a fragment redirect and cleans the URL', async ({
     page,
   }) => {
-    await page.goto('/sermons?sent=1#questions');
-    await expect(page.locator('#questions [role="status"]')).toHaveText(
-      SUCCESS,
-    );
+    await page.goto('/sermons#questions-sent');
+    await expect(page.locator('#questions [data-status]')).toHaveText(SUCCESS);
     await expect(page).toHaveURL(/\/sermons#questions$/);
+    await expect(page.locator('#questions-sent')).toBeHidden();
   });
 
-  test('shows the failure copy after an error redirect', async ({ page }) => {
-    await page.goto('/?error=1#questions');
-    await expect(page.locator('#questions [role="status"]')).toHaveText(
+  test('shows the failure copy after an error fragment redirect', async ({
+    page,
+  }) => {
+    await page.goto('/#questions-error');
+    await expect(page.locator('#questions [data-status]')).toContainText(
       FAILURE,
     );
     await expect(page).toHaveURL(/\/#questions$/);
+    await expect(page.locator('#questions-error')).toBeHidden();
+  });
+
+  test('the static no-JS blocks and noscript note are never visible with JS', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    await expect(page.locator('#questions-sent')).toBeHidden();
+    await expect(page.locator('#questions-error')).toBeHidden();
+    await expect(page.locator('#questions noscript')).toHaveCount(1);
+    await expect(page.locator('#questions .questions__noscript')).toHaveCount(
+      0,
+    );
   });
 });
 
@@ -312,19 +342,51 @@ test.describe('Turnstile loading', () => {
       }
       form.requestSubmit();
     });
-    await expect(page.locator('#questions [role="status"]')).toHaveText(
-      SUCCESS,
-    );
+    await expect(page.locator('#questions [data-status]')).toHaveText(SUCCESS);
   });
 });
 
 test.describe('without JavaScript', () => {
   test.use({ javaScriptEnabled: false });
 
-  test('posts the form and lands on ?sent=1#questions', async ({ page }) => {
+  test('success shows the visible thank-you from the real endpoint', async ({
+    page,
+  }) => {
     await page.goto('/sermons');
+    await expect(page.locator('#questions-sent')).toBeHidden();
+    await expect(page.locator('#questions-error')).toBeHidden();
     await fillForm(page);
     await send(page).click();
-    await expect(page).toHaveURL(/\/sermons\?sent=1#questions$/);
+    await expect(page).toHaveURL(/\/sermons#questions-sent$/);
+    const sent = page.locator('#questions-sent');
+    await expect(sent).toBeVisible();
+    await expect(sent).toHaveText(SUCCESS);
+    await expect(sent).toBeInViewport();
+    await expect(page.locator('#questions-error')).toBeHidden();
+  });
+
+  test('a server rejection shows the visible failure copy with the fallback', async ({
+    page,
+  }) => {
+    await page.goto('/events');
+    await fillForm(page, { Email: 'ada@localhost' });
+    await send(page).click();
+    await expect(page).toHaveURL(/\/events#questions-error$/);
+    const failed = page.locator('#questions-error');
+    await expect(failed).toBeVisible();
+    await expect(failed).toContainText(FAILURE);
+    await expect(failed.locator('[data-placeholder]')).toBeVisible();
+    await expect(failed).toBeInViewport();
+    await expect(page.locator('#questions-sent')).toBeHidden();
+  });
+
+  test('shows the noscript note about the spam check and contact', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const note = page.locator('#questions .questions__noscript');
+    await expect(note).toBeVisible();
+    await expect(note).toContainText('spam check');
+    await expect(note.locator('[data-placeholder]')).toBeVisible();
   });
 });

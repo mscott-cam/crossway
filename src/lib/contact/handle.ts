@@ -78,6 +78,22 @@ function wantsHtml(request: Request): boolean {
   return accept.includes('text/html') && !accept.includes('application/json');
 }
 
+const SAFE_CODE = /^[A-Za-z0-9_.-]{1,64}$/;
+
+function describeFailure(error: unknown): string {
+  const { code, status } = (error ?? {}) as {
+    code?: unknown;
+    status?: unknown;
+  };
+  const parts = [
+    typeof code === 'string' && SAFE_CODE.test(code) ? code : '',
+    typeof status === 'number' && Number.isInteger(status)
+      ? String(status)
+      : '',
+  ].filter(Boolean);
+  return parts.length ? ` (${parts.join(' ')})` : '';
+}
+
 const JSON_HEADERS = { 'Cache-Control': 'no-store' };
 
 function respondJson(status: number, body: unknown): Response {
@@ -117,7 +133,7 @@ export async function handleContact(
       ? new Response(null, {
           status: 303,
           headers: {
-            Location: `${returnTo}?${sent ? 'sent' : 'error'}=1#questions`,
+            Location: `${returnTo}#questions-${sent ? 'sent' : 'error'}`,
             ...JSON_HEADERS,
           },
         })
@@ -128,7 +144,10 @@ export async function handleContact(
   const token = fields.turnstileToken ?? fields['cf-turnstile-response'];
   const parsed = validateContact({ ...fields, turnstileToken: token });
 
-  if (typeof fields.company === 'string' && fields.company.trim() !== '') {
+  if (
+    typeof fields.contact_extra_note === 'string' &&
+    fields.contact_extra_note.trim() !== ''
+  ) {
     return finish(200, { ok: true });
   }
 
@@ -140,7 +159,16 @@ export async function handleContact(
     return finish(503, { ok: false });
   }
 
+  if (env.VERCEL_ENV === 'production' && !present(env.CONTACT_FROM_EMAIL)) {
+    console.error('contact: CONTACT_FROM_EMAIL is not configured');
+    return finish(503, { ok: false });
+  }
+
   if (present(env.TURNSTILE_SECRET_KEY)) {
+    if (!parsed.value.turnstileToken) {
+      console.error('contact: Turnstile token missing');
+      return finish(403, { ok: false });
+    }
     const verified = await deps
       .verifyTurnstile(parsed.value.turnstileToken, clientIp)
       .catch(() => false);
@@ -155,8 +183,8 @@ export async function handleContact(
 
   try {
     await deps.send(parsed.value);
-  } catch {
-    console.error('contact: sending failed');
+  } catch (error) {
+    console.error(`contact: sending failed${describeFailure(error)}`);
     return finish(502, { ok: false });
   }
   return finish(200, { ok: true });

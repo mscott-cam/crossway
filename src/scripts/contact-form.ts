@@ -3,8 +3,6 @@ import { validateContact, type ContactErrors } from '../lib/contact/validate';
 const TURNSTILE_SRC =
   'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 const SUCCESS = "Thank you! We'll get back to you soon.";
-const FAILURE =
-  'Something went wrong sending your message. Please try again, or email us directly.';
 const SENDING = 'Sending…';
 const TOKEN_WAIT_MS = 8000;
 const REQUEST_TIMEOUT_MS = 20000;
@@ -57,6 +55,17 @@ function init(section: HTMLElement) {
     status!.textContent = text;
     if (state) status!.dataset.state = state;
     else delete status!.dataset.state;
+  }
+
+  function setFailure() {
+    const copy = section.querySelector('[data-failure-copy]');
+    const fallback = section.querySelector('[data-fallback]');
+    status!.replaceChildren(
+      ...[copy, fallback].flatMap((node) =>
+        node ? [node.cloneNode(true)] : [],
+      ),
+    );
+    status!.dataset.state = 'error';
   }
 
   function clearErrors() {
@@ -182,7 +191,7 @@ function init(section: HTMLElement) {
       email: control('email').value,
       heardFrom: control('heardFrom').value,
       message: control('message').value,
-      company: control('company').value,
+      contact_extra_note: control('contact_extra_note').value,
     };
     const checked = validateContact({ ...fields, turnstileToken: '' });
     if (!checked.ok) {
@@ -215,31 +224,26 @@ function init(section: HTMLElement) {
         setStatus('');
         showErrors(payload.errors);
       } else {
-        setStatus(FAILURE, 'error');
+        setFailure();
       }
     } catch {
-      setStatus(FAILURE, 'error');
+      setFailure();
     } finally {
       setBusy(false);
       resetTurnstile();
     }
   });
 
-  const params = new URLSearchParams(window.location.search);
-  const sent = params.has('sent');
-  const failed = params.has('error');
-  if (sent || failed) {
-    setStatus(sent ? SUCCESS : FAILURE, sent ? 'success' : 'error');
-    params.delete('sent');
-    params.delete('error');
-    const query = params.toString();
+  const outcome = window.location.hash;
+  if (outcome === '#questions-sent' || outcome === '#questions-error') {
+    if (outcome === '#questions-sent') setStatus(SUCCESS, 'success');
+    else setFailure();
     history.replaceState(
       null,
       '',
-      window.location.pathname +
-        (query ? `?${query}` : '') +
-        window.location.hash,
+      `${window.location.pathname}${window.location.search}#questions`,
     );
+    status.scrollIntoView({ block: 'center' });
   }
 }
 

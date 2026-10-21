@@ -1,0 +1,19 @@
+---
+import Placeholder from './placeholder.astro';
+import { isValidEmail } from '../lib/contact/validate';
+
+interface Props {
+  email?: string;
+}
+
+const { email } = Astro.props;
+const address = email && isValidEmail(email) ? email : undefined;
+---
+
+{address ? (
+  <p class="contact-fallback">
+    You can reach us at <a href={`mailto:${address}`}>{address}</a>.
+  </p>
+) : (
+  <Placeholder label="public contact email" />
+)}

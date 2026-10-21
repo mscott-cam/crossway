@@ -132,8 +132,8 @@ describe('validateContact', () => {
   });
 
   it('keeps the honeypot value so the caller can flag spam', () => {
-    const result = validateContact({ ...valid, company: 'Acme' });
-    expect(result.ok && result.value.company).toBe('Acme');
+    const result = validateContact({ ...valid, contact_extra_note: 'Acme' });
+    expect(result.ok && result.value.contact_extra_note).toBe('Acme');
   });
 });
 
@@ -255,17 +255,23 @@ describe('sendContactEmail', () => {
     expect(prod.send).not.toHaveBeenCalled();
   });
 
-  it('throws when Resend reports an error', async () => {
+  it('throws when Resend reports an error, carrying only its name and status', async () => {
     const { client } = clientWith({
       data: null,
-      error: { name: 'validation_error', message: 'bad' },
+      error: {
+        name: 'validation_error',
+        message: 'bad ada@example.com',
+        statusCode: 422,
+      },
     });
-    await expect(
-      sendContactEmail(v, {
-        client,
-        env: { CONTACT_TO_EMAIL: 'a@church.org' },
-      }),
-    ).rejects.toThrow();
+    const failure = (await sendContactEmail(v, {
+      client,
+      env: { CONTACT_TO_EMAIL: 'a@church.org' },
+    }).catch((error: unknown) => error)) as Error & Record<string, unknown>;
+    expect(failure).toBeInstanceOf(Error);
+    expect(failure.code).toBe('validation_error');
+    expect(failure.status).toBe(422);
+    expect(failure.message).not.toContain('ada@example.com');
   });
 });
 
@@ -470,7 +476,7 @@ describe('handleContact', () => {
   it('silently drops a honeypot hit with 200 and never sends', async () => {
     const { deps, send, verify } = make();
     const response = await handleContact(
-      json({ ...valid, company: 'Acme' }),
+      json({ ...valid, contact_extra_note: 'Acme' }),
       deps,
     );
     expect(await read(response)).toEqual({ status: 200, body: { ok: true } });
@@ -497,7 +503,11 @@ describe('handleContact', () => {
 
   it('answers 503 in production when the Turnstile secret is unset', async () => {
     const { deps, send } = make({
-      env: { ...baseEnv, VERCEL_ENV: 'production' },
+      env: {
+        ...baseEnv,
+        CONTACT_FROM_EMAIL: 'Site <site@church.org>',
+        VERCEL_ENV: 'production',
+      },
     });
     const response = await handleContact(json(valid), deps);
     expect(await read(response)).toEqual({ status: 503, body: { ok: false } });
@@ -523,6 +533,65 @@ describe('handleContact', () => {
       env: { RESEND_API_KEY: '  ', CONTACT_TO_EMAIL: 'x@y.org' },
     });
     expect((await handleContact(json(valid), deps)).status).toBe(503);
+  });
+
+  it('answers 503 in production when CONTACT_FROM_EMAIL is unset, not 502', async () => {
+    const { deps, send } = make({
+      env: {
+        ...baseEnv,
+        TURNSTILE_SECRET_KEY: 'sec',
+        VERCEL_ENV: 'production',
+      },
+    });
+    const response = await handleContact(json(valid), deps);
+    expect(response.status).toBe(503);
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it('answers 403 with a distinct log line when the secret is set but the token is empty', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { deps, send, verify } = make({
+      env: { ...baseEnv, TURNSTILE_SECRET_KEY: 'sec' },
+    });
+    const response = await handleContact(
+      json({ ...valid, turnstileToken: '' }),
+      deps,
+    );
+    expect(response.status).toBe(403);
+    expect(send).not.toHaveBeenCalled();
+    expect(verify).not.toHaveBeenCalled();
+    expect(error.mock.calls.flat().join(' ')).toContain(
+      'Turnstile token missing',
+    );
+
+    error.mockClear();
+    const denied = make({
+      env: { ...baseEnv, TURNSTILE_SECRET_KEY: 'sec' },
+      verify: async () => false,
+    });
+    await handleContact(json(valid), denied.deps);
+    const logged = error.mock.calls.flat().join(' ');
+    expect(logged).toContain('Turnstile verification failed');
+    expect(logged).not.toContain('token missing');
+  });
+
+  it('logs only a non-sensitive error code and status when Resend fails', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { deps } = make({
+      send: async () => {
+        throw Object.assign(new Error('secret re_secret_key ada@example.com'), {
+          code: 'validation_error',
+          status: 422,
+        });
+      },
+    });
+    const response = await handleContact(json(valid), deps);
+    expect(response.status).toBe(502);
+    const logged = error.mock.calls.flat().join(' ');
+    expect(logged).toContain('validation_error');
+    expect(logged).toContain('422');
+    expect(logged).not.toContain('re_secret_key');
+    expect(logged).not.toContain('ada@example.com');
   });
 
   it('answers 502 when Resend fails', async () => {
@@ -585,51 +654,43 @@ describe('handleContact', () => {
       returnTo: '/sermons',
     };
 
-    it('redirects 303 to returnTo with ?sent=1#questions on success', async () => {
+    it('redirects 303 to returnTo with #questions-sent on success', async () => {
       const { deps } = make();
       const response = await handleContact(form(fields), deps);
       expect(response.status).toBe(303);
-      expect(response.headers.get('location')).toBe(
-        '/sermons?sent=1#questions',
-      );
+      expect(response.headers.get('location')).toBe('/sermons#questions-sent');
     });
 
-    it('redirects with ?error=1#questions on any failure', async () => {
+    it('redirects with #questions-error on any failure', async () => {
       const failing = make({
         send: async () => {
           throw new Error('x');
         },
       });
       const sendFail = await handleContact(form(fields), failing.deps);
-      expect(sendFail.headers.get('location')).toBe(
-        '/sermons?error=1#questions',
-      );
+      expect(sendFail.headers.get('location')).toBe('/sermons#questions-error');
       const invalid = await handleContact(
         form({ ...fields, email: '' }),
         make().deps,
       );
       expect(invalid.status).toBe(303);
-      expect(invalid.headers.get('location')).toBe(
-        '/sermons?error=1#questions',
-      );
+      expect(invalid.headers.get('location')).toBe('/sermons#questions-error');
       const unconfigured = await handleContact(
         form(fields),
         make({ env: {} }).deps,
       );
       expect(unconfigured.headers.get('location')).toBe(
-        '/sermons?error=1#questions',
+        '/sermons#questions-error',
       );
     });
 
     it('redirects a honeypot hit as a success', async () => {
       const { deps, send } = make();
       const response = await handleContact(
-        form({ ...fields, company: 'Acme' }),
+        form({ ...fields, contact_extra_note: 'Acme' }),
         deps,
       );
-      expect(response.headers.get('location')).toBe(
-        '/sermons?sent=1#questions',
-      );
+      expect(response.headers.get('location')).toBe('/sermons#questions-sent');
       expect(send).not.toHaveBeenCalled();
     });
 
@@ -639,8 +700,20 @@ describe('handleContact', () => {
           form({ ...fields, returnTo }),
           make().deps,
         );
-        expect(response.headers.get('location')).toBe('/?sent=1#questions');
+        expect(response.headers.get('location')).toBe('/#questions-sent');
       }
+    });
+
+    it('keeps /.//evil on the same origin as a path-only redirect', async () => {
+      const response = await handleContact(
+        form({ ...fields, returnTo: '/.//evil' }),
+        make().deps,
+      );
+      const location = response.headers.get('location')!;
+      expect(location).toBe('/.//evil#questions-sent');
+      const resolved = new URL(location, 'https://crosswaysa.org');
+      expect(resolved.origin).toBe('https://crosswaysa.org');
+      expect(location.startsWith('//')).toBe(false);
     });
 
     it('answers JSON, not a redirect, when the client prefers JSON', async () => {
