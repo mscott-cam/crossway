@@ -267,10 +267,20 @@ function decode(raw: string): string {
 export function extractVimeoUrl(raw: string): string | undefined {
   const text = decode(raw);
   const page = text.match(
-    /(?:https?:)?\/\/(?:www\.)?vimeo\.com\/(?:channels\/[\w-]+\/|groups\/[\w-]+\/videos\/|video\/)?(\d+)(?:\/([0-9a-f]{8,}))?/i,
+    /(?:https?:)?\/\/(?:www\.)?vimeo\.com\/(?:channels\/[\w-]+\/|groups\/[\w-]+\/videos\/|video\/)?(\d+)(?:\/([0-9a-f]{8,})|\?([^\s"'<>#]*))?/i,
   );
-  if (page)
-    return `https://vimeo.com/${page[1]}${page[2] ? `/${page[2]}` : ''}`;
+  if (page) {
+    const queryHash = page[3]?.match(/(?:^|&)h=([0-9a-f]+)/i)?.[1];
+    const playerHash = text.match(
+      new RegExp(
+        `player\\.vimeo\\.com/video/${page[1]}\\?[^"'\\s<>]*?\\bh=([0-9a-f]+)`,
+        'i',
+      ),
+    )?.[1];
+    const hash = queryHash ?? playerHash;
+    const suffix = page[2] ? `/${page[2]}` : hash ? `?h=${hash}` : '';
+    return `https://vimeo.com/${page[1]}${suffix}`;
+  }
   const player = text.match(
     /player\.vimeo\.com\/video\/(\d+)(?:\?([^"'\s<>]*))?/i,
   );
@@ -386,6 +396,18 @@ function plainText(raw: string): string {
   );
 }
 
+const DESCRIPTION_LIMIT = 400;
+
+const idPart = (slug: string) => slug.replace(/[^a-zA-Z0-9._-]/g, '-');
+
+function truncateAtWord(text: string, limit: number): string {
+  if (text.length <= limit) return text;
+  const head = text.slice(0, limit - 1);
+  const lastSpace = head.lastIndexOf(' ');
+  const cut = lastSpace > limit / 2 ? head.slice(0, lastSpace) : head;
+  return `${cut.replace(/[\s,;:.\-–—]+$/, '')}\u2026`;
+}
+
 const slugOf = (text: string) => sermonSlug(text, '');
 
 export function transformRows(
@@ -424,7 +446,7 @@ export function transformRows(
         `series "${slug}": artwork "${artwork}" is not an http(s) URL - ignored`,
       );
     const doc: SeriesDoc = {
-      _id: `series-${slug}`,
+      _id: `series-${idPart(slug)}`,
       _type: 'series',
       title,
       slug: { _type: 'slug', current: slug },
@@ -461,6 +483,7 @@ export function transformRows(
     let slug = clean(cell(row, sc.slug));
     const label = slug || title || `row ${i + 2}`;
     let valid = true;
+    const notes: string[] = [];
     const fail = (message: string) => {
       problems.push(`sermon "${label}": ${message}`);
       valid = false;
@@ -477,7 +500,7 @@ export function transformRows(
       const published = cell(row, sc.publishedOn);
       date = parseSermonDate(published);
       if (date)
-        problems.push(
+        notes.push(
           `sermon "${label}": no Date, used Published On "${published}" (${date}) - check it`,
         );
       else fail('no usable Date or Published On - skipped');
@@ -485,7 +508,7 @@ export function transformRows(
 
     if (!slug && title && date) {
       slug = sermonSlug(title, date);
-      problems.push(
+      notes.push(
         `sermon "${title}": no slug, derived "${slug}" - the old URL may differ`,
       );
     }
@@ -494,8 +517,7 @@ export function transformRows(
     const speakerName = clean(cell(row, sc.speaker));
     const speakerKey = slugOf(speakerName);
     if (!speakerKey) {
-      withoutSpeaker++;
-      problems.push(
+      notes.push(
         `sermon "${label}": no speaker${speakerName ? ` ("${speakerName}")` : ''} - imported without speaker`,
       );
     }
@@ -503,8 +525,7 @@ export function transformRows(
     const rawBook = cell(row, sc.book);
     const book = normalizeBook(rawBook);
     if (!book) {
-      withoutBook++;
-      problems.push(
+      notes.push(
         rawBook
           ? `sermon "${label}": unknown book "${rawBook}" - imported without book (add it to BOOK_ALIASES in scripts/lib/webflow-transform.ts)`
           : `sermon "${label}": no book - imported without book`,
@@ -514,7 +535,7 @@ export function transformRows(
     const vimeoValues = cells(row, sc.vimeo);
     const vimeoUrl = vimeoValues.map(extractVimeoUrl).find(Boolean);
     if (vimeoValues.length && !vimeoUrl)
-      problems.push(
+      notes.push(
         `sermon "${label}": no Vimeo id found in "${vimeoValues[0].slice(0, 80)}" - imported without video`,
       );
 
@@ -523,7 +544,7 @@ export function transformRows(
       .map(extractSpreakerId)
       .find(Boolean);
     if (spreakerValues.length && !spreakerEpisodeId)
-      problems.push(
+      notes.push(
         `sermon "${label}": no Spreaker episode id found in "${spreakerValues[0].slice(0, 80)}" - imported without audio id`,
       );
 
@@ -533,7 +554,7 @@ export function transformRows(
         seriesByName.get(normName(rawSeries)))
       : undefined;
     if (rawSeries && !seriesDoc)
-      problems.push(
+      notes.push(
         `sermon "${label}": series "${rawSeries}" not found - assigned to ${STANDALONE_TITLE}`,
       );
 
@@ -541,7 +562,7 @@ export function transformRows(
       /-(\d{4}-\d{2}-\d{2})(?:-[0-9a-f]{4,6})?$/,
     )?.[1];
     if (valid && date && slugDate && slugDate !== date)
-      problems.push(
+      notes.push(
         `sermon "${label}": date ${date} does not match the slug date ${slugDate}`,
       );
 
@@ -551,6 +572,9 @@ export function transformRows(
     }
 
     seenSlugs.add(slug);
+    problems.push(...notes);
+    if (!speakerKey) withoutSpeaker++;
+    if (!book) withoutBook++;
     if (!seriesDoc || seriesDoc.isStandalone) {
       seriesDoc =
         [...seriesBySlug.values()].find((s) => s.isStandalone) ?? undefined;
@@ -558,10 +582,15 @@ export function transformRows(
     }
     const seriesId = seriesDoc?._id ?? `series-${STANDALONE_SLUG}`;
 
-    const description = plainText(cell(row, sc.description));
+    const fullDescription = plainText(cell(row, sc.description));
+    const description = truncateAtWord(fullDescription, DESCRIPTION_LIMIT);
+    if (description !== fullDescription)
+      problems.push(
+        `sermon "${label}": description was ${fullDescription.length} characters, truncated to fit the ${DESCRIPTION_LIMIT}-character limit`,
+      );
     const passage = clean(cell(row, sc.passage)) || book?.passage;
     candidates.push({
-      _id: `sermon-${slug}`,
+      _id: `sermon-${idPart(slug)}`,
       _type: 'sermon',
       title,
       date,
@@ -601,7 +630,7 @@ export function transformRows(
         (a, b) => b[1] - a[1] || a[0].localeCompare(b[0]),
       )[0];
       return {
-        _id: `speaker-${key}`,
+        _id: `speaker-${idPart(key)}`,
         _type: 'speaker' as const,
         name,
         slug: { _type: 'slug' as const, current: key },
@@ -613,7 +642,10 @@ export function transformRows(
     ({ speakerKey, speakerName: _name, ...rest }) => ({
       ...rest,
       ...(speakerKey && {
-        speaker: { _type: 'reference' as const, _ref: `speaker-${speakerKey}` },
+        speaker: {
+          _type: 'reference' as const,
+          _ref: `speaker-${idPart(speakerKey)}`,
+        },
       }),
     }),
   );

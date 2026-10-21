@@ -5,18 +5,29 @@ export type CliArgs = {
   series?: string;
   map?: string;
   dryRun: boolean;
+  overwrite: boolean;
+  yes: boolean;
   errors: string[];
 };
 
 export const USAGE =
-  'Usage: npx tsx scripts/import-webflow.ts --sermons <sermons.csv> --series <series.csv> [--map <columns.json>] [--dry-run]';
+  'Usage: npx tsx scripts/import-webflow.ts --sermons <sermons.csv> --series <series.csv> [--map <columns.json>] [--dry-run] [--overwrite --yes]';
 
 export function parseArgs(argv: string[]): CliArgs {
-  const args: CliArgs = { dryRun: false, errors: [] };
+  const args: CliArgs = {
+    dryRun: false,
+    overwrite: false,
+    yes: false,
+    errors: [],
+  };
   for (let i = 0; i < argv.length; i++) {
     const [flag, inline] = argv[i].split(/=(.*)/s, 2);
     if (flag === '--dry-run') {
       args.dryRun = true;
+    } else if (flag === '--overwrite') {
+      args.overwrite = true;
+    } else if (flag === '--yes') {
+      args.yes = true;
     } else if (
       flag === '--sermons' ||
       flag === '--series' ||
@@ -64,21 +75,25 @@ export function formatReport(result: TransformResult): string {
   return lines.join('\n');
 }
 
-type TransactionLike = {
-  createOrReplace(doc: { _id: string; _type: string }): TransactionLike;
+export type Mutation = { _id: string; _type: string };
+
+export type TransactionLike = {
+  createIfNotExists(doc: Mutation): TransactionLike;
+  createOrReplace(doc: Mutation): TransactionLike;
   commit(): Promise<unknown>;
 };
 
 export async function commitInBatches(
   client: { transaction(): TransactionLike },
-  docs: readonly { _id: string; _type: string }[],
+  docs: readonly Mutation[],
   size: number,
+  mode: 'createIfNotExists' | 'createOrReplace',
   onBatch?: (written: number, total: number) => void,
 ): Promise<number> {
   let written = 0;
   for (const batch of chunk(docs, size)) {
     const tx = client.transaction();
-    for (const doc of batch) tx.createOrReplace(doc);
+    for (const doc of batch) tx[mode](doc);
     await tx.commit();
     written += batch.length;
     onBatch?.(written, docs.length);

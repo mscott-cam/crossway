@@ -723,6 +723,23 @@ describe('column map', () => {
 });
 
 describe('cli helpers', () => {
+  it('parses --overwrite and --yes', () => {
+    const args = parseArgs([
+      '--sermons',
+      'a',
+      '--series',
+      'b',
+      '--overwrite',
+      '--yes',
+    ]);
+    expect(args.overwrite).toBe(true);
+    expect(args.yes).toBe(true);
+    expect(args.errors).toEqual([]);
+    const plain = parseArgs(['--sermons', 'a', '--series', 'b']);
+    expect(plain.overwrite).toBe(false);
+    expect(plain.yes).toBe(false);
+  });
+
   it('parses arguments', () => {
     expect(
       parseArgs(['--sermons', 'a.csv', '--series', 'b.csv', '--dry-run']),
@@ -730,12 +747,16 @@ describe('cli helpers', () => {
       sermons: 'a.csv',
       series: 'b.csv',
       dryRun: true,
+      overwrite: false,
+      yes: false,
       errors: [],
     });
     expect(parseArgs(['--sermons=a.csv', '--series=b.csv'])).toEqual({
       sermons: 'a.csv',
       series: 'b.csv',
       dryRun: false,
+      overwrite: false,
+      yes: false,
       errors: [],
     });
   });
@@ -772,32 +793,141 @@ describe('cli helpers', () => {
     expect(() => chunk([1], 0)).toThrow();
   });
 
-  it('commits createOrReplace mutations in transactions of at most 100', async () => {
-    const commits: { op: string; id: string }[][] = [];
-    const client = {
-      transaction() {
-        const ops: { op: string; id: string }[] = [];
-        const tx = {
-          createOrReplace(doc: { _id: string }) {
-            ops.push({ op: 'createOrReplace', id: doc._id });
-            return tx;
-          },
-          async commit() {
-            commits.push(ops);
-          },
-        };
-        return tx;
-      },
+  it.each(['createIfNotExists', 'createOrReplace'] as const)(
+    'commits %s mutations in transactions of at most 100',
+    async (mode) => {
+      const commits: { op: string; id: string }[][] = [];
+      const client = {
+        transaction() {
+          const ops: { op: string; id: string }[] = [];
+          const tx = {
+            createIfNotExists(doc: { _id: string }) {
+              ops.push({ op: 'createIfNotExists', id: doc._id });
+              return tx;
+            },
+            createOrReplace(doc: { _id: string }) {
+              ops.push({ op: 'createOrReplace', id: doc._id });
+              return tx;
+            },
+            async commit() {
+              commits.push(ops);
+            },
+          };
+          return tx;
+        },
+      };
+      const docs = Array.from({ length: 205 }, (_, i) => ({
+        _id: `sermon-${i}`,
+        _type: 'sermon',
+      }));
+      const seen: number[] = [];
+      const total = await commitInBatches(client, docs, 100, mode, (n) =>
+        seen.push(n),
+      );
+      expect(total).toBe(205);
+      expect(commits.map((c) => c.length)).toEqual([100, 100, 5]);
+      expect(commits.flat().every((o) => o.op === mode)).toBe(true);
+      expect(seen).toEqual([100, 200, 205]);
+    },
+  );
+});
+
+describe('R18 minors', () => {
+  it('counts withoutBook and withoutSpeaker only for imported rows', () => {
+    const rows = withRow('forgive-one-another', { Date: 'not a date' });
+    const out = transformRows(rows, seriesCsv);
+    expect(out.stats.skippedInvalid).toBe(1);
+    expect(out.stats.withoutBook).toBe(1);
+    expect(out.problems.some((p) => p.includes('"Various"'))).toBe(false);
+    expect(
+      out.problems.some(
+        (p) => p.includes('forgive-one-another') && /parse date/.test(p),
+      ),
+    ).toBe(true);
+  });
+
+  it("does not report a duplicate row's missing book or speaker", () => {
+    const dup = {
+      ...sermonsCsv.find((r) => r['Slug'] === 'gospel-repair')!,
+      Book: 'Nonsense',
     };
-    const docs = Array.from({ length: 205 }, (_, i) => ({
-      _id: `sermon-${i}`,
-      _type: 'sermon',
-    }));
-    const seen: number[] = [];
-    const total = await commitInBatches(client, docs, 100, (n) => seen.push(n));
-    expect(total).toBe(205);
-    expect(commits.map((c) => c.length)).toEqual([100, 100, 5]);
-    expect(commits.flat().every((o) => o.op === 'createOrReplace')).toBe(true);
-    expect(seen).toEqual([100, 200, 205]);
+    const out = transformRows([...sermonsCsv, dup], seriesCsv);
+    expect(out.stats.withoutSpeaker).toBe(1);
+    expect(out.problems.some((p) => p.includes('"Nonsense"'))).toBe(false);
+  });
+
+  it('keeps a ?h= hash on a plain Vimeo page URL', () => {
+    expect(extractVimeoUrl('https://vimeo.com/123456789?h=abcdef1234')).toBe(
+      'https://vimeo.com/123456789?h=abcdef1234',
+    );
+    expect(
+      extractVimeoUrl('https://vimeo.com/123456789?foo=1&h=abcdef1234'),
+    ).toBe('https://vimeo.com/123456789?h=abcdef1234');
+    expect(extractVimeoUrl('https://vimeo.com/123456789?fl=tl&fe=ec')).toBe(
+      'https://vimeo.com/123456789',
+    );
+  });
+
+  it('truncates long descriptions at a word boundary and reports the slug', () => {
+    const long = Array.from({ length: 120 }, (_, i) => `word${i}`).join(' ');
+    expect(long.length).toBeGreaterThan(400);
+    const out = transformRows(
+      withRow('main-character-energy-2026-09-20', { Description: long }),
+      seriesCsv,
+    );
+    const doc = out.sermons.find(
+      (s) => s.slug.current === 'main-character-energy-2026-09-20',
+    )!;
+    expect(doc.description!.length).toBeLessThanOrEqual(400);
+    expect(doc.description!.endsWith('\u2026')).toBe(true);
+    const body = doc.description!.slice(0, -1);
+    expect(long.startsWith(body)).toBe(true);
+    expect(long[body.length]).toBe(' ');
+    expect(
+      out.problems.some(
+        (p) =>
+          p.includes('main-character-energy-2026-09-20') && /truncat/i.test(p),
+      ),
+    ).toBe(true);
+  });
+
+  it('leaves a description of exactly 400 characters alone', () => {
+    const exact = 'a'.repeat(400);
+    const out = transformRows(
+      withRow('main-character-energy-2026-09-20', { Description: exact }),
+      seriesCsv,
+    );
+    expect(
+      out.sermons.find(
+        (s) => s.slug.current === 'main-character-energy-2026-09-20',
+      )?.description,
+    ).toBe(exact);
+    expect(out.problems.some((p) => /truncat/i.test(p))).toBe(false);
+  });
+
+  it('keeps document ids within Sanity-valid characters', () => {
+    const rows = withRow('main-character-energy-2026-09-20', {
+      Slug: 'Weird: slug/ü?',
+    });
+    const series = [
+      ...seriesCsv,
+      {
+        Name: 'Special',
+        Slug: 'spécial series!',
+        Draft: 'false',
+        Archived: 'false',
+      },
+    ];
+    const out = transformRows(rows, series);
+    const ids = [...out.sermons, ...out.series, ...out.speakers].map(
+      (d) => d._id,
+    );
+    for (const id of ids) expect(id).toMatch(/^[a-zA-Z0-9._-]+$/);
+    const weird = out.sermons.find((s) => s.slug.current === 'Weird: slug/ü?')!;
+    expect(weird._id).toBe('sermon-Weird--slug---');
+    expect(weird.webflowPath).toBe('/sermons/Weird: slug/ü?');
+    expect(
+      out.series.find((s) => s.slug.current === 'spécial series!')?._id,
+    ).toBe('series-sp-cial-series-');
   });
 });
